@@ -165,7 +165,7 @@ async function load() {
         ${progressBar(p.progress)}
         <div style="display:flex;gap:8px;margin-top:14px">
           <a href="/project-details.html?id=${p.id}" class="btn btn-secondary btn-sm" style="flex:1;justify-content:center">جزئیات</a>
-          <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openEditModal(${p.id})" data-permission="projects.edit">️</button>
+          <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openEditModal(${p.id})" data-permission="projects.edit"></button>
           <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProject(${p.id},'${p.name}')" data-permission="projects.delete"></button>
         </div>
       </div>
