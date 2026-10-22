@@ -41,7 +41,7 @@ def upgrade() -> None:
     # permissions
     op.create_table(
         "permissions",
-        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
+        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False, sqlite_autoincrement=True),
         sa.Column("code", sa.String(100), nullable=False),
         sa.Column("name", sa.String(150), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
