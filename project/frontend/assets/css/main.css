@@ -1,11 +1,13 @@
 /* =============================================
-   INTERNSHIP MANAGEMENT SYSTEM - DESIGN SYSTEM
+   TASK MANAGEMENT SYSTEM - DESIGN SYSTEM
    RTL Persian UI | Modern SaaS Dashboard
    ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
+200;300;400;500;600;700;800;900&display=swap');
 
 /* ??? CSS Variables ??????????????????????????? */
+@font-face { font-family:'TaskFont'; src:url('/assets/Font/yRmh9nfC') format('woff2'); font-style:normal; font-weight:100 900; font-display:swap; }
+
 :root {
   --primary: #6366f1;
   --primary-dark: #4f46e5;
@@ -73,7 +75,7 @@ html {
 }
 
 body {
-  font-family: 'Vazirmatn', system-ui, sans-serif;
+  font-family: 'TaskFont', Tahoma, system-ui, sans-serif;
   background: var(--background);
   color: var(--text);
   line-height: 1.6;
@@ -1355,3 +1357,23 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 @media (max-width: 768px) {
   .sidebar-overlay.active { display: block; }
 }
+
+/* Responsive dashboard, branding, notifications */
+body { overflow-x:hidden; }
+.app-layout,.main-content,.page-content { min-width:0; }
+.header-brand { display:flex; align-items:center; gap:8px; min-width:0; }
+.header-brand img { width:34px; height:34px; object-fit:contain; flex-shrink:0; }
+.header-brand span { font-size:12px; font-weight:700; color:var(--text-secondary); white-space:nowrap; }
+.header-actions { display:flex; align-items:center; gap:10px; }
+.notification-wrap { position:relative; }
+.notification-toggle { position:relative; display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text-secondary); cursor:pointer; }
+.notification-toggle:hover,.notification-toggle[aria-expanded="true"] { background:var(--primary-bg); color:var(--primary); }
+.notification-dot { position:absolute; top:7px; left:7px; width:7px; height:7px; border-radius:50%; background:var(--danger); display:none; }
+.notification-panel { position:absolute; top:46px; left:0; width:min(340px,calc(100vw - 28px)); max-height:min(420px,70vh); overflow:auto; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow-lg); z-index:120; }
+.notification-panel-header { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700; }
+.notification-empty { padding:28px 16px; text-align:center; color:var(--text-muted); }
+.notification-empty svg { display:block; margin:0 auto 10px; color:var(--primary); }
+.sidebar-logo .logo-icon { background:transparent; }
+.sidebar-logo .logo-icon img { width:100%; height:100%; object-fit:contain; }
+@media(max-width:768px){.header{padding:0 12px;gap:8px}.header-left,.header-right{gap:8px;min-width:0}.header-brand span{display:none}.header-brand img{width:30px;height:30px}.header-user{padding:4px;gap:6px}.user-info{display:none}.page-content{padding:12px}.grid-2,.grid-3,.grid-4{grid-template-columns:minmax(0,1fr)}.card{min-width:0;overflow-wrap:anywhere}.table-container,.table-responsive{max-width:100%;overflow-x:auto}.notification-panel{position:fixed;top:72px;left:12px;right:12px;width:auto}}
+@media(max-width:380px){.page-title{font-size:14px}.sidebar-toggle{width:32px;height:32px}.notification-toggle{width:34px;height:34px}.user-avatar{width:30px;height:30px}}
