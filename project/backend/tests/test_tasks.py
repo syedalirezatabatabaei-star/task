@@ -147,3 +147,19 @@ def test_cross_user_task_access(client, db):
 def test_submit_rejects_progress_out_of_range(client, auth_headers_admin, task):
     resp = client.post(f"/api/v1/tasks/{task['id']}/submit", headers=auth_headers_admin, json={"progress": 101})
     assert resp.status_code == 422
+
+
+def test_removed_project_member_cannot_see_assigned_task(client, auth_headers_admin, auth_headers_user, task, project_id, regular_user):
+    """Removing membership revokes task list and detail access even if assignment remains."""
+    removed = client.delete(
+        f"/api/v1/projects/{project_id}/members/{regular_user.id}",
+        headers=auth_headers_admin,
+    )
+    assert removed.status_code == 200
+
+    listing = client.get("/api/v1/tasks", headers=auth_headers_user)
+    assert listing.status_code == 200
+    assert all(item["id"] != task["id"] for item in listing.json()["data"]["items"])
+
+    detail = client.get(f"/api/v1/tasks/{task['id']}", headers=auth_headers_user)
+    assert detail.status_code == 403
