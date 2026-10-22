@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پروژه‌ها | سیستم مدیریت کارآموزی</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">🎓</div><div><div class="logo-text">کارآموزی</div><div class="logo-sub">سیستم مدیریت</div></div></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">📊</span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">👥</span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item active" href="/projects.html" data-permission="projects.view"><span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">✅</span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span></a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">🚪</span><span class="nav-label">خروج</span></a></div>
+  </aside>
+  <div class="main-content" id="main-content">
+    <header class="header" id="header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <h1 class="page-title">پروژه‌ها</h1>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" id="btn-add-project" data-permission="projects.create">+ پروژه جدید</button>
+        <div class="header-user"><div class="user-avatar" id="header-user-avatar">م</div><div class="user-info"><div class="user-name" id="header-user-name">...</div><div class="user-role" id="header-user-role">...</div></div></div>
+      </div>
+    </header>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <main class="page-content">
+      <div class="card mb-4">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div class="search-bar" style="flex:1;min-width:200px">
+            <span>🔍</span><input type="text" id="search-input" placeholder="جستجو در پروژه‌ها...">
+          </div>
+          <select class="form-control" id="filter-status" style="width:160px">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="PLANNED">برنامه‌ریزی شده</option>
+            <option value="ACTIVE">فعال</option>
+            <option value="COMPLETED">تکمیل شده</option>
+            <option value="ARCHIVED">بایگانی شده</option>
+          </select>
+        </div>
+      </div>
+      <div id="projects-grid" class="grid grid-3"></div>
+      <div class="pagination" id="pagination" style="padding-top:16px"></div>
+    </main>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="project-modal-title">پروژه جدید</h3>
+      <button class="modal-close" onclick="Modal.close('project-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="project-form">
+        <div class="form-group">
+          <label class="form-label">نام پروژه <span class="required">*</span></label>
+          <input type="text" class="form-control" id="f-name" placeholder="نام پروژه">
+        </div>
+        <div class="form-group">
+          <label class="form-label">توضیحات</label>
+          <textarea class="form-control" id="f-desc" rows="3" placeholder="توضیحات پروژه"></textarea>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">وضعیت</label>
+            <select class="form-control" id="f-status">
+              <option value="PLANNED">برنامه‌ریزی شده</option>
+              <option value="ACTIVE">فعال</option>
+              <option value="COMPLETED">تکمیل شده</option>
+              <option value="ARCHIVED">بایگانی شده</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاریخ شروع</label>
+            <input type="date" class="form-control" id="f-start">
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">تاریخ پایان</label>
+            <input type="date" class="form-control" id="f-end">
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:4px">
+            <label class="checkbox-group">
+              <input type="checkbox" id="f-roadmap" checked>
+              <span>نمایش نقشه راه</span>
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('project-modal')">انصراف</button>
+      <button class="btn btn-primary" id="project-save-btn">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+let currentPage = 1;
+const pageSize = 9;
+let editingId = null;
+
+(async () => {
+  const ok = await Auth.initPage();
+  if (!ok) return;
+  document.getElementById('logout-btn').addEventListener('click', async e => { e.preventDefault(); await Auth.logout(); });
+  document.getElementById('btn-add-project').addEventListener('click', openCreateModal);
+  document.getElementById('project-save-btn').addEventListener('click', saveProject);
+  let dt;
+  document.getElementById('search-input').addEventListener('input', () => { clearTimeout(dt); dt = setTimeout(() => { currentPage=1; load(); }, 400); });
+  document.getElementById('filter-status').addEventListener('change', () => { currentPage=1; load(); });
+  await load();
+})();
+
+async function load() {
+  const grid = document.getElementById('projects-grid');
+  grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:48px"><div class="spinner"></div></div>';
+  const params = { page: currentPage, page_size: pageSize };
+  const s = document.getElementById('search-input').value.trim();
+  const st = document.getElementById('filter-status').value;
+  if (s) params.search = s;
+  if (st) params.status = st;
+  try {
+    const res = await Api.getProjects(params);
+    const { items, total, pages } = res.data;
+    if (!items.length) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:48px"><div class="empty-state-icon">📁</div><div class="empty-state-title">پروژه‌ای یافت نشد</div></div>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+    grid.innerHTML = items.map(p => `
+      <div class="card" style="cursor:pointer;transition:all 0.2s" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow=''">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="font-size:16px;font-weight:700;color:var(--text)">${p.name}</div>
+          ${projectStatusBadge(p.status)}
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;min-height:36px">${p.description?.substring(0,80) || 'بدون توضیحات'}${p.description?.length>80?'...':''}</div>
+        <div style="display:flex;gap:16px;font-size:12px;color:var(--text-secondary);margin-bottom:12px">
+          <span>👥 ${p.member_count} عضو</span>
+          <span>✅ ${p.task_count} وظیفه</span>
+          ${p.end_date ? `<span>📅 ${formatDate(p.end_date)}</span>` : ''}
+        </div>
+        ${progressBar(p.progress)}
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <a href="/project-details.html?id=${p.id}" class="btn btn-secondary btn-sm" style="flex:1;justify-content:center">جزئیات</a>
+          <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openEditModal(${p.id})" data-permission="projects.edit">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProject(${p.id},'${p.name}')" data-permission="projects.delete">🗑</button>
+        </div>
+      </div>
+    `).join('');
+    renderPagination('pagination', currentPage, pages, total, pageSize, p => { currentPage=p; load(); });
+  } catch (e) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;color:var(--danger)">${e.message}</div>`;
+  }
+}
+
+function openCreateModal() {
+  editingId = null;
+  document.getElementById('project-modal-title').textContent = 'پروژه جدید';
+  document.getElementById('project-form').reset();
+  document.getElementById('f-roadmap').checked = true;
+  Modal.open('project-modal');
+}
+
+async function openEditModal(id) {
+  try {
+    const res = await Api.getProject(id);
+    const p = res.data;
+    editingId = id;
+    document.getElementById('project-modal-title').textContent = 'ویرایش پروژه';
+    document.getElementById('f-name').value = p.name;
+    document.getElementById('f-desc').value = p.description || '';
+    document.getElementById('f-status').value = p.status;
+    document.getElementById('f-start').value = p.start_date || '';
+    document.getElementById('f-end').value = p.end_date || '';
+    document.getElementById('f-roadmap').checked = p.show_roadmap;
+    Modal.open('project-modal');
+  } catch (e) { Toast.error(e.message); }
+}
+
+async function saveProject() {
+  const btn = document.getElementById('project-save-btn');
+  setLoading(btn, true);
+  try {
+    const data = {
+      name: document.getElementById('f-name').value.trim(),
+      description: document.getElementById('f-desc').value.trim() || null,
+      status: document.getElementById('f-status').value,
+      start_date: document.getElementById('f-start').value || null,
+      end_date: document.getElementById('f-end').value || null,
+      show_roadmap: document.getElementById('f-roadmap').checked,
+    };
+    if (!data.name) { Toast.warning('نام پروژه الزامی است'); return; }
+    if (editingId) { await Api.updateProject(editingId, data); Toast.success('پروژه ویرایش شد'); }
+    else { await Api.createProject(data); Toast.success('پروژه ایجاد شد'); }
+    Modal.close('project-modal');
+    await load();
+  } catch (e) { Toast.error(e.message); }
+  finally { setLoading(btn, false); }
+}
+
+async function deleteProject(id, name) {
+  confirmAction(`آیا از حذف پروژه "${name}" مطمئن هستید؟`, async () => {
+    try { await Api.deleteProject(id); Toast.success('پروژه حذف شد'); await load(); }
+    catch (e) { Toast.error(e.message); }
+  });
+}
+</script>
+</body>
+</html>

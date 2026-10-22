@@ -1,0 +1,307 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جزئیات وظیفه | سیستم مدیریت کارآموزی</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">🎓</div><div><div class="logo-text">کارآموزی</div><div class="logo-sub">سیستم مدیریت</div></div></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">📊</span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">👥</span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item active" href="/tasks.html"><span class="nav-icon">✅</span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span></a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">🚪</span><span class="nav-label">خروج</span></a></div>
+  </aside>
+  <div class="main-content" id="main-content">
+    <header class="header" id="header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <a href="/tasks.html" class="btn btn-ghost btn-sm">← وظایف</a>
+        <h1 class="page-title" id="task-title">جزئیات وظیفه</h1>
+      </div>
+      <div class="header-right">
+        <div class="header-user"><div class="user-avatar" id="header-user-avatar">م</div><div class="user-info"><div class="user-name" id="header-user-name">...</div><div class="user-role" id="header-user-role">...</div></div></div>
+      </div>
+    </header>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <main class="page-content">
+      <div id="task-loading" class="empty-state"><div class="spinner"></div></div>
+      <div id="task-content" class="hidden">
+        <div class="grid" style="grid-template-columns:1fr 340px;gap:20px" id="task-grid">
+          <!-- Left: details -->
+          <div>
+            <div class="card mb-4" id="task-info-card"></div>
+            <!-- Attachments -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <div class="card-title">📎 پیوست‌ها</div>
+                <button class="btn btn-sm btn-primary" id="btn-upload" data-permission="attachments.upload">آپلود فایل</button>
+              </div>
+              <input type="file" id="file-input" style="display:none">
+              <div id="attachments-list"></div>
+            </div>
+            <!-- Evaluations -->
+            <div class="card" id="evaluations-section" data-permission="evaluations.view">
+              <div class="card-header">
+                <div class="card-title">⭐ ارزیابی‌ها</div>
+                <button class="btn btn-sm btn-primary" id="btn-add-eval" data-permission="evaluations.create">+ ارزیابی</button>
+              </div>
+              <div id="evaluations-list"></div>
+            </div>
+          </div>
+          <!-- Right: actions -->
+          <div>
+            <div class="card mb-4" id="task-actions-card"></div>
+            <div class="card" id="task-meta-card"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Eval Modal -->
+<div class="modal-overlay" id="eval-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="eval-modal-title">ارزیابی وظیفه</h3>
+      <button class="modal-close" onclick="Modal.close('eval-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">نمره (۰–۱۰۰) <span class="required">*</span></label>
+        <input type="number" class="form-control" id="ef-score" min="0" max="100" placeholder="نمره">
+      </div>
+      <div class="form-group">
+        <label class="form-label">نقاط قوت</label>
+        <textarea class="form-control" id="ef-strengths" rows="2" placeholder="نقاط مثبت..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">نقاط ضعف</label>
+        <textarea class="form-control" id="ef-weaknesses" rows="2" placeholder="نقاط منفی..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">توضیحات</label>
+        <textarea class="form-control" id="ef-comment" rows="3" placeholder="توضیحات بیشتر..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('eval-modal')">انصراف</button>
+      <button class="btn btn-primary" id="eval-save-btn">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- Submit Modal -->
+<div class="modal-overlay" id="submit-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">ارسال وظیفه</h3>
+      <button class="modal-close" onclick="Modal.close('submit-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">توضیحات</label>
+        <textarea class="form-control" id="submit-comment" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">درصد پیشرفت</label>
+        <input type="number" class="form-control" id="submit-progress" value="100" min="0" max="100">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('submit-modal')">انصراف</button>
+      <button class="btn btn-primary" id="submit-save-btn">ارسال</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+let taskId;
+let task;
+let editingEvalId = null;
+
+(async () => {
+  const ok = await Auth.initPage();
+  if (!ok) return;
+  document.getElementById('logout-btn').addEventListener('click', async e => { e.preventDefault(); await Auth.logout(); });
+
+  taskId = new URLSearchParams(window.location.search).get('id');
+  if (!taskId) { window.location.href = '/tasks.html'; return; }
+
+  await loadTask();
+
+  document.getElementById('btn-add-eval').addEventListener('click', () => { editingEvalId=null; document.getElementById('ef-score').value=''; document.getElementById('ef-strengths').value=''; document.getElementById('ef-weaknesses').value=''; document.getElementById('ef-comment').value=''; document.getElementById('eval-modal-title').textContent='ارزیابی وظیفه'; Modal.open('eval-modal'); });
+  document.getElementById('eval-save-btn').addEventListener('click', saveEval);
+  document.getElementById('submit-save-btn').addEventListener('click', doSubmit);
+
+  const fileInput = document.getElementById('file-input');
+  document.getElementById('btn-upload').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      await Api.uploadAttachment(taskId, file);
+      Toast.success('فایل آپلود شد');
+      await loadAttachments();
+    } catch (err) { Toast.error(err.message); }
+    fileInput.value = '';
+  });
+})();
+
+async function loadTask() {
+  try {
+    const res = await Api.getTask(taskId);
+    task = res.data;
+    document.getElementById('task-title').textContent = task.title;
+
+    const user = Api.getUser();
+    const isAdmin = user?.role === 'ADMIN';
+    const isAssignee = task.assigned_to == user?.id;
+    const canSubmit = (isAssignee || isAdmin) && Api.hasPermission('tasks.submit') &&
+      ['TODO','IN_PROGRESS','NEEDS_REVISION'].includes(task.status);
+
+    document.getElementById('task-info-card').innerHTML = `
+      <div style="margin-bottom:12px">
+        <h2 style="font-size:18px;font-weight:800;margin-bottom:8px">${task.title}</h2>
+        <p style="color:var(--text-secondary);line-height:1.7">${task.description||'بدون توضیحات'}</p>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
+        ${statusBadge(task.status)}
+        ${priorityBadge(task.priority)}
+        ${task.latest_score!=null ? `<span class="badge badge-warning">⭐ نمره: ${task.latest_score}</span>` : ''}
+      </div>
+      <div style="margin-top:16px">${progressBar(task.progress)}</div>`;
+
+    document.getElementById('task-actions-card').innerHTML = `
+      <div class="card-title" style="margin-bottom:12px">⚡ عملیات</div>
+      ${canSubmit ? `<button class="btn btn-primary w-full mb-4" id="btn-submit-task">📤 ارسال وظیفه</button>` : ''}
+      ${isAdmin ? `
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label class="form-label" style="margin-bottom:0">تغییر وضعیت</label>
+          <select class="form-control" id="status-select">
+            <option value="">انتخاب وضعیت</option>
+            <option value="IN_PROGRESS">در حال انجام</option>
+            <option value="SUBMITTED">ارسال شده</option>
+            <option value="NEEDS_REVISION">نیاز به اصلاح</option>
+            <option value="APPROVED">تأیید شده</option>
+            <option value="DONE">انجام شده</option>
+          </select>
+          <button class="btn btn-secondary" id="btn-change-status">اعمال تغییر</button>
+        </div>
+      ` : ''}`;
+
+    document.getElementById('task-meta-card').innerHTML = `
+      <div class="card-title" style="margin-bottom:12px">📋 اطلاعات</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">پروژه</span><span style="font-weight:600">${task.project_name||'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">مرحله</span><span>${task.stage_name||'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">مسئول</span><span>${task.assignee_name||'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">تاریخ شروع</span><span>${formatDate(task.start_date)}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">ددلاین</span><span style="${task.deadline && new Date(task.deadline)<new Date() && !['DONE','APPROVED'].includes(task.status)?'color:var(--danger);font-weight:600':''}">${formatDate(task.deadline)}</span></div>
+        ${task.submitted_at ? `<div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">تاریخ ارسال</span><span>${formatDateTime(task.submitted_at)}</span></div>` : ''}
+      </div>`;
+
+    document.getElementById('btn-submit-task')?.addEventListener('click', () => Modal.open('submit-modal'));
+    document.getElementById('btn-change-status')?.addEventListener('click', async () => {
+      const s = document.getElementById('status-select').value;
+      if (!s) { Toast.warning('وضعیتی انتخاب نشده'); return; }
+      try { await Api.updateTaskStatus(taskId, s); Toast.success('وضعیت تغییر یافت'); await loadTask(); }
+      catch (e) { Toast.error(e.message); }
+    });
+
+    document.getElementById('task-loading').classList.add('hidden');
+    document.getElementById('task-content').classList.remove('hidden');
+
+    await Promise.all([loadAttachments(), loadEvaluations()]);
+  } catch (e) {
+    document.getElementById('task-loading').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+  }
+}
+
+async function loadAttachments() {
+  const el = document.getElementById('attachments-list');
+  try {
+    const res = await Api.getAttachments(taskId);
+    const atts = res.data;
+    if (!atts.length) { el.innerHTML = '<div class="empty-state" style="padding:20px"><p>پیوستی وجود ندارد</p></div>'; return; }
+    el.innerHTML = atts.map(a => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:20px">📄</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${a.original_filename}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${formatFileSize(a.file_size)} | ${formatDateTime(a.created_at)}</div>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="deleteAtt(${a.id})" data-permission="attachments.upload">🗑</button>
+      </div>`).join('');
+  } catch {}
+}
+
+async function loadEvaluations() {
+  const el = document.getElementById('evaluations-list');
+  try {
+    const res = await Api.getEvaluations(taskId);
+    const evals = res.data;
+    if (!evals.length) { el.innerHTML = '<div class="empty-state" style="padding:20px"><p>ارزیابی‌ای وجود ندارد</p></div>'; return; }
+    el.innerHTML = evals.map(e => `
+      <div style="padding:14px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:700;font-size:14px">ارزیابی توسط: ${e.evaluator_name||'ناشناس'}</span>
+          <span style="font-size:24px;font-weight:900;color:${e.score>=70?'var(--success)':e.score>=50?'var(--warning)':'var(--danger)'}">${e.score}</span>
+        </div>
+        ${e.strengths ? `<div style="font-size:13px;color:var(--success);margin-bottom:4px">✅ نقاط قوت: ${e.strengths}</div>` : ''}
+        ${e.weaknesses ? `<div style="font-size:13px;color:var(--danger);margin-bottom:4px">⚠️ نقاط ضعف: ${e.weaknesses}</div>` : ''}
+        ${e.comment ? `<div style="font-size:13px;color:var(--text-secondary)">${e.comment}</div>` : ''}
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">${formatDateTime(e.created_at)}</div>
+      </div>`).join('');
+  } catch {}
+}
+
+async function saveEval() {
+  const btn = document.getElementById('eval-save-btn');
+  setLoading(btn, true);
+  try {
+    const score = parseFloat(document.getElementById('ef-score').value);
+    if (isNaN(score) || score < 0 || score > 100) { Toast.warning('نمره باید بین ۰ و ۱۰۰ باشد'); return; }
+    const data = { score, strengths: document.getElementById('ef-strengths').value.trim()||null, weaknesses: document.getElementById('ef-weaknesses').value.trim()||null, comment: document.getElementById('ef-comment').value.trim()||null };
+    await Api.createEvaluation(taskId, data);
+    Toast.success('ارزیابی ثبت شد');
+    Modal.close('eval-modal');
+    await Promise.all([loadTask(), loadEvaluations()]);
+  } catch (e) { Toast.error(e.message); }
+  finally { setLoading(btn, false); }
+}
+
+async function doSubmit() {
+  const btn = document.getElementById('submit-save-btn');
+  setLoading(btn, true);
+  try {
+    await Api.submitTask(taskId, { comment: document.getElementById('submit-comment').value.trim()||null, progress: parseInt(document.getElementById('submit-progress').value)||100 });
+    Toast.success('وظیفه ارسال شد');
+    Modal.close('submit-modal');
+    await loadTask();
+  } catch (e) { Toast.error(e.message); }
+  finally { setLoading(btn, false); }
+}
+
+async function deleteAtt(id) {
+  confirmAction('آیا از حذف این پیوست اطمینان دارید؟', async () => {
+    try { await Api.deleteAttachment(id); Toast.success('پیوست حذف شد'); await loadAttachments(); }
+    catch (e) { Toast.error(e.message); }
+  });
+}
+</script>
+</body>
+</html>

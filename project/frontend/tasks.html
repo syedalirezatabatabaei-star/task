@@ -1,0 +1,468 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>وظایف | سیستم مدیریت کارآموزی</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">🎓</div><div><div class="logo-text">کارآموزی</div><div class="logo-sub">سیستم مدیریت</div></div></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">📊</span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">👥</span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item active" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">✅</span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span></a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">🚪</span><span class="nav-label">خروج</span></a></div>
+  </aside>
+  <div class="main-content" id="main-content">
+    <header class="header" id="header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <h1 class="page-title">وظایف</h1>
+      </div>
+      <div class="header-right">
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" id="btn-list-view" title="نمایش لیستی">☰ لیست</button>
+          <button class="btn btn-ghost btn-sm" id="btn-kanban-view" title="نمایش کانبان">⬜ کانبان</button>
+        </div>
+        <button class="btn btn-primary" id="btn-add-task" data-permission="tasks.create">+ وظیفه جدید</button>
+        <div class="header-user"><div class="user-avatar" id="header-user-avatar">م</div><div class="user-info"><div class="user-name" id="header-user-name">...</div><div class="user-role" id="header-user-role">...</div></div></div>
+      </div>
+    </header>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <main class="page-content">
+      <!-- Filters -->
+      <div class="card mb-4">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div class="search-bar" style="flex:1;min-width:180px">
+            <span>🔍</span><input type="text" id="search-input" placeholder="جستجو در وظایف...">
+          </div>
+          <select class="form-control" id="filter-status" style="width:145px">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="TODO">در انتظار</option>
+            <option value="IN_PROGRESS">در حال انجام</option>
+            <option value="SUBMITTED">ارسال شده</option>
+            <option value="NEEDS_REVISION">نیاز به اصلاح</option>
+            <option value="APPROVED">تأیید شده</option>
+            <option value="DONE">انجام شده</option>
+          </select>
+          <select class="form-control" id="filter-priority" style="width:120px">
+            <option value="">همه اولویت‌ها</option>
+            <option value="LOW">کم</option>
+            <option value="MEDIUM">متوسط</option>
+            <option value="HIGH">بالا</option>
+            <option value="URGENT">فوری</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- List View -->
+      <div id="list-view">
+        <div class="card p-0">
+          <div class="table-container" id="tasks-table-container">
+            <div class="empty-state" style="padding:48px"><div class="spinner"></div></div>
+          </div>
+          <div class="pagination" id="pagination" style="padding:12px 16px"></div>
+        </div>
+      </div>
+
+      <!-- Kanban View -->
+      <div id="kanban-view" class="hidden">
+        <div class="kanban-board" id="kanban-board"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title" id="task-modal-title">وظیفه جدید</h3>
+      <button class="modal-close" onclick="Modal.close('task-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="task-form">
+        <div class="form-group">
+          <label class="form-label">عنوان <span class="required">*</span></label>
+          <input type="text" class="form-control" id="f-title" placeholder="عنوان وظیفه">
+        </div>
+        <div class="form-group">
+          <label class="form-label">توضیحات</label>
+          <textarea class="form-control" id="f-desc" rows="3" placeholder="توضیحات کامل وظیفه"></textarea>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">پروژه <span class="required">*</span></label>
+            <select class="form-control" id="f-project"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">مرحله</label>
+            <select class="form-control" id="f-stage"><option value="">بدون مرحله</option></select>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">تخصیص به</label>
+            <select class="form-control" id="f-assignee"><option value="">انتخاب کاربر</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">اولویت</label>
+            <select class="form-control" id="f-priority">
+              <option value="LOW">کم</option>
+              <option value="MEDIUM" selected>متوسط</option>
+              <option value="HIGH">بالا</option>
+              <option value="URGENT">فوری</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">تاریخ شروع</label>
+            <input type="date" class="form-control" id="f-start">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ددلاین</label>
+            <input type="date" class="form-control" id="f-deadline">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('task-modal')">انصراف</button>
+      <button class="btn btn-primary" id="task-save-btn">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- Submit Modal -->
+<div class="modal-overlay" id="submit-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">ارسال وظیفه</h3>
+      <button class="modal-close" onclick="Modal.close('submit-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">توضیحات (اختیاری)</label>
+        <textarea class="form-control" id="submit-comment" rows="3" placeholder="توضیحات ارسال..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">درصد پیشرفت</label>
+        <input type="number" class="form-control" id="submit-progress" min="0" max="100" value="100">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('submit-modal')">انصراف</button>
+      <button class="btn btn-primary" id="submit-save-btn">ارسال</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+let currentPage = 1;
+const pageSize = 15;
+let editingTaskId = null;
+let submitTaskId = null;
+let viewMode = 'list';
+
+const KANBAN_COLUMNS = [
+  { key:'TODO', label:'در انتظار', color:'#94a3b8' },
+  { key:'IN_PROGRESS', label:'در حال انجام', color:'#3b82f6' },
+  { key:'SUBMITTED', label:'ارسال شده', color:'#f59e0b' },
+  { key:'NEEDS_REVISION', label:'نیاز به اصلاح', color:'#ef4444' },
+  { key:'APPROVED', label:'تأیید شده', color:'#8b5cf6' },
+  { key:'DONE', label:'انجام شده', color:'#10b981' },
+];
+
+(async () => {
+  const ok = await Auth.initPage();
+  if (!ok) return;
+  document.getElementById('logout-btn').addEventListener('click', async e => { e.preventDefault(); await Auth.logout(); });
+  document.getElementById('btn-add-task').addEventListener('click', openCreateModal);
+  document.getElementById('task-save-btn').addEventListener('click', saveTask);
+  document.getElementById('submit-save-btn').addEventListener('click', doSubmit);
+  document.getElementById('btn-list-view').addEventListener('click', () => switchView('list'));
+  document.getElementById('btn-kanban-view').addEventListener('click', () => switchView('kanban'));
+  let dt;
+  ['search-input','filter-status','filter-priority'].forEach(id => {
+    document.getElementById(id).addEventListener(id === 'search-input' ? 'input' : 'change', () => {
+      if (id === 'search-input') { clearTimeout(dt); dt = setTimeout(() => { currentPage=1; loadView(); }, 400); }
+      else { currentPage=1; loadView(); }
+    });
+  });
+  await loadProjects();
+  await loadUsers();
+  await loadView();
+})();
+
+function switchView(mode) {
+  viewMode = mode;
+  document.getElementById('list-view').classList.toggle('hidden', mode !== 'list');
+  document.getElementById('kanban-view').classList.toggle('hidden', mode !== 'kanban');
+  document.getElementById('btn-list-view').classList.toggle('btn-primary', mode === 'list');
+  document.getElementById('btn-list-view').classList.toggle('btn-secondary', mode === 'list');
+  document.getElementById('btn-kanban-view').classList.toggle('btn-primary', mode === 'kanban');
+  document.getElementById('btn-kanban-view').classList.toggle('btn-ghost', mode !== 'kanban');
+  loadView();
+}
+
+function getFilters() {
+  const p = { page: currentPage, page_size: pageSize };
+  const s = document.getElementById('search-input').value.trim();
+  const st = document.getElementById('filter-status').value;
+  const pr = document.getElementById('filter-priority').value;
+  if (s) p.search = s;
+  if (st) p.status = st;
+  if (pr) p.priority = pr;
+  return p;
+}
+
+async function loadView() {
+  if (viewMode === 'list') await loadList();
+  else await loadKanban();
+}
+
+async function loadList() {
+  const container = document.getElementById('tasks-table-container');
+  container.innerHTML = '<div class="empty-state" style="padding:48px"><div class="spinner"></div></div>';
+  try {
+    const res = await Api.getTasks(getFilters());
+    const { items, total, pages } = res.data;
+    if (!items.length) {
+      container.innerHTML = '<div class="empty-state" style="padding:48px"><div class="empty-state-icon">✅</div><div class="empty-state-title">وظیفه‌ای یافت نشد</div></div>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+    const isAdmin = Api.getUser()?.role === 'ADMIN';
+    container.innerHTML = `
+      <table class="data-table">
+        <thead><tr>
+          <th>عنوان</th><th>پروژه</th>
+          ${isAdmin ? '<th>مسئول</th>' : ''}
+          <th>اولویت</th><th>وضعیت</th><th>پیشرفت</th><th>ددلاین</th><th>عملیات</th>
+        </tr></thead>
+        <tbody>
+          ${items.map(t => {
+            const overdue = t.deadline && new Date(t.deadline) < new Date() && !['DONE','APPROVED'].includes(t.status);
+            return `<tr>
+              <td><a href="/task-details.html?id=${t.id}" style="font-weight:600;color:var(--text)">${t.title}</a></td>
+              <td><span style="font-size:12px;color:var(--text-muted)">${t.project_name||'—'}</span></td>
+              ${isAdmin ? `<td>${t.assignee_name||'—'}</td>` : ''}
+              <td>${priorityBadge(t.priority)}</td>
+              <td>${statusBadge(t.status)}</td>
+              <td style="min-width:120px">${progressBar(t.progress)}</td>
+              <td style="font-size:12px;${overdue?'color:var(--danger);font-weight:600':''}">${t.deadline?formatDate(t.deadline):'—'}</td>
+              <td>
+                <div style="display:flex;gap:4px">
+                  <a href="/task-details.html?id=${t.id}" class="btn btn-sm btn-secondary">👁</a>
+                  ${isAdmin ? `<button class="btn btn-sm btn-secondary" onclick="openEditModal(${t.id})">✏️</button>` : ''}
+                  ${['TODO','IN_PROGRESS','NEEDS_REVISION'].includes(t.status) && t.assigned_to == Api.getUser()?.id
+                    ? `<button class="btn btn-sm btn-primary" onclick="openSubmitModal(${t.id})">📤 ارسال</button>` : ''}
+                  ${isAdmin ? `<button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id},'${t.title}')">🗑</button>` : ''}
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+    renderPagination('pagination', currentPage, pages, total, pageSize, p => { currentPage=p; loadList(); });
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state" style="padding:48px;color:var(--danger)">${e.message}</div>`;
+  }
+}
+
+async function loadKanban() {
+  const board = document.getElementById('kanban-board');
+  board.innerHTML = '<div class="empty-state" style="padding:48px"><div class="spinner"></div></div>';
+  try {
+    const params = {...getFilters(), page: 1, page_size: 200};
+    const res = await Api.getTasks(params);
+    const tasks = res.data.items;
+    const byStatus = {};
+    KANBAN_COLUMNS.forEach(c => byStatus[c.key] = []);
+    tasks.forEach(t => { if (byStatus[t.status]) byStatus[t.status].push(t); });
+
+    board.innerHTML = KANBAN_COLUMNS.map(col => `
+      <div class="kanban-column">
+        <div class="kanban-column-header">
+          <div class="kanban-column-title">
+            <span style="width:10px;height:10px;border-radius:50%;background:${col.color};display:inline-block"></span>
+            ${col.label}
+          </div>
+          <span class="kanban-count">${byStatus[col.key].length}</span>
+        </div>
+        <div class="kanban-cards" id="col-${col.key}" data-status="${col.key}">
+          ${byStatus[col.key].map(t => kanbanCard(t)).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    // SortableJS drag-and-drop (admin only, server validates transitions)
+    if (Api.getUser()?.role === 'ADMIN') {
+      KANBAN_COLUMNS.forEach(col => {
+        const el = document.getElementById(`col-${col.key}`);
+        if (!el) return;
+        Sortable.create(el, {
+          group: 'tasks',
+          animation: 150,
+          ghostClass: 'dragging',
+          onEnd: async (evt) => {
+            const taskId = evt.item.dataset.id;
+            const newStatus = evt.to.dataset.status;
+            const oldStatus = evt.from.dataset.status;
+            if (newStatus === oldStatus) return;
+            try {
+              await Api.updateTaskStatus(taskId, newStatus);
+              Toast.success('وضعیت وظیفه تغییر یافت');
+            } catch (e) {
+              Toast.error(e.message);
+              // Revert
+              evt.from.appendChild(evt.item);
+            }
+          }
+        });
+      });
+    }
+  } catch (e) {
+    board.innerHTML = `<div class="empty-state" style="color:var(--danger)">${e.message}</div>`;
+  }
+}
+
+function kanbanCard(t) {
+  const overdue = t.deadline && new Date(t.deadline) < new Date() && !['DONE','APPROVED'].includes(t.status);
+  return `
+    <div class="kanban-card" data-id="${t.id}">
+      <div class="kanban-card-title">${t.title}</div>
+      <div style="font-size:11px;color:var(--text-muted)">${t.project_name||''}</div>
+      <div class="kanban-card-meta">
+        ${priorityBadge(t.priority)}
+        ${t.assignee_name ? `<span style="font-size:11px;color:var(--text-muted)">👤 ${t.assignee_name}</span>` : ''}
+        ${t.deadline ? `<span style="font-size:11px;${overdue?'color:var(--danger);font-weight:600':'color:var(--text-muted)'}">📅 ${formatDate(t.deadline)}</span>` : ''}
+      </div>
+      <div style="margin-top:8px">${progressBar(t.progress)}</div>
+    </div>`;
+}
+
+async function loadProjects() {
+  try {
+    const res = await Api.getProjects({ page_size: 100 });
+    const sel = document.getElementById('f-project');
+    sel.innerHTML = '<option value="">انتخاب پروژه</option>' +
+      res.data.items.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    sel.addEventListener('change', async () => {
+      const pid = sel.value;
+      const stSel = document.getElementById('f-stage');
+      stSel.innerHTML = '<option value="">بدون مرحله</option>';
+      if (!pid) return;
+      try {
+        const sr = await Api.getStages(pid);
+        stSel.innerHTML += sr.data.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      } catch {}
+    });
+  } catch {}
+}
+
+async function loadUsers() {
+  try {
+    const res = await Api.getUsers({ page_size: 100 });
+    const sel = document.getElementById('f-assignee');
+    sel.innerHTML = '<option value="">انتخاب کاربر</option>' +
+      res.data.items.map(u => `<option value="${u.id}">${u.full_name||u.username}</option>`).join('');
+  } catch {}
+}
+
+function openCreateModal() {
+  editingTaskId = null;
+  document.getElementById('task-modal-title').textContent = 'وظیفه جدید';
+  document.getElementById('task-form').reset();
+  Modal.open('task-modal');
+}
+
+async function openEditModal(id) {
+  try {
+    const res = await Api.getTask(id);
+    const t = res.data;
+    editingTaskId = id;
+    document.getElementById('task-modal-title').textContent = 'ویرایش وظیفه';
+    document.getElementById('f-title').value = t.title;
+    document.getElementById('f-desc').value = t.description || '';
+    document.getElementById('f-project').value = t.project_id;
+    document.getElementById('f-project').dispatchEvent(new Event('change'));
+    setTimeout(() => {
+      document.getElementById('f-stage').value = t.stage_id || '';
+      document.getElementById('f-assignee').value = t.assigned_to || '';
+    }, 300);
+    document.getElementById('f-priority').value = t.priority;
+    document.getElementById('f-start').value = t.start_date || '';
+    document.getElementById('f-deadline').value = t.deadline || '';
+    Modal.open('task-modal');
+  } catch (e) { Toast.error(e.message); }
+}
+
+async function saveTask() {
+  const btn = document.getElementById('task-save-btn');
+  setLoading(btn, true);
+  try {
+    const data = {
+      title: document.getElementById('f-title').value.trim(),
+      description: document.getElementById('f-desc').value.trim() || null,
+      project_id: parseInt(document.getElementById('f-project').value),
+      stage_id: parseInt(document.getElementById('f-stage').value) || null,
+      assigned_to: parseInt(document.getElementById('f-assignee').value) || null,
+      priority: document.getElementById('f-priority').value,
+      start_date: document.getElementById('f-start').value || null,
+      deadline: document.getElementById('f-deadline').value || null,
+    };
+    if (!data.title || !data.project_id) { Toast.warning('عنوان و پروژه الزامی است'); return; }
+    if (editingTaskId) { await Api.updateTask(editingTaskId, data); Toast.success('وظیفه ویرایش شد'); }
+    else { await Api.createTask(data); Toast.success('وظیفه ایجاد شد'); }
+    Modal.close('task-modal');
+    await loadView();
+  } catch (e) { Toast.error(e.message); }
+  finally { setLoading(btn, false); }
+}
+
+function openSubmitModal(id) {
+  submitTaskId = id;
+  document.getElementById('submit-comment').value = '';
+  document.getElementById('submit-progress').value = 100;
+  Modal.open('submit-modal');
+}
+
+async function doSubmit() {
+  const btn = document.getElementById('submit-save-btn');
+  setLoading(btn, true);
+  try {
+    await Api.submitTask(submitTaskId, {
+      comment: document.getElementById('submit-comment').value.trim() || null,
+      progress: parseInt(document.getElementById('submit-progress').value) || 100,
+    });
+    Toast.success('وظیفه با موفقیت ارسال شد');
+    Modal.close('submit-modal');
+    await loadView();
+  } catch (e) { Toast.error(e.message); }
+  finally { setLoading(btn, false); }
+}
+
+async function deleteTask(id, name) {
+  confirmAction(`آیا از حذف وظیفه "${name}" مطمئن هستید؟`, async () => {
+    try { await Api.deleteTask(id); Toast.success('وظیفه حذف شد'); await loadView(); }
+    catch (e) { Toast.error(e.message); }
+  });
+}
+</script>
+</body>
+</html>

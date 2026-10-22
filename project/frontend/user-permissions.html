@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دسترسی‌ها | سیستم مدیریت کارآموزی</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🎓</div>
+      <div><div class="logo-text">کارآموزی</div><div class="logo-sub">سیستم مدیریت</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">📊</span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item active" href="/users.html"><span class="nav-icon">👥</span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html"><span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html"><span class="nav-icon">✅</span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html"><span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">🚪</span><span class="nav-label">خروج</span></a>
+    </div>
+  </aside>
+
+  <div class="main-content" id="main-content">
+    <header class="header" id="header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <a href="/users.html" class="btn btn-ghost btn-sm">← بازگشت</a>
+        <h1 class="page-title" id="page-title">مدیریت دسترسی‌ها</h1>
+      </div>
+      <div class="header-right">
+        <div class="header-user">
+          <div class="user-avatar" id="header-user-avatar">م</div>
+          <div class="user-info">
+            <div class="user-name" id="header-user-name">...</div>
+            <div class="user-role" id="header-user-role">...</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <main class="page-content">
+      <div id="perm-loading" class="empty-state"><div class="spinner"></div></div>
+
+      <div id="perm-content" class="hidden">
+        <div class="card mb-4">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div class="user-avatar" style="width:48px;height:48px;font-size:18px" id="perm-user-avatar">م</div>
+            <div>
+              <div style="font-size:18px;font-weight:700" id="perm-user-name">...</div>
+              <div style="color:var(--text-muted);font-size:13px" id="perm-user-role">...</div>
+            </div>
+            <div class="hidden" id="admin-notice" style="margin-right:auto">
+              <span class="badge badge-purple" style="font-size:13px;padding:6px 12px">مدیر — دسترسی کامل</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="perm-admin-msg" class="hidden card" style="text-align:center;padding:32px;color:var(--text-secondary)">
+          این کاربر مدیر سیستم است و به تمام بخش‌ها دسترسی دارد.
+        </div>
+
+        <div id="perm-grid" class="permissions-grid hidden"></div>
+
+        <div id="perm-actions" class="hidden" style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end">
+          <button class="btn btn-secondary" id="btn-select-all">انتخاب همه</button>
+          <button class="btn btn-secondary" id="btn-clear-all">پاک کردن همه</button>
+          <button class="btn btn-primary" id="btn-save-perms">💾 ذخیره دسترسی‌ها</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+const PERM_GROUPS = [
+  { label: '📊 داشبورد', perms: [{ code:'dashboard.view', label:'مشاهده' }] },
+  { label: '👥 کاربران', perms: [
+    { code:'users.view', label:'مشاهده' }, { code:'users.create', label:'ایجاد' },
+    { code:'users.edit', label:'ویرایش' }, { code:'users.delete', label:'حذف' },
+  ]},
+  { label: '📁 پروژه‌ها', perms: [
+    { code:'projects.view', label:'مشاهده' }, { code:'projects.create', label:'ایجاد' },
+    { code:'projects.edit', label:'ویرایش' }, { code:'projects.delete', label:'حذف' },
+    { code:'projects.members.manage', label:'مدیریت اعضا' },
+  ]},
+  { label: '🗂 مراحل', perms: [
+    { code:'stages.view', label:'مشاهده' }, { code:'stages.create', label:'ایجاد' },
+    { code:'stages.edit', label:'ویرایش' }, { code:'stages.delete', label:'حذف' },
+  ]},
+  { label: '✅ وظایف', perms: [
+    { code:'tasks.view', label:'مشاهده' }, { code:'tasks.create', label:'ایجاد' },
+    { code:'tasks.edit', label:'ویرایش' }, { code:'tasks.delete', label:'حذف' },
+    { code:'tasks.assign', label:'تخصیص' }, { code:'tasks.submit', label:'ارسال' },
+  ]},
+  { label: '🗺 نقشه راه', perms: [
+    { code:'roadmap.view', label:'مشاهده' }, { code:'roadmap.manage', label:'مدیریت' },
+  ]},
+  { label: '⭐ ارزیابی', perms: [
+    { code:'evaluations.view', label:'مشاهده' }, { code:'evaluations.create', label:'ایجاد' },
+    { code:'evaluations.edit', label:'ویرایش' },
+  ]},
+  { label: '📈 گزارش‌ها', perms: [{ code:'reports.view', label:'مشاهده' }] },
+  { label: '📎 پیوست‌ها', perms: [
+    { code:'attachments.view', label:'مشاهده' }, { code:'attachments.upload', label:'آپلود' },
+  ]},
+  { label: '🪵 لاگ سیستم', perms: [{ code:'audit_logs.view', label:'مشاهده' }] },
+];
+
+let userId;
+let isAdmin = false;
+
+(async () => {
+  const ok = await Auth.initPage();
+  if (!ok) return;
+
+  document.getElementById('logout-btn').addEventListener('click', async e => { e.preventDefault(); await Auth.logout(); });
+
+  userId = new URLSearchParams(window.location.search).get('id');
+  if (!userId) { window.location.href = '/users.html'; return; }
+
+  await loadPermissions();
+
+  document.getElementById('btn-save-perms').addEventListener('click', savePermissions);
+  document.getElementById('btn-select-all').addEventListener('click', () => {
+    document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = true);
+  });
+  document.getElementById('btn-clear-all').addEventListener('click', () => {
+    document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = false);
+  });
+})();
+
+async function loadPermissions() {
+  try {
+    const [userRes, permRes] = await Promise.all([Api.getUser(userId), Api.getUserPermissions(userId)]);
+    const user = userRes.data;
+    const data = permRes.data;
+
+    document.getElementById('perm-user-name').textContent = user.full_name || user.username;
+    document.getElementById('perm-user-role').textContent = user.role === 'ADMIN' ? 'مدیر سیستم' : 'کاربر';
+    document.getElementById('perm-user-avatar').textContent = (user.full_name || user.username).charAt(0);
+    document.getElementById('page-title').textContent = `دسترسی‌های ${user.full_name || user.username}`;
+
+    isAdmin = data.is_admin;
+
+    if (isAdmin) {
+      document.getElementById('admin-notice').classList.remove('hidden');
+      document.getElementById('perm-admin-msg').classList.remove('hidden');
+    } else {
+      const userPerms = new Set(data.permissions);
+      renderPermGrid(userPerms);
+      document.getElementById('perm-grid').classList.remove('hidden');
+      document.getElementById('perm-actions').classList.remove('hidden');
+      document.getElementById('perm-actions').style.display = 'flex';
+    }
+
+    document.getElementById('perm-loading').classList.add('hidden');
+    document.getElementById('perm-content').classList.remove('hidden');
+  } catch (e) { Toast.error(e.message); }
+}
+
+function renderPermGrid(userPerms) {
+  const grid = document.getElementById('perm-grid');
+  grid.innerHTML = PERM_GROUPS.map(group => `
+    <div class="perm-section">
+      <div class="perm-section-header">${group.label}</div>
+      <div class="perm-items">
+        ${group.perms.map(p => `
+          <label class="perm-item">
+            <input type="checkbox" class="perm-checkbox" data-code="${p.code}" ${userPerms.has(p.code) ? 'checked' : ''}>
+            <span>${p.label}</span>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function savePermissions() {
+  if (isAdmin) { Toast.info('دسترسی‌های مدیر تغییرپذیر نیست'); return; }
+  const btn = document.getElementById('btn-save-perms');
+  setLoading(btn, true);
+  try {
+    const codes = Array.from(document.querySelectorAll('.perm-checkbox:checked')).map(cb => cb.dataset.code);
+    await Api.updateUserPermissions(userId, codes);
+    Toast.success('دسترسی‌ها با موفقیت ذخیره شد');
+  } catch (e) { Toast.error(e.message); }
+  finally { setLoading(btn, false); }
+}
+</script>
+</body>
+</html>

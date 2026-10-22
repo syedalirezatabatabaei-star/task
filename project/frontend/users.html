@@ -1,0 +1,372 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>کاربران | سیستم مدیریت کارآموزی</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🎓</div>
+      <div><div class="logo-text">کارآموزی</div><div class="logo-sub">سیستم مدیریت</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">📊</span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item active" href="/users.html" data-permission="users.view"><span class="nav-icon">👥</span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">✅</span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">🚪</span><span class="nav-label">خروج</span></a>
+    </div>
+  </aside>
+
+  <div class="main-content" id="main-content">
+    <header class="header" id="header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <h1 class="page-title">مدیریت کاربران</h1>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" id="btn-add-user" data-permission="users.create">
+          + کاربر جدید
+        </button>
+        <div class="header-user">
+          <div class="user-avatar" id="header-user-avatar">م</div>
+          <div class="user-info">
+            <div class="user-name" id="header-user-name">...</div>
+            <div class="user-role" id="header-user-role">...</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <main class="page-content">
+      <!-- Filters -->
+      <div class="card mb-4">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div class="search-bar" style="flex:1;min-width:200px">
+            <span>🔍</span>
+            <input type="text" id="search-input" placeholder="جستجو بر اساس نام یا نام کاربری...">
+          </div>
+          <select class="form-control" id="filter-role" style="width:140px">
+            <option value="">همه نقش‌ها</option>
+            <option value="ADMIN">مدیر</option>
+            <option value="USER">کاربر</option>
+          </select>
+          <select class="form-control" id="filter-status" style="width:140px">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="true">فعال</option>
+            <option value="false">غیرفعال</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card p-0">
+        <div class="table-container" id="users-table-container">
+          <div class="empty-state" style="padding:48px">
+            <div class="spinner"></div>
+            <p class="mt-2 text-muted">در حال بارگذاری...</p>
+          </div>
+        </div>
+        <div class="pagination" id="pagination" style="padding:12px 16px"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="user-modal-title">کاربر جدید</h3>
+      <button class="modal-close" onclick="Modal.close('user-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="user-form">
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">نام <span class="required">*</span></label>
+            <input type="text" class="form-control" id="f-first-name" placeholder="نام">
+          </div>
+          <div class="form-group">
+            <label class="form-label">نام خانوادگی <span class="required">*</span></label>
+            <input type="text" class="form-control" id="f-last-name" placeholder="نام خانوادگی">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">نام کاربری <span class="required">*</span></label>
+          <input type="text" class="form-control" id="f-username" placeholder="نام کاربری">
+        </div>
+        <div class="form-group" id="f-password-group">
+          <label class="form-label">رمز عبور <span class="required">*</span></label>
+          <input type="password" class="form-control" id="f-password" placeholder="حداقل ۶ کاراکتر">
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">ایمیل</label>
+            <input type="email" class="form-control" id="f-email" placeholder="example@domain.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">تلفن</label>
+            <input type="text" class="form-control" id="f-phone" placeholder="09xxxxxxxxx">
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">نقش</label>
+            <select class="form-control" id="f-role">
+              <option value="USER">کاربر</option>
+              <option value="ADMIN">مدیر</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاریخ شروع</label>
+            <input type="date" class="form-control" id="f-start-date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">توضیحات</label>
+          <textarea class="form-control" id="f-description" rows="2" placeholder="توضیحات اختیاری"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('user-modal')">انصراف</button>
+      <button class="btn btn-primary" id="user-save-btn">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">بازنشانی رمز عبور</h3>
+      <button class="modal-close" onclick="Modal.close('reset-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">رمز عبور جدید <span class="required">*</span></label>
+        <input type="password" class="form-control" id="new-password" placeholder="حداقل ۶ کاراکتر">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('reset-modal')">انصراف</button>
+      <button class="btn btn-primary" id="reset-save-btn">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+let currentPage = 1;
+const pageSize = 15;
+let editingUserId = null;
+let resetUserId = null;
+
+(async () => {
+  const ok = await Auth.initPage();
+  if (!ok) return;
+
+  document.getElementById('logout-btn').addEventListener('click', async e => { e.preventDefault(); await Auth.logout(); });
+  document.getElementById('btn-add-user').addEventListener('click', openCreateModal);
+  document.getElementById('user-save-btn').addEventListener('click', saveUser);
+  document.getElementById('reset-save-btn').addEventListener('click', doResetPassword);
+
+  let debounceTimer;
+  document.getElementById('search-input').addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => { currentPage = 1; loadUsers(); }, 400);
+  });
+  document.getElementById('filter-role').addEventListener('change', () => { currentPage = 1; loadUsers(); });
+  document.getElementById('filter-status').addEventListener('change', () => { currentPage = 1; loadUsers(); });
+
+  await loadUsers();
+})();
+
+async function loadUsers() {
+  const container = document.getElementById('users-table-container');
+  container.innerHTML = '<div class="empty-state" style="padding:48px"><div class="spinner"></div></div>';
+
+  const params = {
+    page: currentPage,
+    page_size: pageSize,
+  };
+  const search = document.getElementById('search-input').value.trim();
+  const role = document.getElementById('filter-role').value;
+  const status = document.getElementById('filter-status').value;
+  if (search) params.search = search;
+  if (role) params.role = role;
+  if (status !== '') params.is_active = status;
+
+  try {
+    const res = await Api.getUsers(params);
+    const { items, total, pages } = res.data;
+
+    if (!items.length) {
+      container.innerHTML = '<div class="empty-state" style="padding:48px"><div class="empty-state-icon">👥</div><div class="empty-state-title">کاربری یافت نشد</div></div>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>نام</th>
+            <th>نام کاربری</th>
+            <th>نقش</th>
+            <th>وضعیت</th>
+            <th>تاریخ شروع</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map((u, i) => `
+            <tr>
+              <td>${(currentPage-1)*pageSize + i + 1}</td>
+              <td>
+                <div style="font-weight:600">${u.full_name || '—'}</div>
+                <div style="font-size:12px;color:var(--text-muted)">${u.email || ''}</div>
+              </td>
+              <td><code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;font-size:12px">${u.username}</code></td>
+              <td>${u.role === 'ADMIN' ? '<span class="badge badge-purple">مدیر</span>' : '<span class="badge badge-info">کاربر</span>'}</td>
+              <td>${u.is_active
+                ? '<span class="badge badge-success">فعال</span>'
+                : '<span class="badge badge-gray">غیرفعال</span>'}</td>
+              <td>${u.start_date ? formatDate(u.start_date) : '—'}</td>
+              <td>
+                <div style="display:flex;gap:6px">
+                  <a href="/user-details.html?id=${u.id}" class="btn btn-sm btn-secondary" title="جزئیات">👁</a>
+                  <button class="btn btn-sm btn-secondary" onclick="openEditModal(${u.id})" title="ویرایش">✏️</button>
+                  <button class="btn btn-sm btn-secondary" onclick="openResetModal(${u.id})" title="بازنشانی رمز">🔑</button>
+                  <a href="/user-permissions.html?id=${u.id}" class="btn btn-sm btn-secondary" title="دسترسی‌ها">🔐</a>
+                  <button class="btn btn-sm ${u.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleStatus(${u.id},${u.is_active})" title="${u.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">${u.is_active ? '🚫' : '✅'}</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id},'${u.full_name}')" title="حذف">🗑</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
+    renderPagination('pagination', currentPage, pages, total, pageSize, (p) => { currentPage = p; loadUsers(); });
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state" style="padding:48px;color:var(--danger)">${e.message}</div>`;
+  }
+}
+
+function openCreateModal() {
+  editingUserId = null;
+  document.getElementById('user-modal-title').textContent = 'کاربر جدید';
+  document.getElementById('user-form').reset();
+  document.getElementById('f-password-group').style.display = 'block';
+  Modal.open('user-modal');
+}
+
+async function openEditModal(id) {
+  try {
+    const res = await Api.getUser(id);
+    const u = res.data;
+    editingUserId = id;
+    document.getElementById('user-modal-title').textContent = 'ویرایش کاربر';
+    document.getElementById('f-first-name').value = u.first_name || '';
+    document.getElementById('f-last-name').value = u.last_name || '';
+    document.getElementById('f-username').value = u.username;
+    document.getElementById('f-username').disabled = true;
+    document.getElementById('f-email').value = u.email || '';
+    document.getElementById('f-phone').value = u.phone || '';
+    document.getElementById('f-role').value = u.role;
+    document.getElementById('f-start-date').value = u.start_date || '';
+    document.getElementById('f-description').value = u.description || '';
+    document.getElementById('f-password-group').style.display = 'none';
+    Modal.open('user-modal');
+  } catch (e) { Toast.error(e.message); }
+}
+
+async function saveUser() {
+  const btn = document.getElementById('user-save-btn');
+  setLoading(btn, true);
+  try {
+    const data = {
+      first_name: document.getElementById('f-first-name').value.trim(),
+      last_name: document.getElementById('f-last-name').value.trim(),
+      email: document.getElementById('f-email').value.trim() || null,
+      phone: document.getElementById('f-phone').value.trim() || null,
+      role: document.getElementById('f-role').value,
+      start_date: document.getElementById('f-start-date').value || null,
+      description: document.getElementById('f-description').value.trim() || null,
+    };
+
+    if (editingUserId) {
+      await Api.updateUser(editingUserId, data);
+      Toast.success('کاربر با موفقیت ویرایش شد');
+    } else {
+      data.username = document.getElementById('f-username').value.trim();
+      data.password = document.getElementById('f-password').value;
+      await Api.createUser(data);
+      Toast.success('کاربر با موفقیت ایجاد شد');
+    }
+
+    document.getElementById('f-username').disabled = false;
+    Modal.close('user-modal');
+    await loadUsers();
+  } catch (e) {
+    Toast.error(e.message);
+  } finally {
+    setLoading(btn, false);
+  }
+}
+
+function openResetModal(id) {
+  resetUserId = id;
+  document.getElementById('new-password').value = '';
+  Modal.open('reset-modal');
+}
+
+async function doResetPassword() {
+  const pwd = document.getElementById('new-password').value;
+  if (!pwd || pwd.length < 6) { Toast.warning('رمز عبور باید حداقل ۶ کاراکتر باشد'); return; }
+  const btn = document.getElementById('reset-save-btn');
+  setLoading(btn, true);
+  try {
+    await Api.resetPassword(resetUserId, pwd);
+    Toast.success('رمز عبور تغییر یافت');
+    Modal.close('reset-modal');
+  } catch (e) { Toast.error(e.message); }
+  finally { setLoading(btn, false); }
+}
+
+async function toggleStatus(id, isActive) {
+  try {
+    await Api.updateStatus(id, !isActive);
+    Toast.success(`کاربر ${isActive ? 'غیرفعال' : 'فعال'} شد`);
+    await loadUsers();
+  } catch (e) { Toast.error(e.message); }
+}
+
+async function deleteUser(id, name) {
+  confirmAction(`آیا از حذف کاربر "${name}" مطمئن هستید؟`, async () => {
+    try {
+      await Api.deleteUser(id);
+      Toast.success('کاربر حذف شد');
+      await loadUsers();
+    } catch (e) { Toast.error(e.message); }
+  });
+}
+</script>
+</body>
+</html>

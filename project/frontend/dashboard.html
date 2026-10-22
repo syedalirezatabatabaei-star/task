@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد | سیستم مدیریت کارآموزی</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🎓</div>
+      <div>
+        <div class="logo-text">کارآموزی</div>
+        <div class="logo-sub">سیستم مدیریت</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="/dashboard.html">
+        <span class="nav-icon">📊</span><span class="nav-label">داشبورد</span>
+      </a>
+      <a class="nav-item" href="/users.html" data-permission="users.view">
+        <span class="nav-icon">👥</span><span class="nav-label">کاربران</span>
+      </a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view">
+        <span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span>
+      </a>
+      <a class="nav-item" href="/tasks.html" data-permission="tasks.view">
+        <span class="nav-icon">✅</span><span class="nav-label">وظایف</span>
+      </a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view">
+        <span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="#" id="logout-btn">
+        <span class="nav-icon">🚪</span><span class="nav-label">خروج</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content" id="main-content">
+    <header class="header" id="header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <h1 class="page-title" id="page-title">داشبورد</h1>
+      </div>
+      <div class="header-right">
+        <div class="header-user" id="header-user">
+          <div class="user-avatar" id="header-user-avatar">م</div>
+          <div class="user-info">
+            <div class="user-name" id="header-user-name">...</div>
+            <div class="user-role" id="header-user-role">...</div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <main class="page-content">
+      <!-- Admin Dashboard -->
+      <div id="admin-dashboard" class="hidden">
+        <div class="grid grid-4 mb-4" id="stat-cards-admin">
+          <!-- populated by JS -->
+        </div>
+        <div class="grid grid-2 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">وضعیت وظایف</div>
+                <div class="card-subtitle">توزیع وظایف بر اساس وضعیت</div>
+              </div>
+            </div>
+            <canvas id="tasks-chart" height="220"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">آخرین وظایف</div>
+            </div>
+            <div id="recent-tasks-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Dashboard -->
+      <div id="user-dashboard" class="hidden">
+        <div class="card mb-4" style="background: linear-gradient(135deg,#6366f1,#8b5cf6); color:white; border:none;">
+          <div style="display:flex; align-items:center; gap:16px">
+            <div style="font-size:48px">👋</div>
+            <div>
+              <div style="font-size:22px; font-weight:800;" id="user-greeting">سلام!</div>
+              <div style="opacity:0.85; margin-top:4px">خوش آمدید. وظایف امروز خود را مشاهده کنید.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-4 mb-4" id="stat-cards-user"></div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">ددلاین‌های نزدیک</div>
+              <span class="badge badge-warning">هفته جاری</span>
+            </div>
+            <div id="upcoming-deadlines"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">آخرین ارزیابی‌ها</div>
+            </div>
+            <div id="recent-evaluations"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="dashboard-loading" class="empty-state">
+        <div class="spinner"></div>
+        <p class="mt-2 text-muted">در حال بارگذاری...</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+(async () => {
+  const ok = await Auth.initPage();
+  if (!ok) return;
+
+  document.getElementById('logout-btn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await Auth.logout();
+  });
+
+  const user = Api.getUser();
+  const isAdmin = user?.role === 'ADMIN';
+  const loading = document.getElementById('dashboard-loading');
+
+  if (isAdmin) {
+    await loadAdminDashboard();
+  } else {
+    await loadUserDashboard();
+  }
+
+  loading.classList.add('hidden');
+
+  async function loadAdminDashboard() {
+    document.getElementById('admin-dashboard').classList.remove('hidden');
+    try {
+      const res = await Api.getAdminDashboard();
+      const d = res.data;
+
+      document.getElementById('stat-cards-admin').innerHTML = [
+        { label: 'کاربران فعال',      value: d.active_users,         icon: '👥', color: '#eef2ff', iconColor: '#6366f1' },
+        { label: 'پروژه‌های فعال',    value: d.active_projects,      icon: '📁', color: '#ecfdf5', iconColor: '#10b981' },
+        { label: 'وظایف در جریان',   value: d.in_progress_tasks,    icon: '🔄', color: '#eff6ff', iconColor: '#3b82f6' },
+        { label: 'نیاز به بررسی',    value: d.submitted_tasks,      icon: '📬', color: '#fffbeb', iconColor: '#f59e0b' },
+        { label: 'انجام‌شده',        value: d.completed_tasks,       icon: '✅', color: '#ecfdf5', iconColor: '#10b981' },
+        { label: 'عقب‌افتاده',       value: d.overdue_tasks,         icon: '⏰', color: '#fef2f2', iconColor: '#ef4444' },
+        { label: 'کل وظایف',         value: d.total_tasks,           icon: '📋', color: '#f8fafc', iconColor: '#64748b' },
+        { label: 'کل کاربران',       value: d.total_users,           icon: '🧑‍💻', color: '#f5f3ff', iconColor: '#8b5cf6' },
+      ].map(s => `
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">${s.label}</div>
+            <div class="stat-value">${s.value}</div>
+          </div>
+          <div class="stat-icon" style="background:${s.color}; font-size:22px">${s.icon}</div>
+        </div>
+      `).join('');
+
+      // Chart
+      const ctx = document.getElementById('tasks-chart').getContext('2d');
+      const dist = d.status_distribution || {};
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['در انتظار','در حال انجام','ارسال شده','نیاز به اصلاح','تأیید شده','انجام شده'],
+          datasets: [{
+            data: [dist.TODO||0, dist.IN_PROGRESS||0, dist.SUBMITTED||0, dist.NEEDS_REVISION||0, dist.APPROVED||0, dist.DONE||0],
+            backgroundColor: ['#e2e8f0','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#10b981'],
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', rtl: true, labels: { font: { family: 'Vazirmatn', size: 12 }, padding: 10 } }
+          }
+        }
+      });
+
+      // Recent tasks
+      const tasksHtml = (d.recent_tasks || []).map(t => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">${t.title}</div>
+            <div style="font-size:12px;color:var(--text-muted)">${t.project_name||'—'} | ${t.assignee_name||'—'}</div>
+          </div>
+          ${statusBadge(t.status)}
+        </div>
+      `).join('');
+      document.getElementById('recent-tasks-list').innerHTML = tasksHtml || '<div class="empty-state" style="padding:24px"><p>وظیفه‌ای وجود ندارد</p></div>';
+
+    } catch (e) {
+      Toast.error(e.message || 'خطا در بارگذاری داشبورد');
+    }
+  }
+
+  async function loadUserDashboard() {
+    document.getElementById('user-dashboard').classList.remove('hidden');
+    try {
+      const res = await Api.getUserDashboard();
+      const d = res.data;
+
+      document.getElementById('user-greeting').textContent = `سلام ${d.user?.full_name || ''} 👋`;
+
+      document.getElementById('stat-cards-user').innerHTML = [
+        { label: 'پروژه‌هایم',       value: d.my_project_count,      icon: '📁' },
+        { label: 'کل وظایفم',        value: d.tasks?.total,           icon: '📋' },
+        { label: 'در حال انجام',     value: d.tasks?.in_progress,     icon: '🔄' },
+        { label: 'میانگین نمره',     value: d.average_score != null ? d.average_score : '—', icon: '⭐' },
+      ].map(s => `
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">${s.label}</div>
+            <div class="stat-value">${s.value ?? 0}</div>
+          </div>
+          <div class="stat-icon" style="background:var(--surface-2);font-size:22px">${s.icon}</div>
+        </div>
+      `).join('');
+
+      // Upcoming deadlines
+      const upcomingHtml = (d.upcoming_deadlines || []).length
+        ? d.upcoming_deadlines.map(t => `
+            <a href="/task-details.html?id=${t.id}" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit">
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600">${t.title}</div>
+                <div style="font-size:12px;color:var(--text-muted)">${t.project_name||''}</div>
+              </div>
+              <div style="text-align:left">
+                <div style="font-size:12px;color:var(--danger);font-weight:600">${formatDate(t.deadline)}</div>
+                ${priorityBadge(t.priority)}
+              </div>
+            </a>
+          `).join('')
+        : '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">🎉</div><p>ددلاین نزدیکی وجود ندارد</p></div>';
+      document.getElementById('upcoming-deadlines').innerHTML = upcomingHtml;
+
+      // Recent evaluations
+      const evalHtml = (d.recent_evaluations || []).length
+        ? d.recent_evaluations.map(e => `
+            <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="font-size:13px;font-weight:600">${e.task_title||'وظیفه'}</div>
+                <div style="font-size:18px;font-weight:800;color:${e.score>=70?'var(--success)':e.score>=50?'var(--warning)':'var(--danger)'}">${e.score}</div>
+              </div>
+              ${e.comment?`<div style="font-size:12px;color:var(--text-muted);margin-top:3px">${e.comment}</div>`:''}
+            </div>
+          `).join('')
+        : '<div class="empty-state" style="padding:24px"><p>ارزیابی‌ای وجود ندارد</p></div>';
+      document.getElementById('recent-evaluations').innerHTML = evalHtml;
+
+    } catch (e) {
+      Toast.error(e.message || 'خطا در بارگذاری داشبورد');
+    }
+  }
+})();
+</script>
+</body>
+</html>

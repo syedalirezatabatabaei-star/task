@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>گزارش‌ها | سیستم مدیریت کارآموزی</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">🎓</div><div><div class="logo-text">کارآموزی</div><div class="logo-sub">سیستم مدیریت</div></div></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">📊</span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">👥</span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">✅</span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item active" href="/reports.html" data-permission="reports.view"><span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span></a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">🚪</span><span class="nav-label">خروج</span></a></div>
+  </aside>
+  <div class="main-content" id="main-content">
+    <header class="header" id="header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <h1 class="page-title">گزارش‌ها</h1>
+      </div>
+      <div class="header-right">
+        <div class="header-user"><div class="user-avatar" id="header-user-avatar">م</div><div class="user-info"><div class="user-name" id="header-user-name">...</div><div class="user-role" id="header-user-role">...</div></div></div>
+      </div>
+    </header>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <main class="page-content">
+      <div class="tabs" id="report-tabs" style="margin-bottom:20px">
+        <button class="tab-btn active" id="tab-user-btn">گزارش کاربر</button>
+        <button class="tab-btn" id="tab-project-btn" data-permission="projects.view">گزارش پروژه</button>
+        <button class="tab-btn" id="tab-audit-btn" data-permission="audit_logs.view">لاگ‌های سیستم</button>
+      </div>
+
+      <!-- User Report -->
+      <div id="tab-user-content">
+        <div class="card mb-4">
+          <div style="display:flex;gap:12px;align-items:flex-end">
+            <div class="form-group" style="flex:1;margin-bottom:0">
+              <label class="form-label">انتخاب کاربر</label>
+              <select class="form-control" id="user-select"><option value="">انتخاب کنید...</option></select>
+            </div>
+            <button class="btn btn-primary" id="btn-load-user-report">مشاهده گزارش</button>
+          </div>
+        </div>
+        <div id="user-report-content" class="hidden">
+          <div class="grid grid-4 mb-4" id="user-stat-cards"></div>
+          <div class="grid grid-2 mb-4">
+            <div class="card"><div class="card-title" style="margin-bottom:12px">توزیع وظایف</div><canvas id="user-tasks-chart" height="200"></canvas></div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:12px">پروژه‌های مرتبط</div>
+              <div id="user-projects-list"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px">تاریخچه ارزیابی</div>
+            <div id="user-eval-history"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Report -->
+      <div id="tab-project-content" class="hidden">
+        <div class="card mb-4">
+          <div style="display:flex;gap:12px;align-items:flex-end">
+            <div class="form-group" style="flex:1;margin-bottom:0">
+              <label class="form-label">انتخاب پروژه</label>
+              <select class="form-control" id="project-select"><option value="">انتخاب کنید...</option></select>
+            </div>
+            <button class="btn btn-primary" id="btn-load-project-report">مشاهده گزارش</button>
+          </div>
+        </div>
+        <div id="project-report-content" class="hidden">
+          <div class="grid grid-3 mb-4" id="project-stat-cards"></div>
+          <div class="card mb-4">
+            <div class="card-title" style="margin-bottom:12px">عملکرد اعضا</div>
+            <div class="table-container" id="member-stats-table"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Logs -->
+      <div id="tab-audit-content" class="hidden">
+        <div class="card p-0">
+          <div class="table-container" id="audit-table">
+            <div class="empty-state" style="padding:32px"><p>برای مشاهده لاگ‌ها تب لاگ‌های سیستم را انتخاب کنید</p></div>
+          </div>
+          <div class="pagination" id="audit-pagination" style="padding:12px 16px"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+let auditPage = 1;
+let userChart = null;
+
+(async () => {
+  const ok = await Auth.initPage();
+  if (!ok) return;
+  document.getElementById('logout-btn').addEventListener('click', async e => { e.preventDefault(); await Auth.logout(); });
+
+  // Tab switching
+  document.getElementById('tab-user-btn').addEventListener('click', () => switchTab('user'));
+  document.getElementById('tab-project-btn').addEventListener('click', () => switchTab('project'));
+  document.getElementById('tab-audit-btn').addEventListener('click', () => { switchTab('audit'); loadAuditLogs(); });
+
+  document.getElementById('btn-load-user-report').addEventListener('click', loadUserReport);
+  document.getElementById('btn-load-project-report').addEventListener('click', loadProjectReport);
+
+  await Promise.all([loadUsersSelect(), loadProjectsSelect()]);
+
+  // Auto-load own report for non-admin
+  const me = Api.getUser();
+  if (me?.role !== 'ADMIN') {
+    document.getElementById('user-select').value = me.id;
+    await loadUserReport();
+  }
+})();
+
+function switchTab(tab) {
+  ['user','project','audit'].forEach(t => {
+    document.getElementById(`tab-${t}-btn`)?.classList.toggle('active', t === tab);
+    document.getElementById(`tab-${t}-content`)?.classList.toggle('hidden', t !== tab);
+  });
+}
+
+async function loadUsersSelect() {
+  try {
+    const me = Api.getUser();
+    const sel = document.getElementById('user-select');
+    if (me?.role !== 'ADMIN') {
+      sel.innerHTML = `<option value="${me.id}">${me.full_name||me.username}</option>`;
+      return;
+    }
+    const res = await Api.getUsers({ page_size: 100 });
+    sel.innerHTML = '<option value="">انتخاب کنید...</option>' + res.data.items.map(u => `<option value="${u.id}">${u.full_name||u.username}</option>`).join('');
+  } catch {}
+}
+
+async function loadProjectsSelect() {
+  try {
+    const res = await Api.getProjects({ page_size: 100 });
+    document.getElementById('project-select').innerHTML = '<option value="">انتخاب کنید...</option>' + res.data.items.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  } catch {}
+}
+
+async function loadUserReport() {
+  const id = document.getElementById('user-select').value;
+  if (!id) { Toast.warning('کاربری انتخاب نشده'); return; }
+  try {
+    const res = await Api.getUserReport(id);
+    const d = res.data;
+    const stats = d.statistics;
+
+    document.getElementById('user-stat-cards').innerHTML = [
+      { label:'کل وظایف', value: stats.total_tasks, icon:'📋' },
+      { label:'انجام‌شده', value: stats.done + stats.approved, icon:'✅' },
+      { label:'نرخ تکمیل', value: stats.completion_rate + '%', icon:'📊' },
+      { label:'میانگین نمره', value: stats.average_score ?? '—', icon:'⭐' },
+      { label:'در حال انجام', value: stats.in_progress, icon:'🔄' },
+      { label:'نیاز به اصلاح', value: stats.needs_revision, icon:'⚠️' },
+      { label:'عقب‌افتاده', value: stats.overdue, icon:'⏰' },
+      { label:'ارسال‌شده', value: stats.submitted, icon:'📤' },
+    ].map(s => `
+      <div class="stat-card">
+        <div class="stat-info"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>
+        <div class="stat-icon" style="background:var(--surface-2);font-size:20px">${s.icon}</div>
+      </div>`).join('');
+
+    // Chart
+    if (userChart) userChart.destroy();
+    const ctx = document.getElementById('user-tasks-chart').getContext('2d');
+    userChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['انجام‌شده','تأییدشده','در جریان','ارسال‌شده','نیاز اصلاح','عقب‌افتاده'],
+        datasets: [{ data: [stats.done, stats.approved, stats.in_progress, stats.submitted, stats.needs_revision, stats.overdue],
+          backgroundColor: ['#10b981','#8b5cf6','#3b82f6','#f59e0b','#ef4444','#dc2626'], borderRadius: 6 }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // Projects
+    document.getElementById('user-projects-list').innerHTML = d.projects.map(p => `
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;font-weight:600">${p.name}</span>
+        ${projectStatusBadge(p.status)}
+      </div>`).join('') || '<p style="color:var(--text-muted);font-size:13px">پروژه‌ای وجود ندارد</p>';
+
+    // Eval history
+    document.getElementById('user-eval-history').innerHTML = d.evaluation_history.length
+      ? `<div class="table-container"><table class="data-table">
+          <thead><tr><th>وظیفه</th><th>نمره</th><th>توضیحات</th><th>تاریخ</th></tr></thead>
+          <tbody>${d.evaluation_history.map(e => `<tr>
+            <td>${e.task_title||'—'}</td>
+            <td><span style="font-weight:800;color:${e.score>=70?'var(--success)':e.score>=50?'var(--warning)':'var(--danger)'}">${e.score}</span></td>
+            <td style="font-size:12px;max-width:200px">${e.comment||'—'}</td>
+            <td style="font-size:12px">${formatDate(e.created_at)}</td>
+          </tr>`).join('')}</tbody>
+        </table></div>`
+      : '<div class="empty-state" style="padding:24px"><p>ارزیابی‌ای وجود ندارد</p></div>';
+
+    document.getElementById('user-report-content').classList.remove('hidden');
+  } catch (e) { Toast.error(e.message); }
+}
+
+async function loadProjectReport() {
+  const id = document.getElementById('project-select').value;
+  if (!id) { Toast.warning('پروژه‌ای انتخاب نشده'); return; }
+  try {
+    const res = await Api.getProjectReport(id);
+    const d = res.data;
+    const ts = d.task_summary;
+
+    document.getElementById('project-stat-cards').innerHTML = [
+      { label:'کل وظایف', value: ts.total, icon:'📋' },
+      { label:'انجام‌شده', value: (ts.by_status?.DONE||0) + (ts.by_status?.APPROVED||0), icon:'✅' },
+      { label:'عقب‌افتاده', value: ts.overdue, icon:'⏰' },
+    ].map(s => `
+      <div class="stat-card">
+        <div class="stat-info"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>
+        <div class="stat-icon" style="background:var(--surface-2);font-size:20px">${s.icon}</div>
+      </div>`).join('');
+
+    document.getElementById('member-stats-table').innerHTML = d.member_stats.length
+      ? `<table class="data-table">
+          <thead><tr><th>نام</th><th>نقش</th><th>کل وظایف</th><th>انجام‌شده</th><th>میانگین نمره</th></tr></thead>
+          <tbody>${d.member_stats.map(m => `<tr>
+            <td style="font-weight:600">${m.full_name}</td>
+            <td style="font-size:12px;color:var(--text-muted)">${m.project_role||'—'}</td>
+            <td>${m.total_tasks}</td>
+            <td>${m.completed_tasks}</td>
+            <td>${m.average_score!=null?`<span style="font-weight:700;color:var(--success)">${m.average_score}</span>`:'—'}</td>
+          </tr>`).join('')}</tbody>
+        </table>`
+      : '<div class="empty-state" style="padding:24px"><p>عضوی وجود ندارد</p></div>';
+
+    document.getElementById('project-report-content').classList.remove('hidden');
+  } catch (e) { Toast.error(e.message); }
+}
+
+async function loadAuditLogs() {
+  const el = document.getElementById('audit-table');
+  el.innerHTML = '<div class="empty-state" style="padding:32px"><div class="spinner"></div></div>';
+  try {
+    const res = await Api.getAuditLogs({ page: auditPage, page_size: 20 });
+    const { items, total, pages } = res.data;
+    el.innerHTML = `<table class="data-table">
+      <thead><tr><th>#</th><th>کاربر</th><th>عملیات</th><th>نوع</th><th>توضیحات</th><th>آدرس IP</th><th>تاریخ</th></tr></thead>
+      <tbody>${items.map(l => `<tr>
+        <td style="font-size:11px;color:var(--text-muted)">${l.id}</td>
+        <td>${l.user_name||'سیستم'}</td>
+        <td><code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;font-size:11px">${l.action}</code></td>
+        <td style="font-size:12px">${l.entity_type||'—'}</td>
+        <td style="font-size:12px;max-width:250px">${l.description||'—'}</td>
+        <td style="font-size:11px;color:var(--text-muted)">${l.ip_address||'—'}</td>
+        <td style="font-size:11px">${formatDateTime(l.created_at)}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+    renderPagination('audit-pagination', auditPage, pages, total, 20, p => { auditPage=p; loadAuditLogs(); });
+  } catch (e) { el.innerHTML = `<div class="empty-state" style="color:var(--danger)">${e.message}</div>`; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ورود | سیستم مدیریت کارآموزی</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { direction: rtl; font-size: 14px; }
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+    }
+    .login-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px;
+      color: white;
+    }
+    .login-title {
+      font-size: 22px; font-weight: 800; color: #0f172a;
+    }
+    .login-subtitle {
+      font-size: 13px; color: #94a3b8; margin-top: 4px;
+    }
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: #374151; margin-bottom: 6px;
+    }
+    .input-wrapper { position: relative; }
+    .form-control {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid #e2e8f0; border-radius: 10px;
+      font-family: inherit; font-size: 14px; color: #0f172a;
+      outline: none; transition: all 0.2s;
+      -webkit-appearance: none;
+    }
+    .form-control:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    }
+    .form-control.has-icon { padding-right: 42px; }
+    .input-icon-right {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      right: 14px; color: #94a3b8; pointer-events: none; font-size: 16px;
+    }
+    .toggle-password {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      left: 12px; background: none; border: none;
+      cursor: pointer; color: #94a3b8; font-size: 16px;
+      padding: 4px; border-radius: 4px;
+    }
+    .toggle-password:hover { color: #6366f1; }
+    .error-box {
+      background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 10px; padding: 12px 14px;
+      color: #dc2626; font-size: 13px; margin-bottom: 16px;
+      display: none; align-items: center; gap: 8px;
+    }
+    .error-box.visible { display: flex; }
+    .btn-login {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white; border: none; border-radius: 10px;
+      font-family: inherit; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-login:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(99,102,241,0.4);
+    }
+    .btn-login:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .btn-login.loading .spinner { display: block; }
+    .btn-login.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .login-footer {
+      text-align: center; margin-top: 24px;
+      font-size: 12px; color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-logo">
+      <div class="logo-icon">🎓</div>
+      <h1 class="login-title">سیستم مدیریت کارآموزی</h1>
+      <p class="login-subtitle">لطفاً وارد حساب کاربری خود شوید</p>
+    </div>
+
+    <div class="error-box" id="error-box">
+      <span>⚠️</span>
+      <span id="error-message"></span>
+    </div>
+
+    <form id="login-form" autocomplete="off">
+      <div class="form-group">
+        <label class="form-label" for="username">نام کاربری</label>
+        <div class="input-wrapper">
+          <span class="input-icon-right">👤</span>
+          <input type="text" id="username" name="username" class="form-control has-icon"
+            placeholder="نام کاربری خود را وارد کنید" autocomplete="username" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">رمز عبور</label>
+        <div class="input-wrapper">
+          <span class="input-icon-right">🔒</span>
+          <input type="password" id="password" name="password" class="form-control has-icon"
+            placeholder="رمز عبور خود را وارد کنید" autocomplete="current-password" required>
+          <button type="button" class="toggle-password" id="toggle-password" title="نمایش/پنهان رمز">
+            👁
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-login" id="login-btn">
+        <span class="spinner" id="login-spinner"></span>
+        <span class="btn-text">ورود به سیستم</span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      سیستم مدیریت کارآموزی و پروژه &nbsp;|&nbsp; نسخه ۱.۰
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8000/api/v1';
+
+    // Redirect if already logged in
+    if (localStorage.getItem('access_token')) {
+      window.location.href = '/dashboard.html';
+    }
+
+    const form = document.getElementById('login-form');
+    const loginBtn = document.getElementById('login-btn');
+    const errorBox = document.getElementById('error-box');
+    const errorMsg = document.getElementById('error-message');
+    const toggleBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password');
+
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      toggleBtn.textContent = isPassword ? '🙈' : '👁';
+    });
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorBox.classList.add('visible');
+    }
+
+    function hideError() {
+      errorBox.classList.remove('visible');
+    }
+
+    function setLoading(loading) {
+      loginBtn.disabled = loading;
+      loginBtn.classList.toggle('loading', loading);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        showError('لطفاً نام کاربری و رمز عبور را وارد کنید.');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.detail?.message || 'نام کاربری یا رمز عبور اشتباه است.');
+          return;
+        }
+
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('current_user', JSON.stringify(data.user));
+
+        // Fetch permissions
+        const meRes = await fetch(`${API_BASE}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${data.access_token}` }
+        });
+        const meData = await meRes.json();
+        if (meData && meData.data) {
+          localStorage.setItem('user_permissions', JSON.stringify(meData.data.permissions || []));
+          localStorage.setItem('current_user', JSON.stringify(meData.data));
+        }
+
+        window.location.href = '/dashboard.html';
+      } catch (err) {
+        showError('خطا در اتصال به سرور. لطفاً دوباره تلاش کنید.');
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
