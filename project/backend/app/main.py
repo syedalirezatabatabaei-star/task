@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import os
 
 from app.core.config import settings
-from app.api import auth, users, permissions, projects, stages, tasks, evaluations, attachments, dashboard, reports, audit
+from app.api import auth, users, permissions, projects, stages, tasks, evaluations, attachments, dashboard, reports, audit, notifications
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -40,6 +40,7 @@ app.include_router(attachments.router, prefix=PREFIX)
 app.include_router(dashboard.router, prefix=PREFIX)
 app.include_router(reports.router, prefix=PREFIX)
 app.include_router(audit.router, prefix=PREFIX)
+app.include_router(notifications.router, prefix=PREFIX)
 
 
 @app.get("/", tags=["Health"])

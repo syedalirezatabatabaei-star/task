@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مدیریت اعلان‌ها | سیستم مدیریت تسک</title>
+  <link rel="icon" type="image/jpeg" href="/assets/images/logo.jpg" sizes="32x32">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"></div><div><div class="logo-text">مدیریت تسک</div><div class="logo-sub">سیستم مدیریت</div></div></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/></svg></span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/></svg></span><span class="nav-label">گزارش‌ها</span></a>
+      <a class="nav-item active" href="/notifications.html" data-admin-only="true"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="nav-label">مدیریت اعلان‌ها</span></a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></span><span class="nav-label">خروج</span></a></div>
+  </aside>
+  <div class="main-content" id="main-content">
+    <header class="header" id="header">
+      <div class="header-left"><button class="sidebar-toggle" id="sidebar-toggle" aria-label="نمایش منو">☰</button><h1 class="page-title" id="page-title">مدیریت اعلان‌ها</h1></div>
+      <div class="header-right header-actions">
+        <div class="header-brand"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"><span>ره آورد رایان تینا</span></div>
+        <div class="notification-wrap"><button type="button" id="notification-toggle" class="notification-toggle" aria-label="اعلان‌ها" aria-expanded="false" aria-controls="notification-panel"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-dot" id="notification-dot"></span></button><section id="notification-panel" class="notification-panel hidden" aria-label="اعلان‌ها"><div class="notification-panel-header"><span>اعلان‌ها</span><button type="button" class="btn btn-sm btn-secondary" id="notification-clear">خوانده‌شدن همه</button></div><div id="notification-list" class="notification-empty"><p>اعلانی برای نمایش وجود ندارد.</p></div></section></div>
+        <div class="header-user"><div class="user-avatar" id="header-user-avatar">م</div><div class="user-info"><div class="user-name" id="header-user-name">...</div><div class="user-role" id="header-user-role">...</div></div></div>
+      </div>
+    </header>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <main class="page-content">
+      <div class="card notification-compose">
+        <div class="card-header"><div><div class="card-title">انتشار اعلان</div><div class="card-subtitle">اعلان عمومی برای همه کاربران فعال یا اعلان خصوصی برای یک کاربر مشخص</div></div></div>
+        <form id="announcement-form">
+          <div class="form-group"><label class="form-label" for="announcement-title">عنوان</label><input class="form-control" id="announcement-title" maxlength="200" required placeholder="عنوان اعلان"></div>
+          <div class="form-group"><label class="form-label" for="announcement-message">متن اعلان</label><textarea class="form-control" id="announcement-message" maxlength="10000" required placeholder="متن کامل اعلان را وارد کنید"></textarea></div>
+          <div class="notification-scope">
+            <label><input type="radio" name="announcement-scope" value="public" checked> عمومی؛ ارسال برای همه کاربران فعال</label>
+            <label><input type="radio" name="announcement-scope" value="private"> خصوصی؛ ارسال برای یک کاربر</label>
+          </div>
+          <div class="form-group hidden" id="recipient-group"><label class="form-label" for="announcement-recipient">کاربر دریافت‌کننده</label><select class="form-control" id="announcement-recipient"><option value="">در حال بارگذاری کاربران...</option></select></div>
+          <p class="notification-admin-note">اعلان‌ها در پایگاه داده برای هر دریافت‌کننده جداگانه ثبت می‌شوند و از طریق آیکون اعلان در نوار بالای سامانه قابل مشاهده‌اند. تاریخ نمایش اعلان‌ها شمسی است.</p>
+          <div style="display:flex;justify-content:flex-end;margin-top:20px"><button class="btn btn-primary" type="submit" id="announcement-submit">انتشار اعلان</button></div>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+(async () => {
+  const ok = await Auth.initPage();
+  if (!ok) return;
+  const user = Api.getCurrentUser();
+  if (user?.role !== 'ADMIN') { window.location.replace('/dashboard.html'); return; }
+  document.getElementById('logout-btn').addEventListener('click', async e => { e.preventDefault(); await Auth.logout(); });
+  const scopeInputs = document.querySelectorAll('input[name="announcement-scope"]');
+  const recipientGroup = document.getElementById('recipient-group');
+  const recipient = document.getElementById('announcement-recipient');
+  const submit = document.getElementById('announcement-submit');
+
+  const updateScope = () => {
+    const scope = document.querySelector('input[name="announcement-scope"]:checked').value;
+    recipientGroup.classList.toggle('hidden', scope !== 'private');
+    submit.textContent = scope === 'private' ? 'ارسال اعلان خصوصی' : 'انتشار اعلان عمومی';
+  };
+  scopeInputs.forEach(input => input.addEventListener('change', updateScope));
+  updateScope();
+
+  try {
+    const res = await Api.getUsers({page_size:100, is_active:true});
+    const users = res.data?.items || [];
+    recipient.innerHTML = '<option value="">انتخاب کاربر</option>' + users.map(u => '<option value="' + Number(u.id) + '">' + escapeHtml(u.full_name || u.username) + ' (' + escapeHtml(u.username) + ')</option>').join('');
+  } catch (e) {
+    recipient.innerHTML = '<option value="">بارگذاری کاربران ناموفق بود</option>';
+    Toast.error(e.message || 'دریافت فهرست کاربران ناموفق بود');
+  }
+
+  document.getElementById('announcement-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const scope = document.querySelector('input[name="announcement-scope"]:checked').value;
+    const payload = {
+      title: document.getElementById('announcement-title').value.trim(),
+      message: document.getElementById('announcement-message').value.trim(),
+      scope,
+      recipient_user_id: scope === 'private' ? Number(recipient.value) || null : null
+    };
+    if (scope === 'private' && !payload.recipient_user_id) { Toast.warning('برای اعلان خصوصی یک کاربر انتخاب کنید'); return; }
+    setLoading(submit, true);
+    try {
+      const result = await Api.publishAnnouncement(payload);
+      Toast.success('اعلان برای ' + (result.data?.recipient_count || 0) + ' کاربر ثبت شد');
+      document.getElementById('announcement-title').value = '';
+      document.getElementById('announcement-message').value = '';
+      if (scope === 'private') recipient.value = '';
+    } catch (err) { Toast.error(err.message || 'انتشار اعلان ناموفق بود'); }
+    finally { setLoading(submit, false); }
+  });
+})();
+</script>
+</body>
+</html>

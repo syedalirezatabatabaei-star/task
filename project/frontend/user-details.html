@@ -12,18 +12,18 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"></div><div><div class="logo-text">مدیریت تسک</div><div class="logo-sub">سیستم مدیریت</div></div></div>
     <nav class="sidebar-nav">
-      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">&#x1F4CA;</span><span class="nav-label">داشبورد</span></a>
-      <a class="nav-item active" href="/users.html"><span class="nav-icon">&#x1F465;</span><span class="nav-label">کاربران</span></a>
-      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">&#x1F4C1;</span><span class="nav-label">پروژه‌ها</span></a>
-      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">&#x2705;</span><span class="nav-label">وظایف</span></a>
-      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">&#x1F4C8;</span><span class="nav-label">گزارش‌ها</span></a>
-    </nav>
-    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">&#x1F6AA;</span><span class="nav-label">خروج</span></a></div>
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item active" href="/users.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M17 9h2v2"/></svg></span><span class="nav-label">گزارش‌ها</span></a>
+    <a class="nav-item" href="/notifications.html" data-admin-only="true"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="nav-label">مدیریت اعلان‌ها</span></a></nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon"></span><span class="nav-label">خروج</span></a></div>
   </aside>
   <div class="main-content" id="main-content">
     <header class="header" id="header">
       <div class="header-left">
-        <button class="sidebar-toggle" id="sidebar-toggle">&#x2630;</button>
+        <button class="sidebar-toggle" id="sidebar-toggle"></button>
         <a href="/users.html" class="btn btn-ghost btn-sm">← کاربران</a>
         <h1 class="page-title" id="user-page-title">جزئیات کاربر</h1>
       </div>
@@ -48,7 +48,7 @@
             </div>
             <div style="border-top:1px solid var(--border);padding-top:16px;display:flex;flex-direction:column;gap:10px;font-size:13px" id="detail-meta"></div>
             <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px" data-permission="users.edit">
-              <a id="edit-perms-btn" href="#" class="btn btn-secondary">&#x1F510; مدیریت دسترسی‌ها</a>
+              <a id="edit-perms-btn" href="#" class="btn btn-secondary"> مدیریت دسترسی‌ها</a>
             </div>
           </div>
           <!-- Stats + tasks -->
@@ -94,12 +94,12 @@
       : '<span class="badge badge-danger">غیرفعال</span>';
 
     document.getElementById('detail-meta').innerHTML = [
-      ['&#x1F464; نام کاربری', user.username],
-      ['&#x1F4E7; ایمیل', user.email || '—'],
-      ['&#x1F4DE; تلفن', user.phone || '—'],
-      ['&#x1F4C5; تاریخ شروع', formatDate(user.start_date)],
-      ['&#x1F4C5; تاریخ پایان', formatDate(user.end_date)],
-      ['&#x1F5D3; عضویت', formatDate(user.created_at)],
+      [' نام کاربری', user.username],
+      [' ایمیل', user.email || '—'],
+      [' تلفن', user.phone || '—'],
+      [' تاریخ شروع', formatDate(user.start_date)],
+      [' تاریخ پایان', formatDate(user.end_date)],
+      [' عضویت', formatDate(user.created_at)],
     ].map(([k,v]) => `<div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">${k}</span><span style="font-weight:500">${v}</span></div>`).join('');
 
     document.getElementById('edit-perms-btn').href = `/user-permissions.html?id=${userId}`;
@@ -107,10 +107,10 @@
     if (report) {
       const s = report.statistics;
       document.getElementById('user-quick-stats').innerHTML = [
-        { label:'کل وظایف', value: s.total_tasks, icon:'&#x1F4CB;' },
-        { label:'انجام‌شده', value: s.done + s.approved, icon:'&#x2705;' },
-        { label:'نرخ تکمیل', value: s.completion_rate + '%', icon:'&#x1F4CA;' },
-        { label:'میانگین نمره', value: s.average_score ?? '—', icon:'⭐' },
+        { label:'کل وظایف', value: s.total_tasks, icon:'' },
+        { label:'انجام‌شده', value: s.done + s.approved, icon:'' },
+        { label:'نرخ تکمیل', value: s.completion_rate + '%', icon:'' },
+        { label:'میانگین نمره', value: s.average_score ?? '—', icon:'' },
       ].map(s => `<div class="stat-card"><div class="stat-info"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div><div class="stat-icon" style="background:var(--surface-2);font-size:20px">${s.icon}</div></div>`).join('');
     }
 

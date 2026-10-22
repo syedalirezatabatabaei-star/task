@@ -22,21 +22,21 @@
     </div>
     <nav class="sidebar-nav">
       <a class="nav-item active" href="/dashboard.html">
-        <span class="nav-icon" aria-hidden="true">&#x25A6;</span><span class="nav-label">داشبورد</span>
+        <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">داشبورد</span>
       </a>
       <a class="nav-item" href="/users.html" data-permission="users.view">
-        <span class="nav-icon" aria-hidden="true">&#x2637;</span><span class="nav-label">کاربران</span>
+        <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label">کاربران</span>
       </a>
       <a class="nav-item" href="/projects.html" data-permission="projects.view">
-        <span class="nav-icon" aria-hidden="true">&#x25A3;</span><span class="nav-label">پروژه‌ها</span>
+        <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="nav-label">پروژه‌ها</span>
       </a>
       <a class="nav-item" href="/tasks.html" data-permission="tasks.view">
-        <span class="nav-icon" aria-hidden="true">&#x2713;</span><span class="nav-label">وظایف</span>
+        <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label">وظایف</span>
       </a>
       <a class="nav-item" href="/reports.html" data-permission="reports.view">
-        <span class="nav-icon" aria-hidden="true">&#x25A5;</span><span class="nav-label">گزارش‌ها</span>
+        <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M17 9h2v2"/></svg></span><span class="nav-label">گزارش‌ها</span>
       </a>
-    </nav>
+    <a class="nav-item" href="/notifications.html" data-admin-only="true"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="nav-label">مدیریت اعلان‌ها</span></a></nav>
     <div class="sidebar-footer">
       <a class="nav-item" href="#" id="logout-btn">
         <span class="nav-icon" aria-hidden="true">&#x21AA;</span><span class="nav-label">خروج</span>
@@ -48,7 +48,7 @@
   <div class="main-content" id="main-content">
     <header class="header" id="header">
       <div class="header-left">
-        <button class="sidebar-toggle" id="sidebar-toggle">&#x2630;</button>
+        <button class="sidebar-toggle" id="sidebar-toggle"></button>
         <h1 class="page-title" id="page-title">داشبورد</h1>
       </div>
       <div class="header-right header-actions">
@@ -103,7 +103,7 @@
       <div id="personnel-dashboard" class="hidden">
         <div class="card mb-4" style="background: linear-gradient(135deg,#071a3d,#1677bd); color:white; border:none;">
           <div style="display:flex; align-items:center; gap:16px">
-            <div style="font-size:48px">&#x1F44B;</div>
+            <div style="font-size:48px"></div>
             <div>
               <div style="font-size:22px; font-weight:800;" id="user-greeting">سلام!</div>
               <div style="opacity:0.85; margin-top:4px">خوش آمدید. وظایف امروز خود را مشاهده کنید.</div>
@@ -171,14 +171,14 @@ if (isAdmin) {
       const d = res.data;
 
       document.getElementById('stat-cards-admin').innerHTML = [
-        { label: 'کاربران فعال',      value: d.active_users,         icon: '&#x1F465;', color: '#eef2ff', iconColor: '#6366f1' },
-        { label: 'پروژه‌های فعال',    value: d.active_projects,      icon: '&#x1F4C1;', color: '#ecfdf5', iconColor: '#10b981' },
-        { label: 'وظایف در جریان',   value: d.in_progress_tasks,    icon: '&#x1F504;', color: '#eff6ff', iconColor: '#3b82f6' },
-        { label: 'نیاز به بررسی',    value: d.submitted_tasks,      icon: '&#x1F4EC;', color: '#fffbeb', iconColor: '#f59e0b' },
-        { label: 'انجام‌شده',        value: d.completed_tasks,       icon: '&#x2705;', color: '#ecfdf5', iconColor: '#10b981' },
-        { label: 'عقب‌افتاده',       value: d.overdue_tasks,         icon: '⏰', color: '#fef2f2', iconColor: '#ef4444' },
-        { label: 'کل وظایف',         value: d.total_tasks,           icon: '&#x1F4CB;', color: '#f8fafc', iconColor: '#64748b' },
-        { label: 'کل کاربران',       value: d.total_users,           icon: '&#x1F9D1;‍&#x1F4BB;', color: '#f5f3ff', iconColor: '#8b5cf6' },
+        { label: 'کاربران فعال',      value: d.active_users,         icon: '', color: '#eef2ff', iconColor: '#6366f1' },
+        { label: 'پروژه‌های فعال',    value: d.active_projects,      icon: '', color: '#ecfdf5', iconColor: '#10b981' },
+        { label: 'وظایف در جریان',   value: d.in_progress_tasks,    icon: '', color: '#eff6ff', iconColor: '#3b82f6' },
+        { label: 'نیاز به بررسی',    value: d.submitted_tasks,      icon: '', color: '#fffbeb', iconColor: '#f59e0b' },
+        { label: 'انجام‌شده',        value: d.completed_tasks,       icon: '', color: '#ecfdf5', iconColor: '#10b981' },
+        { label: 'عقب‌افتاده',       value: d.overdue_tasks,         icon: '', color: '#fef2f2', iconColor: '#ef4444' },
+        { label: 'کل وظایف',         value: d.total_tasks,           icon: '', color: '#f8fafc', iconColor: '#64748b' },
+        { label: 'کل کاربران',       value: d.total_users,           icon: '', color: '#f5f3ff', iconColor: '#8b5cf6' },
       ].map(s => `
         <div class="stat-card">
           <div class="stat-info">
@@ -236,10 +236,10 @@ if (isAdmin) {
       document.getElementById('user-greeting').textContent = `سلام ${d.user?.full_name || ''}`;
 
       document.getElementById('stat-cards-user').innerHTML = [
-        { label: 'پروژه‌هایم',       value: d.my_project_count,      icon: '&#x1F4C1;' },
-        { label: 'کل وظایفم',        value: d.tasks?.total,           icon: '&#x1F4CB;' },
-        { label: 'در حال انجام',     value: d.tasks?.in_progress,     icon: '&#x1F504;' },
-        { label: 'میانگین نمره',     value: d.average_score != null ? d.average_score : '—', icon: '⭐' },
+        { label: 'پروژه‌هایم',       value: d.my_project_count,      icon: '' },
+        { label: 'کل وظایفم',        value: d.tasks?.total,           icon: '' },
+        { label: 'در حال انجام',     value: d.tasks?.in_progress,     icon: '' },
+        { label: 'میانگین نمره',     value: d.average_score != null ? d.average_score : '—', icon: '' },
       ].map(s => `
         <div class="stat-card">
           <div class="stat-info">
@@ -264,7 +264,7 @@ if (isAdmin) {
               </div>
             </a>
           `).join('')
-        : '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">&#x1F389;</div><p>ددلاین نزدیکی وجود ندارد</p></div>';
+        : '<div class="empty-state" style="padding:24px"><div class="empty-state-icon"></div><p>ددلاین نزدیکی وجود ندارد</p></div>';
       document.getElementById('upcoming-deadlines').innerHTML = upcomingHtml;
 
       // Recent evaluations

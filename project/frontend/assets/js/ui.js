@@ -180,14 +180,18 @@ function initTabs(containerId) {
 // ─── Format helpers ──────────────────────────────
 function formatDate(dateStr) {
   if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))
+    ? new Date(Number(dateStr.slice(0, 4)), Number(dateStr.slice(5, 7)) - 1, Number(dateStr.slice(8, 10)), 12)
+    : new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('fa-IR-u-ca-persian-nu-arabext', { calendar: 'persian', numberingSystem: 'arabext', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function formatDateTime(dateStr) {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
-  return d.toLocaleString('fa-IR');
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleString('fa-IR-u-ca-persian-nu-arabext', { calendar: 'persian', numberingSystem: 'arabext', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
 function formatFileSize(bytes) {
@@ -284,3 +288,102 @@ function clearFieldErrors(formId) {
   form.querySelectorAll('.form-control.error').forEach(el => el.classList.remove('error'));
   form.querySelectorAll('.form-error').forEach(el => el.remove());
 }
+
+// ─── Jalali display for native date controls ──────
+(function initJalaliDateFields() {
+  const nativeValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  if (!nativeValue) return;
+  document.querySelectorAll('input[type="date"]').forEach(input => {
+    if (input.dataset.jalaliReady === 'true') return;
+    input.dataset.jalaliReady = 'true';
+    const wrapper = document.createElement('span');
+    wrapper.className = 'jalali-date-wrap';
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+    const display = document.createElement('span');
+    display.className = 'jalali-date-display';
+    display.setAttribute('aria-hidden', 'true');
+    wrapper.appendChild(display);
+    const sync = () => {
+      const value = nativeValue.get.call(input);
+      display.textContent = value ? formatDate(value) : 'انتخاب تاریخ شمسی';
+    };
+    Object.defineProperty(input, 'value', {
+      configurable: true,
+      enumerable: true,
+      get() { return nativeValue.get.call(this); },
+      set(value) { nativeValue.set.call(this, value); sync(); }
+    });
+    input.addEventListener('change', sync);
+    input.addEventListener('input', sync);
+    input.setAttribute('aria-label', input.getAttribute('aria-label') || 'تاریخ شمسی');
+    sync();
+  });
+})();
+
+// ─── Shared notification center ──────────────────
+(function initNotificationCenter() {
+  document.querySelectorAll('[data-admin-only="true"]').forEach(el => { if (Api.getCurrentUser()?.role !== 'ADMIN') el.remove(); });
+  const toggle = document.getElementById('notification-toggle');
+  const panel = document.getElementById('notification-panel');
+  const list = document.getElementById('notification-list');
+  const dot = document.getElementById('notification-dot');
+  const clear = document.getElementById('notification-clear');
+  if (!toggle || !panel || !list || typeof Api === 'undefined' || !Api.getToken()) return;
+
+  let loaded = false;
+  const render = async () => {
+    try {
+      const response = await Api.getNotifications();
+      const data = response.data || {};
+      const items = data.items || [];
+      dot.style.display = data.unread_count > 0 ? 'block' : 'none';
+      dot.setAttribute('aria-label', data.unread_count > 0 ? String(data.unread_count) : '');
+      if (!items.length) {
+        list.className = 'notification-empty';
+        list.innerHTML = '<p>اعلانی برای نمایش وجود ندارد.</p>';
+        loaded = true;
+        return;
+      }
+      list.className = 'notification-items';
+      list.innerHTML = items.map(n => `
+        <article class="notification-item ${n.is_read ? '' : 'unread'}" data-notification-id="${Number(n.id)}">
+          <div class="notification-item-title">${escapeHtml(n.title)}</div>
+          <div class="notification-item-message">${escapeHtml(n.message).replace(/\\n/g, '<br>')}</div>
+          <div class="notification-item-meta">${formatDateTime(n.created_at)} · ${n.scope === 'public' ? 'عمومی' : 'خصوصی'} ${n.is_read ? '' : '<button type="button" class="notification-mark-read" data-read-id="' + Number(n.id) + '">خواندم</button>'}</div>
+        </article>
+      `).join('');
+      loaded = true;
+    } catch (error) {
+      list.className = 'notification-empty';
+      list.textContent = error.message || 'بارگذاری اعلان‌ها ناموفق بود.';
+    }
+  };
+
+  toggle.addEventListener('click', async () => {
+    const opening = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden', !opening);
+    toggle.setAttribute('aria-expanded', String(opening));
+    if (opening || !loaded) await render();
+  });
+  document.addEventListener('click', async event => {
+    const markButton = event.target.closest('[data-read-id]');
+    if (markButton) {
+      try {
+        await Api.markNotificationRead(Number(markButton.dataset.readId));
+        await render();
+      } catch (error) { Toast.error(error.message || 'ثبت وضعیت اعلان ناموفق بود'); }
+    } else if (!event.target.closest('.notification-wrap') && !panel.classList.contains('hidden')) {
+      panel.classList.add('hidden');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  if (clear) clear.addEventListener('click', async () => {
+    try {
+      await Api.markAllNotificationsRead();
+      await render();
+    } catch (error) { Toast.error(error.message || 'ثبت وضعیت اعلان‌ها ناموفق بود'); }
+  });
+  render();
+  window.setInterval(render, 60000);
+})();
