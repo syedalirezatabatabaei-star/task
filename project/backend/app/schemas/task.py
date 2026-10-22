@@ -34,13 +34,29 @@ class TaskCreate(TaskBase):
 
 
 class TaskUpdate(BaseModel):
-    title: Optional[str] = None
+    title: Optional[str] = Field(default=None, min_length=1, max_length=255)
     description: Optional[str] = None
     stage_id: Optional[int] = None
     assigned_to: Optional[int] = None
     priority: Optional[TaskPriority] = None
     start_date: Optional[date] = None
     deadline: Optional[date] = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_optional_title(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        value = value.strip()
+        if not value:
+            raise ValueError("عنوان وظیفه نمی‌تواند خالی باشد")
+        return value
+
+    @model_validator(mode="after")
+    def validate_dates(self):
+        if self.start_date and self.deadline and self.deadline < self.start_date:
+            raise ValueError("مهلت انجام نمی‌تواند قبل از تاریخ شروع باشد")
+        return self
 
 
 class TaskStatusUpdate(BaseModel):
