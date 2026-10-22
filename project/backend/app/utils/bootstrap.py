@@ -16,7 +16,7 @@ def validate_environment() -> None:
     missing = [name for name in REQUIRED if not os.getenv(name, "").strip()]
     if missing:
         raise SystemExit("Missing required environment variables: " + ", ".join(missing))
-    weak = [name for name in REQUIRED if os.getenv(name, "").strip().lower() in PLACEHOLDERS]
+    weak = [name for name in REQUIRED if os.getenv(name, "").strip().lower() in PLACEHOLDERS or os.getenv(name, "").strip().upper().startswith("REPLACE_WITH_")]
     if weak:
         raise SystemExit("Replace placeholder values in .env before starting: " + ", ".join(weak))
     if len(os.environ["ADMIN_PASSWORD"]) < 12:
