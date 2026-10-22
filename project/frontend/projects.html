@@ -1,29 +1,29 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>پروژه‌ها | سیستم مدیریت کارآموزی</title>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/main.css">
+  <title>پروژه‌ها | سیستم مدیریت تسک</title>
+  <link rel="icon" type="image/jpeg" href="/assets/images/logo.jpg" sizes="32x32">
+<link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><div class="logo-icon">🎓</div><div><div class="logo-text">کارآموزی</div><div class="logo-sub">سیستم مدیریت</div></div></div>
+    <div class="sidebar-logo"><div class="logo-icon">&#x1F393;</div><div><div class="logo-text">مدیریت تسک</div><div class="logo-sub">سیستم مدیریت</div></div></div>
     <nav class="sidebar-nav">
-      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">📊</span><span class="nav-label">داشبورد</span></a>
-      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">👥</span><span class="nav-label">کاربران</span></a>
-      <a class="nav-item active" href="/projects.html" data-permission="projects.view"><span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span></a>
-      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">✅</span><span class="nav-label">وظایف</span></a>
-      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span></a>
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">&#x1F4CA;</span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">&#x1F465;</span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item active" href="/projects.html" data-permission="projects.view"><span class="nav-icon">&#x1F4C1;</span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">&#x2705;</span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">&#x1F4C8;</span><span class="nav-label">گزارش‌ها</span></a>
     </nav>
-    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">🚪</span><span class="nav-label">خروج</span></a></div>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">&#x1F6AA;</span><span class="nav-label">خروج</span></a></div>
   </aside>
   <div class="main-content" id="main-content">
     <header class="header" id="header">
       <div class="header-left">
-        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <button class="sidebar-toggle" id="sidebar-toggle">&#x2630;</button>
         <h1 class="page-title">پروژه‌ها</h1>
       </div>
       <div class="header-right">
@@ -36,7 +36,7 @@
       <div class="card mb-4">
         <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
           <div class="search-bar" style="flex:1;min-width:200px">
-            <span>🔍</span><input type="text" id="search-input" placeholder="جستجو در پروژه‌ها...">
+            <span>&#x1F50D;</span><input type="text" id="search-input" placeholder="جستجو در پروژه‌ها...">
           </div>
           <select class="form-control" id="filter-status" style="width:160px">
             <option value="">همه وضعیت‌ها</option>
@@ -58,7 +58,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 class="modal-title" id="project-modal-title">پروژه جدید</h3>
-      <button class="modal-close" onclick="Modal.close('project-modal')">✕</button>
+      <button class="modal-close" onclick="Modal.close('project-modal')">&#x2715;</button>
     </div>
     <div class="modal-body">
       <form id="project-form">
@@ -139,7 +139,7 @@ async function load() {
     const res = await Api.getProjects(params);
     const { items, total, pages } = res.data;
     if (!items.length) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:48px"><div class="empty-state-icon">📁</div><div class="empty-state-title">پروژه‌ای یافت نشد</div></div>';
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:48px"><div class="empty-state-icon">&#x1F4C1;</div><div class="empty-state-title">پروژه‌ای یافت نشد</div></div>';
       document.getElementById('pagination').innerHTML = '';
       return;
     }
@@ -151,15 +151,15 @@ async function load() {
         </div>
         <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;min-height:36px">${p.description?.substring(0,80) || 'بدون توضیحات'}${p.description?.length>80?'...':''}</div>
         <div style="display:flex;gap:16px;font-size:12px;color:var(--text-secondary);margin-bottom:12px">
-          <span>👥 ${p.member_count} عضو</span>
-          <span>✅ ${p.task_count} وظیفه</span>
-          ${p.end_date ? `<span>📅 ${formatDate(p.end_date)}</span>` : ''}
+          <span>&#x1F465; ${p.member_count} عضو</span>
+          <span>&#x2705; ${p.task_count} وظیفه</span>
+          ${p.end_date ? `<span>&#x1F4C5; ${formatDate(p.end_date)}</span>` : ''}
         </div>
         ${progressBar(p.progress)}
         <div style="display:flex;gap:8px;margin-top:14px">
           <a href="/project-details.html?id=${p.id}" class="btn btn-secondary btn-sm" style="flex:1;justify-content:center">جزئیات</a>
-          <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openEditModal(${p.id})" data-permission="projects.edit">✏️</button>
-          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProject(${p.id},'${p.name}')" data-permission="projects.delete">🗑</button>
+          <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openEditModal(${p.id})" data-permission="projects.edit">&#x270F;️</button>
+          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProject(${p.id},'${p.name}')" data-permission="projects.delete">&#x1F5D1;</button>
         </div>
       </div>
     `).join('');
