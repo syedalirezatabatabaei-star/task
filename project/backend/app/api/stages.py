@@ -45,6 +45,7 @@ def create_stage(
     db: Session = Depends(get_db),
 ):
     project = _get_project_or_404(project_id, db)
+    _check_access(project, current_user, db)
 
     stage = ProjectStage(
         project_id=project_id,
@@ -77,13 +78,15 @@ def update_stage(
     db: Session = Depends(get_db),
 ):
     stage = _get_stage_or_404(stage_id, db)
+    project = _get_project_or_404(stage.project_id, db)
+    _check_access(project, current_user, db)
 
-    for field, value in body.model_dump(exclude_none=True).items():
+    for field, value in body.model_dump(exclude_unset=True).items():
         setattr(stage, field, value)
 
     db.commit()
     db.refresh(stage)
-
+    log_action(db=db, user_id=current_user.id, action="STAGE_UPDATED", entity_type="stage", entity_id=stage.id, description=f"مرحله '{stage.name}' ویرایش شد", ip_address=get_client_ip(request))
     return {"success": True, "data": _stage_dict(stage, db)}
 
 
@@ -95,8 +98,12 @@ def delete_stage(
     db: Session = Depends(get_db),
 ):
     stage = _get_stage_or_404(stage_id, db)
+    project = _get_project_or_404(stage.project_id, db)
+    _check_access(project, current_user, db)
+    stage_name = stage.name
     db.delete(stage)
     db.commit()
+    log_action(db=db, user_id=current_user.id, action="STAGE_DELETED", entity_type="stage", entity_id=stage_id, description=f"مرحله '{stage_name}' حذف شد", ip_address=get_client_ip(request))
     return {"success": True, "message": "مرحله با موفقیت حذف شد"}
 
 
