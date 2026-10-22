@@ -150,8 +150,12 @@ def update_project(
     _check_project_access(project, current_user, db)
 
     updates = body.model_dump(exclude_unset=True)
-    if updates.get('start_date') and updates.get('end_date') and updates['end_date'] < updates['start_date']:
-        raise HTTPException(status_code=422, detail={'success': False, 'message': 'تاریخ پایان نمی‌تواند قبل از شروع باشد'})
+    if "name" in updates and updates["name"] is None:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "نام پروژه نمی‌تواند خالی باشد"})
+    effective_start = updates.get("start_date", project.start_date)
+    effective_end = updates.get("end_date", project.end_date)
+    if effective_start and effective_end and effective_end < effective_start:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "تاریخ پایان نمی‌تواند قبل از شروع باشد"})
     for field, value in updates.items():
         setattr(project, field, value)
 
