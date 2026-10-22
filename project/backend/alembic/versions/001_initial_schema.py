@@ -15,10 +15,32 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
+
+
+def create_table_if_missing(table_name: str, *args, **kwargs):
+    """Create a table only when it is absent from the current database."""
+    inspector = sa.inspect(op.get_bind())
+    if inspector.has_table(table_name):
+        print(f"Alembic: table {table_name!r} already exists; skipping creation.", flush=True)
+        return None
+    return op.create_table(table_name, *args, **kwargs)
+
+
+def create_index_if_missing(index_name: str, table_name: str, columns, **kwargs):
+    """Create an index only when it is absent; supports safe startup retries."""
+    inspector = sa.inspect(op.get_bind())
+    if not inspector.has_table(table_name):
+        raise RuntimeError(f"Cannot create index {index_name!r}: table {table_name!r} does not exist.")
+    existing = {index.get("name") for index in inspector.get_indexes(table_name)}
+    if index_name in existing:
+        print(f"Alembic: index {index_name!r} already exists; skipping creation.", flush=True)
+        return None
+    return create_index_if_missing(index_name, table_name, columns, **kwargs)
+
+
 def upgrade() -> None:
     # users
-    op.create_table(
-        "users",
+    create_table_if_missing(\"users\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("username", sa.String(100), nullable=False),
         sa.Column("password_hash", sa.String(255), nullable=False),
@@ -36,11 +58,10 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("username"),
     )
-    op.create_index("ix_users_username", "users", ["username"])
+    create_index_if_missing("ix_users_username", "users", ["username"])
 
     # permissions
-    op.create_table(
-        "permissions",
+    create_table_if_missing(\"permissions\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False, sqlite_autoincrement=True),
         sa.Column("code", sa.String(100), nullable=False),
         sa.Column("name", sa.String(150), nullable=False),
@@ -48,11 +69,10 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("code"),
     )
-    op.create_index("ix_permissions_code", "permissions", ["code"])
+    create_index_if_missing("ix_permissions_code", "permissions", ["code"])
 
     # user_permissions
-    op.create_table(
-        "user_permissions",
+    create_table_if_missing(\"user_permissions\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("permission_id", sa.BigInteger(), nullable=False),
@@ -64,8 +84,7 @@ def upgrade() -> None:
     )
 
     # projects
-    op.create_table(
-        "projects",
+    create_table_if_missing(\"projects\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
@@ -81,8 +100,7 @@ def upgrade() -> None:
     )
 
     # project_members
-    op.create_table(
-        "project_members",
+    create_table_if_missing(\"project_members\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("project_id", sa.BigInteger(), nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=False),
@@ -95,8 +113,7 @@ def upgrade() -> None:
     )
 
     # project_stages
-    op.create_table(
-        "project_stages",
+    create_table_if_missing(\"project_stages\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("project_id", sa.BigInteger(), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
@@ -111,8 +128,7 @@ def upgrade() -> None:
     )
 
     # tasks
-    op.create_table(
-        "tasks",
+    create_table_if_missing(\"tasks\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("project_id", sa.BigInteger(), nullable=False),
         sa.Column("stage_id", sa.BigInteger(), nullable=True),
@@ -137,8 +153,7 @@ def upgrade() -> None:
     )
 
     # evaluations
-    op.create_table(
-        "evaluations",
+    create_table_if_missing(\"evaluations\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("task_id", sa.BigInteger(), nullable=False),
         sa.Column("evaluator_id", sa.BigInteger(), nullable=True),
@@ -154,8 +169,7 @@ def upgrade() -> None:
     )
 
     # attachments
-    op.create_table(
-        "attachments",
+    create_table_if_missing(\"attachments\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("task_id", sa.BigInteger(), nullable=False),
         sa.Column("uploaded_by", sa.BigInteger(), nullable=True),
@@ -171,8 +185,7 @@ def upgrade() -> None:
     )
 
     # audit_logs
-    op.create_table(
-        "audit_logs",
+    create_table_if_missing(\"audit_logs\",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=True),
         sa.Column("action", sa.String(100), nullable=False),
@@ -184,12 +197,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_audit_logs_action", "audit_logs", ["action"])
-    op.create_index("ix_audit_logs_user_id", "audit_logs", ["user_id"])
+    create_index_if_missing("ix_audit_logs_action", "audit_logs", ["action"])
+    create_index_if_missing("ix_audit_logs_user_id", "audit_logs", ["user_id"])
 
     # Seed permissions
     op.execute("""
-        INSERT INTO permissions (code, name, description) VALUES
+        INSERT IGNORE INTO permissions (code, name, description) VALUES
         ('dashboard.view', 'مشاهده داشبورد', 'دسترسی به داشبورد اصلی'),
         ('users.view', 'مشاهده کاربران', 'مشاهده لیست کاربران'),
         ('users.create', 'ایجاد کاربر', 'ایجاد کاربر جدید'),
