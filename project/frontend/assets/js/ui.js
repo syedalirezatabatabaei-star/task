@@ -31,7 +31,7 @@ const Toast = (() => {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `
-      <span class="toast-icon">${icons[type] || '&#x1F4E2;'}</span>
+      <span class="toast-icon">${icons[type] || '&#x2139;'}</span>
       <div class="toast-body">
         <div class="toast-title">${escapeHtml(titles[type] || '')}</div>
         <div class="toast-message">${escapeHtml(message)}</div>
