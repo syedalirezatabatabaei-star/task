@@ -170,11 +170,14 @@
   </main>
 
   <script>
-    const API_BASE = 'http://localhost:8000/api/v1';
+    const API_BASE = window.API_BASE_URL || 'http://localhost:8000/api/v1';
+    const isLocalDemoHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+    const demoRequested = new URLSearchParams(window.location.search).get('demo') === '1';
+    if (demoRequested) sessionStorage.setItem('task_demo_enabled', 'true');
 
 // Do not auto-redirect based on an old token; let the user choose demo or real login.
     if (localStorage.getItem('task_demo_mode') === 'true'
-        && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) {
+        && (isLocalDemoHost || sessionStorage.getItem('task_demo_enabled') === 'true')) {
       window.location.href = '/dashboard.html';
     }
 
@@ -222,8 +225,8 @@
       }
 
       // Local-only demo login for frontend development; never enabled on public hosts.
-      const isLocalDemoHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
-      if (isLocalDemoHost && username === 'admin' && password === 'admin') {
+      const demoAllowed = isLocalDemoHost || sessionStorage.getItem('task_demo_enabled') === 'true';
+      if (demoAllowed && username === 'admin' && password === 'admin') {
         localStorage.setItem('task_demo_mode', 'true');
         localStorage.setItem('current_user', JSON.stringify({
           id: 0,
