@@ -15,21 +15,21 @@
       <div><div class="logo-text">مدیریت تسک</div><div class="logo-sub">سیستم مدیریت</div></div>
     </div>
     <nav class="sidebar-nav">
-      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">&#x1F4CA;</span><span class="nav-label">داشبورد</span></a>
-      <a class="nav-item active" href="/users.html"><span class="nav-icon">&#x1F465;</span><span class="nav-label">کاربران</span></a>
-      <a class="nav-item" href="/projects.html"><span class="nav-icon">&#x1F4C1;</span><span class="nav-label">پروژه‌ها</span></a>
-      <a class="nav-item" href="/tasks.html"><span class="nav-icon">&#x2705;</span><span class="nav-label">وظایف</span></a>
-      <a class="nav-item" href="/reports.html"><span class="nav-icon">&#x1F4C8;</span><span class="nav-label">گزارش‌ها</span></a>
-    </nav>
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item active" href="/users.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M17 9h2v2"/></svg></span><span class="nav-label">گزارش‌ها</span></a>
+    <a class="nav-item" href="/notifications.html" data-admin-only="true"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="nav-label">مدیریت اعلان‌ها</span></a></nav>
     <div class="sidebar-footer">
-      <a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">&#x1F6AA;</span><span class="nav-label">خروج</span></a>
+      <a class="nav-item" href="#" id="logout-btn"><span class="nav-icon"></span><span class="nav-label">خروج</span></a>
     </div>
   </aside>
 
   <div class="main-content" id="main-content">
     <header class="header" id="header">
       <div class="header-left">
-        <button class="sidebar-toggle" id="sidebar-toggle">&#x2630;</button>
+        <button class="sidebar-toggle" id="sidebar-toggle"></button>
         <a href="/users.html" class="btn btn-ghost btn-sm">← بازگشت</a>
         <h1 class="page-title" id="page-title">مدیریت دسترسی‌ها</h1>
       </div>
@@ -73,7 +73,7 @@
         <div id="perm-actions" class="hidden" style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end">
           <button class="btn btn-secondary" id="btn-select-all">انتخاب همه</button>
           <button class="btn btn-secondary" id="btn-clear-all">پاک کردن همه</button>
-          <button class="btn btn-primary" id="btn-save-perms">&#x1F4BE; ذخیره دسترسی‌ها</button>
+          <button class="btn btn-primary" id="btn-save-perms"> ذخیره دسترسی‌ها</button>
         </div>
       </div>
     </main>
@@ -86,37 +86,37 @@
 <script src="/assets/js/ui.js"></script>
 <script>
 const PERM_GROUPS = [
-  { label: '&#x1F4CA; داشبورد', perms: [{ code:'dashboard.view', label:'مشاهده' }] },
-  { label: '&#x1F465; کاربران', perms: [
+  { label: ' داشبورد', perms: [{ code:'dashboard.view', label:'مشاهده' }] },
+  { label: ' کاربران', perms: [
     { code:'users.view', label:'مشاهده' }, { code:'users.create', label:'ایجاد' },
     { code:'users.edit', label:'ویرایش' }, { code:'users.delete', label:'حذف' },
   ]},
-  { label: '&#x1F4C1; پروژه‌ها', perms: [
+  { label: ' پروژه‌ها', perms: [
     { code:'projects.view', label:'مشاهده' }, { code:'projects.create', label:'ایجاد' },
     { code:'projects.edit', label:'ویرایش' }, { code:'projects.delete', label:'حذف' },
     { code:'projects.members.manage', label:'مدیریت اعضا' },
   ]},
-  { label: '&#x1F5C2; مراحل', perms: [
+  { label: ' مراحل', perms: [
     { code:'stages.view', label:'مشاهده' }, { code:'stages.create', label:'ایجاد' },
     { code:'stages.edit', label:'ویرایش' }, { code:'stages.delete', label:'حذف' },
   ]},
-  { label: '&#x2705; وظایف', perms: [
+  { label: ' وظایف', perms: [
     { code:'tasks.view', label:'مشاهده' }, { code:'tasks.create', label:'ایجاد' },
     { code:'tasks.edit', label:'ویرایش' }, { code:'tasks.delete', label:'حذف' },
     { code:'tasks.assign', label:'تخصیص' }, { code:'tasks.submit', label:'ارسال' },
   ]},
-  { label: '&#x1F5FA; نقشه راه', perms: [
+  { label: ' نقشه راه', perms: [
     { code:'roadmap.view', label:'مشاهده' }, { code:'roadmap.manage', label:'مدیریت' },
   ]},
   { label: '⭐ ارزیابی', perms: [
     { code:'evaluations.view', label:'مشاهده' }, { code:'evaluations.create', label:'ایجاد' },
     { code:'evaluations.edit', label:'ویرایش' },
   ]},
-  { label: '&#x1F4C8; گزارش‌ها', perms: [{ code:'reports.view', label:'مشاهده' }] },
-  { label: '&#x1F4CE; پیوست‌ها', perms: [
+  { label: ' گزارش‌ها', perms: [{ code:'reports.view', label:'مشاهده' }] },
+  { label: ' پیوست‌ها', perms: [
     { code:'attachments.view', label:'مشاهده' }, { code:'attachments.upload', label:'آپلود' },
   ]},
-  { label: '&#x1FAB5; لاگ سیستم', perms: [{ code:'audit_logs.view', label:'مشاهده' }] },
+  { label: ' لاگ سیستم', perms: [{ code:'audit_logs.view', label:'مشاهده' }] },
 ];
 
 let userId;
