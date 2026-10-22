@@ -92,6 +92,7 @@ def test_cross_user_task_access(client, db):
     db.commit()
 
     perm = db.query(Permission).filter(Permission.code == P.TASKS_VIEW).first()
+    edit_perm = db.query(Permission).filter(Permission.code == P.TASKS_EDIT).first()
     if perm:
         db.add(UserPermission(user_id=user2.id, permission_id=perm.id))
         db.commit()
@@ -117,8 +118,22 @@ def test_cross_user_task_access(client, db):
     db.commit()
     if perm:
         db.add(UserPermission(user_id=user3.id, permission_id=perm.id))
-        db.commit()
+    if edit_perm:
+        db.add(UserPermission(user_id=user3.id, permission_id=edit_perm.id))
+    db.commit()
 
     token3 = create_access_token({"sub": str(user3.id)})
-    resp3 = client.get(f"/api/v1/tasks/{task.id}", headers={"Authorization": f"Bearer {token3}"})
+    headers3 = {"Authorization": f"Bearer {token3}"}
+    resp3 = client.get(f"/api/v1/tasks/{task.id}", headers=headers3)
     assert resp3.status_code == 403
+    edit_resp = client.put(f"/api/v1/tasks/{task.id}", headers=headers3, json={"title": "unauthorized update"})
+    assert edit_resp.status_code == 403
+    status_resp = client.patch(f"/api/v1/tasks/{task.id}/status", headers=headers3, json={"status": "IN_PROGRESS"})
+    assert status_resp.status_code == 403
+    progress_resp = client.patch(f"/api/v1/tasks/{task.id}/progress", headers=headers3, json={"progress": 50})
+    assert progress_resp.status_code == 403
+
+
+def test_submit_rejects_progress_out_of_range(client, auth_headers_admin, task):
+    resp = client.post(f"/api/v1/tasks/{task['id']}/submit", headers=auth_headers_admin, json={"progress": 101})
+    assert resp.status_code == 422
