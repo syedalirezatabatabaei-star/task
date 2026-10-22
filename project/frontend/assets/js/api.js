@@ -108,7 +108,7 @@ const Api = (() => {
   // ─── Public Methods ───────────────────────────
   return {
     // Accessors
-    getToken, setToken, clearAuth, getUser: getCurrentUser, setUser, getPermissions, setPermissions, hasPermission,
+    getToken, setToken, clearAuth, getCurrentUser: getUser, setUser, getPermissions, setPermissions, hasPermission,
 
     // HTTP verbs
     get:    (path)              => request('GET',    path),
