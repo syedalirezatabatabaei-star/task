@@ -93,7 +93,10 @@ def user_dashboard(
 ):
     today = date.today()
 
-    my_tasks = db.query(Task).filter(Task.assigned_to == current_user.id)
+    my_tasks = db.query(Task).filter(Task.assigned_to == current_user.id).join(
+        ProjectMember,
+        (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id),
+    )
     total_tasks = my_tasks.count()
     todo_tasks = my_tasks.filter(Task.status == TaskStatus.TODO).count()
     in_progress = my_tasks.filter(Task.status == TaskStatus.IN_PROGRESS).count()
@@ -119,6 +122,7 @@ def user_dashboard(
     next_week = today + timedelta(days=7)
     upcoming = (
         db.query(Task)
+        .join(ProjectMember, (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id))
         .filter(
             Task.assigned_to == current_user.id,
             Task.deadline >= today,
@@ -135,6 +139,7 @@ def user_dashboard(
     recent_evals = (
         db.query(Evaluation)
         .join(Task, Task.id == Evaluation.task_id)
+        .join(ProjectMember, (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id))
         .filter(Task.assigned_to == current_user.id)
         .order_by(Evaluation.created_at.desc())
         .limit(3)
@@ -146,6 +151,7 @@ def user_dashboard(
     avg_score = (
         db.query(sqlfunc.avg(Evaluation.score))
         .join(Task, Task.id == Evaluation.task_id)
+        .join(ProjectMember, (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id))
         .filter(Task.assigned_to == current_user.id)
         .scalar()
     )
