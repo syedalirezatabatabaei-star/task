@@ -39,7 +39,7 @@ async def upload_attachment(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
 
     # Validate MIME type (client-provided MIME alone is not trustworthy).
     if file.content_type not in settings.ALLOWED_MIME_TYPES:
@@ -123,9 +123,12 @@ def delete_attachment(
     if not att:
         raise HTTPException(status_code=404, detail={"success": False, "message": "پیوست یافت نشد"})
 
+    task = _get_task_or_404(att.task_id, db)
+    _check_task_access(task, current_user, db)
+
     # Only uploader or admin can delete
     if att.uploaded_by != current_user.id and current_user.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail={"success": False, "message": "دسترسی ندارید"})
+        raise HTTPException(status_code=403, detail={"success": False, "message": "فقط بارگذار یا مدیر می‌تواند پیوست را حذف کند"})
 
     file_path = att.file_path
     task_id = att.task_id
