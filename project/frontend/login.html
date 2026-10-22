@@ -172,14 +172,7 @@
   <script>
     const API_BASE = 'http://localhost:8000/api/v1';
 
-    // تابع دسترسی سریع به مسیر داشبورد؛ احراز هویت همچنان توسط داشبورد بررسی می‌شود.
-    function فرار() { window.location.href = '/dashboard.html'; }
-    window.فرار = فرار;
-    window.escapeToDashboard = فرار;
-    window.goToDashboard = فرار;
-    window.escape = فرار;
-
-    // Redirect if already logged in
+// Redirect if already logged in
     if (localStorage.getItem('access_token')) {
       window.location.href = '/dashboard.html';
     }
@@ -224,6 +217,23 @@
 
       if (!username || !password) {
         showError('لطفاً نام کاربری و رمز عبور را وارد کنید.');
+        return;
+      }
+
+      // Local-only demo login for frontend development; never enabled on public hosts.
+      const isLocalDemoHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+      if (isLocalDemoHost && username === 'admin' && password === 'admin') {
+        localStorage.setItem('task_demo_mode', 'true');
+        localStorage.setItem('current_user', JSON.stringify({
+          id: 0,
+          username: 'admin',
+          full_name: 'مدیر آزمایشی',
+          role: 'ADMIN',
+          permissions: []
+        }));
+        localStorage.setItem('user_permissions', JSON.stringify([]));
+        localStorage.removeItem('access_token');
+        window.location.href = '/dashboard.html';
         return;
       }
 
