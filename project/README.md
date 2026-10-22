@@ -1,241 +1,101 @@
-﻿# سیستم مدیریت کارآموزی و پروژه
+# سیستم مدیریت تسک
 
-یک سیستم کامل مدیریت کارآموزی با FastAPI (Backend) و Vanilla JS/HTML (Frontend).
+سامانه مدیریت پروژه و تسک با FastAPI، HTML/CSS/JavaScript و MySQL 8.
 
----
+## معماری استقرار
 
-## معماری
+- دامنه سامانه: `task.tinateck.ir`
+- پورت داخلی فرانت‌اند روی سرور: `127.0.0.1:1597`
+- Nginx میزبان درخواست‌ها را به پورت 1597 می‌فرستد.
+- Nginx داخل کانتینر مسیرهای `/api/` و `/uploads/` را به Backend هدایت می‌کند.
+- Backend و MySQL به اینترنت پورت منتشر نمی‌کنند.
+- دامنه اصلی `tinateck.ir` در کانفیگ این پروژه تعریف نشده و برای وب‌سایت جداگانه شما آزاد می‌ماند.
 
-```
-Browser
-   │
-   ├── Frontend (Nginx) — Port 80
-   │
-   └── Backend (FastAPI/Uvicorn) — Port 8000
-                │
-                └── MySQL 8 — Port 3306 (internal)
-```
+## آیا دیتابیس INSERT دارد؟
 
-## پیش‌نیازها
+بله. migration موجود در `backend/alembic/versions/001_initial_schema.py` ساختار جدول‌ها را می‌سازد و مجوزهای اولیه را با `INSERT INTO permissions` وارد می‌کند. اسکریپت `backend/app/utils/create_admin.py` نیز حساب مدیر را ایجاد می‌کند؛ قبلاً باید آن را دستی اجرا می‌کردید. اکنون اسکریپت شروع برنامه این مراحل را خودکار انجام می‌دهد.
 
-- Docker و Docker Compose
-- یا Python 3.12+ و MySQL 8+ (بدون Docker)
+در هر شروع کانتینر Backend:
+1. پیکربندی و رمزهای ضروری اعتبارسنجی می‌شوند.
+2. برنامه منتظر آماده‌شدن MySQL می‌ماند.
+3. `alembic upgrade head` اجرا می‌شود.
+4. مدیر اولیه مطابق مقادیر `.env` ایجاد می‌شود، اگر از قبل وجود نداشته باشد.
+5. API اجرا می‌شود.
 
----
+Migrationها و ساخت مدیر اولیه قابل تکرارند؛ داده‌های موجود حذف نمی‌شوند. از `docker compose down -v` در محیط دارای داده واقعی استفاده نکنید، چون volume دیتابیس را حذف می‌کند.
 
-## راه‌اندازی سریع با Docker
+## راه‌اندازی روی سرور
 
-### ۱. کپی فایل محیطی
+### 1. ساخت فایل محیطی
+
+از پوشه `project` اجرا کنید:
+
 ```bash
 cp .env.example .env
+nano .env
 ```
 
-### ۲. ویرایش `.env`
-حتماً مقادیر زیر را تغییر دهید:
-```env
-SECRET_KEY=یک-رشته-تصادفی-طولانی
-JWT_SECRET_KEY=یک-رشته-تصادفی-دیگر
-MYSQL_PASSWORD=رمز-عبور-دیتابیس
-ADMIN_PASSWORD=رمز-عبور-مدیر
-ADMIN_USERNAME=admin
-```
+همه مقدارهای `REPLACE_WITH_...` را با رمزها و کلیدهای یکتای خودتان جایگزین کنید. رمز مدیر باید حداقل ۱۲ کاراکتر و دو کلید امضا باید حداقل ۳۲ کاراکتر باشند. برای سازگاری ساده‌تر با اتصال MySQL، برای رمز دیتابیس رشته تصادفی حروف و اعداد بسازید؛ نمونه تولید مقدار:
 
-### ۳. ساخت و اجرا
 ```bash
+openssl rand -hex 32
+```
+
+برای هر متغیر محرمانه مقدار متفاوت تولید کنید. فایل واقعی `.env` در Git نادیده گرفته می‌شود؛ آن را commit نکنید و برای کسی نفرستید.
+
+### 2. ساخت و اجرای سرویس‌ها
+
+روی سرور Docker Engine و افزونه Docker Compose باید نصب باشند. در پوشه `project`:
+
+```bash
+docker compose config
 docker compose up -d --build
+docker compose ps
+docker compose logs -f backend
 ```
 
-### ۴. اجرای migrations
-```bash
-docker compose exec backend alembic upgrade head
-```
+برای دیدن لاگ‌ها از ترمینال با `Ctrl+C` خارج شوید؛ این کار کانتینرها را متوقف نمی‌کند.
 
-### ۵. ایجاد اولین مدیر
-```bash
-docker compose exec backend python -m app.utils.create_admin
-```
+### 3. تنظیم DNS
 
-### ۶. دسترسی به سیستم
-| آدرس | توضیح |
-|------|-------|
-| http://localhost | رابط کاربری |
-| http://localhost:8000/docs | مستندات Swagger |
-| http://localhost:8000/redoc | مستندات ReDoc |
+در پنل DNS دامنه، رکورد `A` برای نام `task` بسازید که به IP عمومی سرور اشاره کند:
 
----
+- نام/Host: `task`
+- نوع: `A`
+- مقدار: IP سرور
 
-## راه‌اندازی دستی (بدون Docker)
+این تغییر فقط زیر دامنه `task.tinateck.ir` را هدف می‌گیرد. رکورد و کانفیگ دامنه اصلی `tinateck.ir` را برای این پروژه تغییر ندهید.
 
-### Backend
+### 4. فعال‌سازی Nginx روی میزبان
+
+فایل آماده در `deploy/nginx-task.tinateck.ir.conf` است. آن را در Nginx میزبان نصب کنید:
 
 ```bash
-cd backend
-
-# ایجاد محیط مجازی
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Linux/Mac:
-source venv/bin/activate
-
-# نصب وابستگی‌ها
-pip install -r requirements.txt
-
-# ایجاد فایل .env در پوشه backend
-cp ../.env.example .env
-# مقادیر را ویرایش کنید (MYSQL_HOST=localhost)
-
-# اجرای migrations
-alembic upgrade head
-
-# ایجاد مدیر اول
-python -m app.utils.create_admin
-
-# اجرای سرور
-uvicorn app.main:app --reload --port 8000
+sudo cp deploy/nginx-task.tinateck.ir.conf /etc/nginx/sites-available/task.tinateck.ir
+sudo ln -s /etc/nginx/sites-available/task.tinateck.ir /etc/nginx/sites-enabled/task.tinateck.ir
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
-### Frontend
+اگر لینک قبلاً وجود دارد، دوباره آن را نسازید. این فایل فقط پورت 80 را تنظیم می‌کند. پس از تنظیم DNS و تأیید دسترسی HTTP، برای HTTPS گواهی TLS صادر و فعال کنید؛ گواهی و DNS از داخل این مخزن قابل ایجاد نیستند.
 
-```bash
-cd frontend
-# با هر web server ساده:
-python -m http.server 3000
-# یا npx serve . -p 3000
-```
+### 5. بررسی اجرا
 
----
+- سامانه: `http://task.tinateck.ir`
+- سلامت API از داخل شبکه: `/health` روی Backend
+- مستندات API: در حال حاضر Backend پورت میزبان ندارد؛ برای دسترسی عمومی به Swagger پورت 8000 را باز نکنید. در صورت نیاز، مسیر `/docs` را با سیاست دسترسی مناسب از Nginx منتشر کنید.
 
-## متغیرهای محیطی
+اولین ورود از نام کاربری و رمز تعیین‌شده در `.env` استفاده می‌کند. مقدار پیش‌فرض امنی برای رمز مدیر وجود ندارد؛ شروع سرویس با رمزهای نمونه رد می‌شود.
 
-| متغیر | توضیح | پیش‌فرض |
-|-------|-------|---------|
-| `APP_NAME` | نام برنامه | Internship Management System |
-| `SECRET_KEY` | کلید رمزنگاری | **الزامی** |
-| `JWT_SECRET_KEY` | کلید JWT | **الزامی** |
-| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | مدت اعتبار توکن (دقیقه) | 480 |
-| `MYSQL_HOST` | هاست MySQL | mysql |
-| `MYSQL_PORT` | پورت MySQL | 3306 |
-| `MYSQL_DATABASE` | نام دیتابیس | internship_db |
-| `MYSQL_USER` | کاربر MySQL | internship_user |
-| `MYSQL_PASSWORD` | رمز MySQL | **الزامی** |
-| `CORS_ORIGINS` | Origins مجاز | http://localhost |
-| `UPLOAD_DIR` | پوشه آپلود | uploads |
-| `MAX_UPLOAD_SIZE` | حداکثر حجم فایل (bytes) | 10485760 |
-| `ADMIN_USERNAME` | نام کاربری مدیر اول | admin |
-| `ADMIN_PASSWORD` | رمز مدیر اول | **الزامی** |
+## ساختار مهم
 
----
+- `backend/alembic/versions/`: migrationها و داده‌های اولیه مجوزها
+- `backend/app/utils/create_admin.py`: ساخت مدیر اولیه
+- `backend/app/utils/bootstrap.py`: آماده‌سازی دیتابیس و شروع API
+- `docker-compose.yml`: MySQL، Backend و Frontend
+- `frontend/nginx.conf`: سرویس‌دهی فرانت‌اند و پراکسی API
+- `deploy/nginx-task.tinateck.ir.conf`: کانفیگ Nginx میزبان برای زیر دامنه
 
-## Migrations
+## توسعه
 
-```bash
-# مشاهده وضعیت
-alembic current
-
-# اعمال همه migrations
-alembic upgrade head
-
-# برگشت یک مرحله
-alembic downgrade -1
-
-# ایجاد migration جدید
-alembic revision --autogenerate -m "توضیحات"
-```
-
----
-
-## تست‌ها
-
-```bash
-cd backend
-pytest tests/ -v
-
-# با پوشش کد
-pytest tests/ --cov=app --cov-report=html
-```
-
----
-
-## ساختار پروژه
-
-```
-project/
-├── backend/
-│   ├── app/
-│   │   ├── main.py           # نقطه ورود FastAPI
-│   │   ├── core/             # پیکربندی، دیتابیس، امنیت
-│   │   ├── models/           # SQLAlchemy models
-│   │   ├── schemas/          # Pydantic schemas
-│   │   ├── api/              # Route handlers
-│   │   ├── services/         # Business logic
-│   │   └── utils/            # ابزارها (create_admin)
-│   ├── alembic/              # Database migrations
-│   ├── tests/                # pytest tests
-│   └── requirements.txt
-├── frontend/
-│   ├── index.html
-│   ├── login.html
-│   ├── dashboard.html
-│   ├── users.html
-│   ├── user-permissions.html
-│   ├── projects.html
-│   ├── project-details.html
-│   ├── tasks.html
-│   ├── task-details.html
-│   ├── reports.html
-│   └── assets/
-│       ├── css/main.css
-│       └── js/
-│           ├── api.js        # API client مرکزی
-│           ├── auth.js       # مدیریت احراز هویت
-│           └── ui.js         # کامپوننت‌های UI
-├── docker-compose.yml
-├── .env.example
-└── README.md
-```
-
----
-
-## API Documentation
-
-بعد از اجرای backend:
-
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-
-### نمونه endpoints
-
-```
-POST /api/v1/auth/login       ورود
-GET  /api/v1/auth/me          اطلاعات کاربر جاری
-
-GET  /api/v1/users            لیست کاربران
-POST /api/v1/users            ایجاد کاربر
-
-GET  /api/v1/projects         لیست پروژه‌ها
-POST /api/v1/projects         ایجاد پروژه
-
-GET  /api/v1/tasks            لیست وظایف
-POST /api/v1/tasks/{id}/submit ارسال وظیفه
-
-GET  /api/v1/dashboard/admin  داشبورد مدیر
-GET  /api/v1/dashboard/user   داشبورد کاربر
-```
-
----
-
-## امنیت
-
-- رمزهای عبور با **bcrypt** هش می‌شوند
-- احراز هویت با **JWT** 
-- بررسی دسترسی‌ها **server-side** انجام می‌شود
-- SQL injection از طریق SQLAlchemy ORM جلوگیری می‌شود
-- آپلود فایل با بررسی MIME type و حجم ایمن است
-- هیچ اطلاعات حساسی در کد منبع ذخیره نمی‌شود
-
----
-
-## License
-
-MIT
+برای تغییر ساختار دیتابیس migration جدید بسازید؛ migration اولیه را برای دیتابیس‌هایی که قبلاً نصب شده‌اند بازنویسی نکنید. فایل `.env` و داده‌های کاربران را در Git قرار ندهید.
