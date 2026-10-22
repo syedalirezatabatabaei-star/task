@@ -78,3 +78,30 @@ def test_create_stage(client, auth_headers_admin, project):
     })
     assert resp.status_code == 201
     assert resp.json()["data"]["name"] == "مرحله اول"
+
+
+def test_users_only_see_projects_they_belong_to(client, auth_headers_admin, auth_headers_user, project, regular_user):
+    """Project list and detail endpoints must enforce membership isolation."""
+    add_member = client.post(
+        f"/api/v1/projects/{project['id']}/members",
+        headers=auth_headers_admin,
+        json={"user_id": regular_user.id, "project_role": "عضو"},
+    )
+    assert add_member.status_code == 200
+
+    private_project = client.post(
+        "/api/v1/projects",
+        headers=auth_headers_admin,
+        json={"name": "پروژه خصوصی دیگر", "status": "ACTIVE"},
+    )
+    assert private_project.status_code == 201
+    private_id = private_project.json()["data"]["id"]
+
+    listed = client.get("/api/v1/projects", headers=auth_headers_user)
+    assert listed.status_code == 200
+    visible_ids = {item["id"] for item in listed.json()["data"]["items"]}
+    assert project["id"] in visible_ids
+    assert private_id not in visible_ids
+
+    hidden_detail = client.get(f"/api/v1/projects/{private_id}", headers=auth_headers_user)
+    assert hidden_detail.status_code == 403

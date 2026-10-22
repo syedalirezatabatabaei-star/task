@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models.user import User, UserRole
 from app.models.task import Task
+from app.models.project import ProjectMember
 from app.models.attachment import Attachment
 from app.api.deps import get_current_user, require_permission, get_client_ip
 from app.services.audit_service import log_action
@@ -23,7 +24,7 @@ def list_attachments(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
 
     attachments = db.query(Attachment).filter(Attachment.task_id == task_id).all()
     return {"success": True, "data": [_att_dict(a) for a in attachments]}
@@ -38,21 +39,26 @@ async def upload_attachment(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
 
-    # Validate MIME type
+    # Validate MIME type (client-provided MIME alone is not trustworthy).
     if file.content_type not in settings.ALLOWED_MIME_TYPES:
         raise HTTPException(
             status_code=415,
             detail={"success": False, "message": "نوع فایل مجاز نیست", "code": "INVALID_MIME"},
         )
 
-    # Read and check size
-    content = await file.read()
+    # Read at most the configured limit plus one byte to avoid unbounded memory use.
+    content = await file.read(settings.MAX_UPLOAD_SIZE + 1)
     if len(content) > settings.MAX_UPLOAD_SIZE:
         raise HTTPException(
             status_code=413,
             detail={"success": False, "message": "حجم فایل بیش از حد مجاز است", "code": "FILE_TOO_LARGE"},
+        )
+    if not _matches_file_signature(content, file.content_type):
+        raise HTTPException(
+            status_code=415,
+            detail={"success": False, "message": "محتوای فایل با نوع اعلام‌شده مطابقت ندارد", "code": "INVALID_FILE_SIGNATURE"},
         )
 
     # Sanitize and store with UUID name
@@ -90,6 +96,22 @@ async def upload_attachment(
     return {"success": True, "data": _att_dict(attachment)}
 
 
+@router.get("/attachments/{attachment_id}/download", summary="دریافت پیوست")
+def download_attachment(
+    attachment_id: int,
+    current_user: User = Depends(require_permission(P.ATTACHMENTS_VIEW)),
+    db: Session = Depends(get_db),
+):
+    att = db.query(Attachment).filter(Attachment.id == attachment_id).first()
+    if not att:
+        raise HTTPException(status_code=404, detail={"success": False, "message": "پیوست یافت نشد"})
+    task = _get_task_or_404(att.task_id, db)
+    _check_task_access(task, current_user, db)
+    if not os.path.isfile(att.file_path):
+        raise HTTPException(status_code=404, detail={"success": False, "message": "فایل روی سرور موجود نیست"})
+    return FileResponse(att.file_path, media_type="application/octet-stream", filename=att.original_filename, content_disposition_type="attachment")
+
+
 @router.delete("/attachments/{attachment_id}", summary="حذف پیوست")
 def delete_attachment(
     attachment_id: int,
@@ -101,17 +123,55 @@ def delete_attachment(
     if not att:
         raise HTTPException(status_code=404, detail={"success": False, "message": "پیوست یافت نشد"})
 
+    task = _get_task_or_404(att.task_id, db)
+    _check_task_access(task, current_user, db)
+
     # Only uploader or admin can delete
     if att.uploaded_by != current_user.id and current_user.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail={"success": False, "message": "دسترسی ندارید"})
+        raise HTTPException(status_code=403, detail={"success": False, "message": "فقط بارگذار یا مدیر می‌تواند پیوست را حذف کند"})
 
-    # Delete physical file
-    if os.path.exists(att.file_path):
-        os.remove(att.file_path)
-
+    file_path = att.file_path
+    task_id = att.task_id
+    original_filename = att.original_filename
     db.delete(att)
     db.commit()
+
+    # Delete the physical file only after the database transaction succeeds.
+    if os.path.isfile(file_path):
+        try:
+            os.remove(file_path)
+        except OSError:
+            # Metadata is already removed; an orphaned file can be cleaned up later.
+            pass
+    log_action(db=db, user_id=current_user.id, action="ATTACHMENT_DELETED", entity_type="task", entity_id=task_id, description=f"فایل '{original_filename}' حذف شد", ip_address=get_client_ip(request))
     return {"success": True, "message": "پیوست حذف شد"}
+
+
+def _matches_file_signature(content: bytes, mime_type: str | None) -> bool:
+    signatures = {
+        "image/jpeg": lambda b: b.startswith(b"\xff\xd8\xff"),
+        "image/png": lambda b: b.startswith(b"\x89PNG\r\n\x1a\n"),
+        "image/gif": lambda b: b.startswith((b"GIF87a", b"GIF89a")),
+        "image/webp": lambda b: len(b) >= 12 and b.startswith(b"RIFF") and b[8:12] == b"WEBP",
+        "application/pdf": lambda b: b.startswith(b"%PDF-"),
+        "application/zip": lambda b: b.startswith(b"PK\x03\x04"),
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": lambda b: b.startswith(b"PK\x03\x04"),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": lambda b: b.startswith(b"PK\x03\x04"),
+        "application/msword": lambda b: b.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"),
+        "application/vnd.ms-excel": lambda b: b.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"),
+        "application/x-rar-compressed": lambda b: b.startswith((b"Rar!\x1a\x07\x00", b"Rar!\x1a\x07\x01\x00")),
+        "text/plain": lambda b: b"\x00" not in b and _is_utf8(b),
+    }
+    validator = signatures.get(mime_type or "")
+    return bool(content) and validator is not None and validator(content)
+
+
+def _is_utf8(content: bytes) -> bool:
+    try:
+        content.decode("utf-8")
+        return True
+    except UnicodeDecodeError:
+        return False
 
 
 def _get_task_or_404(task_id: int, db: Session) -> Task:
@@ -121,11 +181,17 @@ def _get_task_or_404(task_id: int, db: Session) -> Task:
     return task
 
 
-def _check_task_access(task: Task, user: User):
+def _check_task_access(task: Task, user: User, db: Session):
     if user.role == UserRole.ADMIN:
         return
     if task.assigned_to != user.id:
-        raise HTTPException(status_code=403, detail={"success": False, "message": "دسترسی ندارید"})
+        raise HTTPException(status_code=403, detail={"success": False, "message": "این وظیفه به شما تخصیص داده نشده است", "code": "ACCESS_DENIED"})
+    membership = db.query(ProjectMember.id).filter(
+        ProjectMember.project_id == task.project_id,
+        ProjectMember.user_id == user.id,
+    ).first()
+    if not membership:
+        raise HTTPException(status_code=403, detail={"success": False, "message": "شما به این پروژه دسترسی ندارید", "code": "PROJECT_ACCESS_DENIED"})
 
 
 def _att_dict(a: Attachment) -> dict:

@@ -1,14 +1,14 @@
 # سیستم مدیریت تسک
 
-سامانه مدیریت پروژه و تسک با FastAPI، HTML/CSS/JavaScript و MySQL 8.
+سامانه مدیریت پروژه و تسک با FastAPI، HTML/CSS/JavaScript و سازگار با MySQL 5.7.
 
 ## معماری استقرار
 
 - دامنه سامانه: `task.tinateck.ir`
 - پورت داخلی فرانت‌اند روی سرور: `127.0.0.1:1597`
 - Nginx میزبان درخواست‌ها را به پورت 1597 می‌فرستد.
-- Nginx داخل کانتینر مسیرهای `/api/` و `/uploads/` را به Backend هدایت می‌کند.
-- Backend و MySQL به اینترنت پورت منتشر نمی‌کنند.
+- Nginx داخل کانتینر فقط مسیر `/api/` را به Backend هدایت می‌کند؛ دانلود پیوست‌ها از endpoint احراز هویت‌شده انجام می‌شود.
+- Backend پورت عمومی ندارد. دیتابیس MySQL 5.7 باید جداگانه روی شبکه Docker خارجی `project_task_net` در دسترس باشد و نباید به اینترنت پورت منتشر کند.
 - دامنه اصلی `tinateck.ir` در کانفیگ این پروژه تعریف نشده و برای وب‌سایت جداگانه شما آزاد می‌ماند.
 
 ## آیا دیتابیس INSERT دارد؟
@@ -92,7 +92,7 @@ sudo systemctl reload nginx
 - `backend/alembic/versions/`: migrationها و داده‌های اولیه مجوزها
 - `backend/app/utils/create_admin.py`: ساخت مدیر اولیه
 - `backend/app/utils/bootstrap.py`: آماده‌سازی دیتابیس و شروع API
-- `docker-compose.yml`: MySQL، Backend و Frontend
+- `docker-compose.yml`: Backend، Frontend و Nginx؛ MySQL 5.7 به‌صورت سرویس خارجی/جداگانه فراهم می‌شود
 - `frontend/nginx.conf`: سرویس‌دهی فرانت‌اند و پراکسی API
 - `deploy/nginx-task.tinateck.ir.conf`: کانفیگ Nginx میزبان برای زیر دامنه
 

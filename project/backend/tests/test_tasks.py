@@ -3,12 +3,20 @@ import pytest
 
 
 @pytest.fixture
-def project_id(client, auth_headers_admin):
+def project_id(client, auth_headers_admin, regular_user):
     resp = client.post("/api/v1/projects", headers=auth_headers_admin, json={
         "name": "پروژه وظایف",
         "status": "ACTIVE",
     })
-    return resp.json()["data"]["id"]
+    assert resp.status_code == 201
+    project_id = resp.json()["data"]["id"]
+    member_resp = client.post(
+        f"/api/v1/projects/{project_id}/members",
+        headers=auth_headers_admin,
+        json={"user_id": regular_user.id, "project_role": "عضو"},
+    )
+    assert member_resp.status_code == 200
+    return project_id
 
 
 @pytest.fixture
@@ -82,7 +90,7 @@ def test_cross_user_task_access(client, db):
     """User cannot access another user's task."""
     from app.models.user import User, UserRole
     from app.models.task import Task
-    from app.models.project import Project
+    from app.models.project import Project, ProjectMember
     from app.core.security import hash_password, create_access_token
     from app.models.permission import Permission, UserPermission
     from app.core import permissions as P
@@ -92,12 +100,15 @@ def test_cross_user_task_access(client, db):
     db.commit()
 
     perm = db.query(Permission).filter(Permission.code == P.TASKS_VIEW).first()
+    edit_perm = db.query(Permission).filter(Permission.code == P.TASKS_EDIT).first()
     if perm:
         db.add(UserPermission(user_id=user2.id, permission_id=perm.id))
         db.commit()
 
     proj = Project(name="p", created_by=user2.id, status="ACTIVE")
     db.add(proj)
+    db.commit()
+    db.add(ProjectMember(project_id=proj.id, user_id=user2.id, project_role="عضو"))
     db.commit()
 
     task = Task(title="private task", project_id=proj.id, assigned_to=user2.id, status="TODO", priority="MEDIUM")
@@ -117,8 +128,38 @@ def test_cross_user_task_access(client, db):
     db.commit()
     if perm:
         db.add(UserPermission(user_id=user3.id, permission_id=perm.id))
-        db.commit()
+    if edit_perm:
+        db.add(UserPermission(user_id=user3.id, permission_id=edit_perm.id))
+    db.commit()
 
     token3 = create_access_token({"sub": str(user3.id)})
-    resp3 = client.get(f"/api/v1/tasks/{task.id}", headers={"Authorization": f"Bearer {token3}"})
+    headers3 = {"Authorization": f"Bearer {token3}"}
+    resp3 = client.get(f"/api/v1/tasks/{task.id}", headers=headers3)
     assert resp3.status_code == 403
+    edit_resp = client.put(f"/api/v1/tasks/{task.id}", headers=headers3, json={"title": "unauthorized update"})
+    assert edit_resp.status_code == 403
+    status_resp = client.patch(f"/api/v1/tasks/{task.id}/status", headers=headers3, json={"status": "IN_PROGRESS"})
+    assert status_resp.status_code == 403
+    progress_resp = client.patch(f"/api/v1/tasks/{task.id}/progress", headers=headers3, json={"progress": 50})
+    assert progress_resp.status_code == 403
+
+
+def test_submit_rejects_progress_out_of_range(client, auth_headers_admin, task):
+    resp = client.post(f"/api/v1/tasks/{task['id']}/submit", headers=auth_headers_admin, json={"progress": 101})
+    assert resp.status_code == 422
+
+
+def test_removed_project_member_cannot_see_assigned_task(client, auth_headers_admin, auth_headers_user, task, project_id, regular_user):
+    """Removing membership revokes task list and detail access even if assignment remains."""
+    removed = client.delete(
+        f"/api/v1/projects/{project_id}/members/{regular_user.id}",
+        headers=auth_headers_admin,
+    )
+    assert removed.status_code == 200
+
+    listing = client.get("/api/v1/tasks", headers=auth_headers_user)
+    assert listing.status_code == 200
+    assert all(item["id"] != task["id"] for item in listing.json()["data"]["items"])
+
+    detail = client.get(f"/api/v1/tasks/{task['id']}", headers=auth_headers_user)
+    assert detail.status_code == 403

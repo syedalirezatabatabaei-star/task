@@ -34,7 +34,14 @@ def user_report(
         raise HTTPException(status_code=404, detail={"success": False, "message": "کاربر یافت نشد"})
 
     today = date.today()
-    tasks = db.query(Task).filter(Task.assigned_to == user_id).all()
+    task_query = db.query(Task).filter(Task.assigned_to == user_id)
+    if current_user.role != UserRole.ADMIN:
+        task_query = task_query.join(
+            ProjectMember,
+            (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id),
+        )
+    tasks = task_query.all()
+    visible_task_ids = [task.id for task in tasks]
     total = len(tasks)
     done = sum(1 for t in tasks if t.status == TaskStatus.DONE)
     approved = sum(1 for t in tasks if t.status == TaskStatus.APPROVED)
@@ -50,14 +57,14 @@ def user_report(
     avg_score = (
         db.query(func.avg(Evaluation.score))
         .join(Task, Task.id == Evaluation.task_id)
-        .filter(Task.assigned_to == user_id)
+        .filter(Task.id.in_(visible_task_ids) if visible_task_ids else Task.id == -1)
         .scalar()
     )
 
     evaluations = (
         db.query(Evaluation)
         .join(Task, Task.id == Evaluation.task_id)
-        .filter(Task.assigned_to == user_id)
+        .filter(Task.id.in_(visible_task_ids) if visible_task_ids else Task.id == -1)
         .order_by(Evaluation.created_at.desc())
         .all()
     )

@@ -8,9 +8,10 @@ from app.core.database import get_db
 from app.models.user import User, UserRole
 from app.models.project import Project, ProjectMember
 from app.models.task import Task, TaskStatus, TaskPriority
+from app.models.project_stage import ProjectStage
 from app.models.evaluation import Evaluation
 from app.schemas.task import TaskCreate, TaskUpdate, TaskStatusUpdate, TaskProgressUpdate, TaskSubmit
-from app.api.deps import get_current_user, require_permission, get_client_ip
+from app.api.deps import get_current_user, require_permission, get_client_ip, get_user_permission_codes
 from app.services.audit_service import log_action
 from app.core import permissions as P
 
@@ -42,9 +43,12 @@ def list_tasks(
 ):
     query = db.query(Task)
 
-    # Non-admins only see their own assigned tasks
+    # Non-admins only see tasks assigned to them inside projects they belong to.
     if current_user.role != UserRole.ADMIN:
-        query = query.filter(Task.assigned_to == current_user.id)
+        query = query.join(
+            ProjectMember,
+            (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id),
+        ).filter(Task.assigned_to == current_user.id)
 
     if project_id:
         query = query.filter(Task.project_id == project_id)
@@ -85,6 +89,33 @@ def create_task(
     if not project:
         raise HTTPException(status_code=404, detail={"success": False, "message": "پروژه یافت نشد"})
 
+    if current_user.role != UserRole.ADMIN:
+        membership = db.query(ProjectMember.id).filter(
+            ProjectMember.project_id == project.id,
+            ProjectMember.user_id == current_user.id,
+        ).first()
+        if not membership:
+            raise HTTPException(status_code=403, detail={"success": False, "message": "برای ایجاد وظیفه باید عضو پروژه باشید", "code": "NOT_MEMBER"})
+
+    if body.stage_id is not None:
+        stage = db.query(ProjectStage).filter(
+            ProjectStage.id == body.stage_id,
+            ProjectStage.project_id == project.id,
+        ).first()
+        if not stage:
+            raise HTTPException(status_code=400, detail={"success": False, "message": "مرحله انتخاب‌شده متعلق به این پروژه نیست", "code": "INVALID_STAGE"})
+
+    if body.assigned_to is not None:
+        assignee = db.query(User).filter(User.id == body.assigned_to, User.is_active == True).first()
+        if not assignee:
+            raise HTTPException(status_code=404, detail={"success": False, "message": "کاربر تخصیص‌یافته یافت نشد یا غیرفعال است", "code": "INVALID_ASSIGNEE"})
+        assignee_membership = db.query(ProjectMember.id).filter(
+            ProjectMember.project_id == project.id,
+            ProjectMember.user_id == body.assigned_to,
+        ).first()
+        if not assignee_membership:
+            raise HTTPException(status_code=400, detail={"success": False, "message": "کاربر تخصیص‌یافته عضو پروژه نیست", "code": "ASSIGNEE_NOT_MEMBER"})
+
     task = Task(
         project_id=body.project_id,
         stage_id=body.stage_id,
@@ -117,7 +148,7 @@ def get_task(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
     return {"success": True, "data": _task_dict(task, db)}
 
 
@@ -130,8 +161,37 @@ def update_task(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
+    _check_task_access(task, current_user, db)
 
-    for field, value in body.model_dump(exclude_none=True).items():
+    updates = body.model_dump(exclude_unset=True)
+    if "title" in updates and updates["title"] is None:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "عنوان وظیفه نمی‌تواند خالی باشد"})
+    effective_start = updates.get("start_date", task.start_date)
+    effective_deadline = updates.get("deadline", task.deadline)
+    if effective_start and effective_deadline and effective_deadline < effective_start:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "مهلت انجام نمی‌تواند قبل از تاریخ شروع باشد"})
+    if updates.get("stage_id") is not None:
+        stage = db.query(ProjectStage).filter(
+            ProjectStage.id == updates["stage_id"],
+            ProjectStage.project_id == task.project_id,
+        ).first()
+        if not stage:
+            raise HTTPException(status_code=400, detail={"success": False, "message": "مرحله انتخاب‌شده متعلق به این پروژه نیست", "code": "INVALID_STAGE"})
+    if "assigned_to" in updates and current_user.role != UserRole.ADMIN:
+        if P.TASKS_ASSIGN not in get_user_permission_codes(current_user, db):
+            raise HTTPException(status_code=403, detail={"success": False, "message": "اجازه تخصیص وظیفه را ندارید", "code": "TASK_ASSIGN_DENIED"})
+    if updates.get("assigned_to") is not None:
+        assignee = db.query(User).filter(User.id == updates["assigned_to"], User.is_active == True).first()
+        if not assignee:
+            raise HTTPException(status_code=404, detail={"success": False, "message": "کاربر تخصیص‌یافته یافت نشد یا غیرفعال است", "code": "INVALID_ASSIGNEE"})
+        member = db.query(ProjectMember.id).filter(
+            ProjectMember.project_id == task.project_id,
+            ProjectMember.user_id == updates["assigned_to"],
+        ).first()
+        if not member:
+            raise HTTPException(status_code=400, detail={"success": False, "message": "کاربر تخصیص‌یافته عضو پروژه نیست", "code": "ASSIGNEE_NOT_MEMBER"})
+
+    for field, value in updates.items():
         setattr(task, field, value)
 
     db.commit()
@@ -155,8 +215,16 @@ def delete_task(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
+    _check_task_access(task, current_user, db)
+    task_title = task.title
     db.delete(task)
     db.commit()
+    log_action(
+        db=db, user_id=current_user.id, action="TASK_DELETED",
+        entity_type="task", entity_id=task_id,
+        description=f"وظیفه '{task_title}' حذف شد",
+        ip_address=get_client_ip(request),
+    )
     return {"success": True, "message": "وظیفه با موفقیت حذف شد"}
 
 
@@ -169,6 +237,7 @@ def update_task_status(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
+    _check_task_access(task, current_user, db)
 
     allowed = VALID_TRANSITIONS.get(task.status, [])
     if body.status not in allowed:
@@ -201,12 +270,20 @@ def update_task_status(
 def update_progress(
     task_id: int,
     body: TaskProgressUpdate,
+    request: Request,
     current_user: User = Depends(require_permission(P.TASKS_EDIT)),
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
+    _check_task_access(task, current_user, db)
     task.progress = body.progress
     db.commit()
+    log_action(
+        db=db, user_id=current_user.id, action="TASK_PROGRESS_UPDATED",
+        entity_type="task", entity_id=task.id,
+        description=f"پیشرفت وظیفه '{task.title}' به {task.progress}% تغییر یافت",
+        ip_address=get_client_ip(request),
+    )
     return {"success": True, "data": {"progress": task.progress}}
 
 
@@ -219,6 +296,7 @@ def submit_task(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
+    _check_task_access(task, current_user, db)
 
     # Only the assignee can submit
     if task.assigned_to != current_user.id and current_user.role != UserRole.ADMIN:
@@ -260,13 +338,22 @@ def _get_task_or_404(task_id: int, db: Session) -> Task:
     return task
 
 
-def _check_task_access(task: Task, user: User):
+def _check_task_access(task: Task, user: User, db: Session):
     if user.role == UserRole.ADMIN:
         return
     if task.assigned_to != user.id:
         raise HTTPException(
             status_code=403,
-            detail={"success": False, "message": "دسترسی به این وظیفه مجاز نیست", "code": "ACCESS_DENIED"},
+            detail={"success": False, "message": "این وظیفه به شما تخصیص داده نشده است", "code": "ACCESS_DENIED"},
+        )
+    membership = db.query(ProjectMember.id).filter(
+        ProjectMember.project_id == task.project_id,
+        ProjectMember.user_id == user.id,
+    ).first()
+    if not membership:
+        raise HTTPException(
+            status_code=403,
+            detail={"success": False, "message": "شما به این پروژه دسترسی ندارید", "code": "PROJECT_ACCESS_DENIED"},
         )
 
 

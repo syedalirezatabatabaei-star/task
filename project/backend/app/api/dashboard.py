@@ -7,7 +7,7 @@ from app.core.database import get_db
 from app.models.user import User, UserRole
 from app.models.project import Project, ProjectStatus, ProjectMember
 from app.models.task import Task, TaskStatus
-from app.api.deps import get_current_user, require_permission
+from app.api.deps import get_current_user, require_permission, require_admin
 from app.core import permissions as P
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 @router.get("/admin", summary="داشبورد مدیر")
 def admin_dashboard(
-    current_user: User = Depends(require_permission(P.DASHBOARD_VIEW)),
+    current_user: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
     today = date.today()
@@ -93,7 +93,10 @@ def user_dashboard(
 ):
     today = date.today()
 
-    my_tasks = db.query(Task).filter(Task.assigned_to == current_user.id)
+    my_tasks = db.query(Task).filter(Task.assigned_to == current_user.id).join(
+        ProjectMember,
+        (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id),
+    )
     total_tasks = my_tasks.count()
     todo_tasks = my_tasks.filter(Task.status == TaskStatus.TODO).count()
     in_progress = my_tasks.filter(Task.status == TaskStatus.IN_PROGRESS).count()
@@ -119,6 +122,7 @@ def user_dashboard(
     next_week = today + timedelta(days=7)
     upcoming = (
         db.query(Task)
+        .join(ProjectMember, (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id))
         .filter(
             Task.assigned_to == current_user.id,
             Task.deadline >= today,
@@ -135,6 +139,7 @@ def user_dashboard(
     recent_evals = (
         db.query(Evaluation)
         .join(Task, Task.id == Evaluation.task_id)
+        .join(ProjectMember, (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id))
         .filter(Task.assigned_to == current_user.id)
         .order_by(Evaluation.created_at.desc())
         .limit(3)
@@ -146,6 +151,7 @@ def user_dashboard(
     avg_score = (
         db.query(sqlfunc.avg(Evaluation.score))
         .join(Task, Task.id == Evaluation.task_id)
+        .join(ProjectMember, (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id))
         .filter(Task.assigned_to == current_user.id)
         .scalar()
     )

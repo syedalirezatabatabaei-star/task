@@ -1,16 +1,30 @@
 from datetime import date, datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator, model_validator
 from app.models.project import ProjectStatus
 
 
 class ProjectBase(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=255)
     description: Optional[str] = None
     status: ProjectStatus = ProjectStatus.PLANNED
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     show_roadmap: bool = True
+
+    @field_validator('name')
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError('نام پروژه نمی‌تواند خالی باشد')
+        return value
+
+    @model_validator(mode='after')
+    def validate_dates(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValueError('تاریخ پایان نمی‌تواند قبل از شروع باشد')
+        return self
 
 
 class ProjectCreate(ProjectBase):
@@ -18,12 +32,28 @@ class ProjectCreate(ProjectBase):
 
 
 class ProjectUpdate(BaseModel):
-    name: Optional[str] = None
+    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
     description: Optional[str] = None
     status: Optional[ProjectStatus] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     show_roadmap: Optional[bool] = None
+
+    @field_validator('name')
+    @classmethod
+    def validate_optional_name(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        value = value.strip()
+        if not value:
+            raise ValueError('نام پروژه نمی‌تواند خالی باشد')
+        return value
+
+    @model_validator(mode='after')
+    def validate_dates(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValueError('تاریخ پایان نمی‌تواند قبل از شروع باشد')
+        return self
 
 
 class ProjectMemberAdd(BaseModel):
@@ -62,11 +92,25 @@ class ProjectDetail(ProjectResponse):
 
 
 class StageBase(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=255)
     description: Optional[str] = None
     order_index: int = 0
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+
+    @field_validator('name')
+    @classmethod
+    def validate_stage_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError('نام مرحله نمی‌تواند خالی باشد')
+        return value
+
+    @model_validator(mode='after')
+    def validate_dates(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValueError('تاریخ پایان مرحله نمی‌تواند قبل از شروع باشد')
+        return self
 
 
 class StageCreate(StageBase):

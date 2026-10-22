@@ -120,7 +120,10 @@ const Api = (() => {
 
     // ─── Auth ──────────────────────────────────
     login: (username, password) => request('POST', '/auth/login', { username, password }),
-    logout: () => request('POST', '/auth/logout'),
+    logout: async () => {
+      try { return await request('POST', '/auth/logout'); }
+      finally { clearAuth(); }
+    },
     getMe:  () => request('GET', '/auth/me'),
 
     // ─── Users ─────────────────────────────────

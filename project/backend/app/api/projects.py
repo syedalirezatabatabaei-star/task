@@ -71,13 +71,14 @@ def create_project(
         created_by=current_user.id,
     )
     db.add(project)
-    db.commit()
-    db.refresh(project)
+    db.flush()
 
-    # Auto-add creator as member
+    # Add the creator in the same transaction so a failed membership insert
+    # cannot leave an orphan project behind.
     member = ProjectMember(project_id=project.id, user_id=current_user.id, project_role="مدیر پروژه")
     db.add(member)
     db.commit()
+    db.refresh(project)
 
     log_action(
         db=db, user_id=current_user.id, action="PROJECT_CREATED",
@@ -146,8 +147,16 @@ def update_project(
     db: Session = Depends(get_db),
 ):
     project = _get_project_or_404(project_id, db)
+    _check_project_access(project, current_user, db)
 
-    for field, value in body.model_dump(exclude_none=True).items():
+    updates = body.model_dump(exclude_unset=True)
+    if "name" in updates and updates["name"] is None:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "نام پروژه نمی‌تواند خالی باشد"})
+    effective_start = updates.get("start_date", project.start_date)
+    effective_end = updates.get("end_date", project.end_date)
+    if effective_start and effective_end and effective_end < effective_start:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "تاریخ پایان نمی‌تواند قبل از شروع باشد"})
+    for field, value in updates.items():
         setattr(project, field, value)
 
     db.commit()
@@ -171,6 +180,7 @@ def delete_project(
     db: Session = Depends(get_db),
 ):
     project = _get_project_or_404(project_id, db)
+    _check_project_access(project, current_user, db)
 
     log_action(
         db=db, user_id=current_user.id, action="PROJECT_DELETED",
@@ -224,8 +234,9 @@ def add_member(
     db: Session = Depends(get_db),
 ):
     project = _get_project_or_404(project_id, db)
+    _check_project_access(project, current_user, db)
 
-    user = db.query(User).filter(User.id == body.user_id).first()
+    user = db.query(User).filter(User.id == body.user_id, User.is_active == True).first()
     if not user:
         raise HTTPException(status_code=404, detail={"success": False, "message": "کاربر یافت نشد"})
 
@@ -261,6 +272,8 @@ def remove_member(
     current_user: User = Depends(require_permission(P.PROJECTS_MEMBERS_MANAGE)),
     db: Session = Depends(get_db),
 ):
+    project = _get_project_or_404(project_id, db)
+    _check_project_access(project, current_user, db)
     member = db.query(ProjectMember).filter(
         ProjectMember.project_id == project_id,
         ProjectMember.user_id == user_id,
@@ -268,8 +281,15 @@ def remove_member(
     if not member:
         raise HTTPException(status_code=404, detail={"success": False, "message": "عضو یافت نشد"})
 
+    member_name = member.user.username if member.user else str(user_id)
     db.delete(member)
     db.commit()
+    log_action(
+        db=db, user_id=current_user.id, action="PROJECT_MEMBER_REMOVED",
+        entity_type="project", entity_id=project_id,
+        description=f"کاربر {member_name} از پروژه '{project.name}' حذف شد",
+        ip_address=get_client_ip(request),
+    )
     return {"success": True, "message": "عضو با موفقیت حذف شد"}
 
 

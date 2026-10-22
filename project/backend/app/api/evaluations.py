@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import User, UserRole
 from app.models.task import Task, TaskStatus
+from app.models.project import ProjectMember
 from app.models.evaluation import Evaluation
 from app.schemas.evaluation import EvaluationCreate, EvaluationUpdate
 from app.api.deps import get_current_user, require_permission, get_client_ip
@@ -20,7 +21,7 @@ def list_evaluations(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_evaluation_access(task, current_user, db)
 
     evaluations = (
         db.query(Evaluation)
@@ -40,6 +41,9 @@ def create_evaluation(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
+    _check_evaluation_access(task, current_user, db)
+    if current_user.role != UserRole.ADMIN and task.assigned_to == current_user.id:
+        raise HTTPException(status_code=403, detail={"success": False, "message": "کاربر تخصیص‌یافته نمی‌تواند ارزیاب وظیفه خودش باشد", "code": "EVALUATOR_REQUIRED"})
 
     if task.status not in [TaskStatus.SUBMITTED, TaskStatus.APPROVED]:
         raise HTTPException(
@@ -83,13 +87,20 @@ def update_evaluation(
     evaluation = db.query(Evaluation).filter(Evaluation.id == evaluation_id).first()
     if not evaluation:
         raise HTTPException(status_code=404, detail={"success": False, "message": "ارزیابی یافت نشد"})
+    task = _get_task_or_404(evaluation.task_id, db)
+    _check_evaluation_access(task, current_user, db)
+    if current_user.role != UserRole.ADMIN and evaluation.evaluator_id != current_user.id:
+        raise HTTPException(status_code=403, detail={"success": False, "message": "فقط ارزیاب ثبت‌کننده می‌تواند ارزیابی را ویرایش کند"})
 
-    for field, value in body.model_dump(exclude_none=True).items():
+    updates = body.model_dump(exclude_unset=True)
+    if "score" in updates and updates["score"] is None:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "نمره ارزیابی الزامی است"})
+    for field, value in updates.items():
         setattr(evaluation, field, value)
 
     db.commit()
     db.refresh(evaluation)
-
+    log_action(db=db, user_id=current_user.id, action="EVALUATION_UPDATED", entity_type="evaluation", entity_id=evaluation.id, description=f"ارزیابی وظیفه {task.id} ویرایش شد", ip_address=get_client_ip(request))
     return {"success": True, "data": _eval_dict(evaluation)}
 
 
@@ -101,13 +112,20 @@ def _get_task_or_404(task_id: int, db: Session) -> Task:
 
 
 def _check_task_access(task: Task, user: User):
+    if user.role == UserRole.ADMIN or task.assigned_to == user.id:
+        return
+    raise HTTPException(status_code=403, detail={"success": False, "message": "دسترسی به این وظیفه مجاز نیست"})
+
+
+def _check_evaluation_access(task: Task, user: User, db: Session):
     if user.role == UserRole.ADMIN:
         return
-    if task.assigned_to != user.id:
-        raise HTTPException(
-            status_code=403,
-            detail={"success": False, "message": "دسترسی به این وظیفه مجاز نیست"},
-        )
+    member = db.query(ProjectMember.id).filter(
+        ProjectMember.project_id == task.project_id,
+        ProjectMember.user_id == user.id,
+    ).first()
+    if not member:
+        raise HTTPException(status_code=403, detail={"success": False, "message": "فقط اعضای پروژه می‌توانند ارزیابی را مشاهده یا مدیریت کنند"})
 
 
 def _eval_dict(e: Evaluation) -> dict:
