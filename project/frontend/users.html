@@ -1,38 +1,40 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>کاربران | سیستم مدیریت کارآموزی</title>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/main.css">
+  <title>کاربران | سیستم مدیریت پرسنلی</title>
+  <link rel="icon" type="image/jpeg" href="/assets/images/logo.jpg" sizes="32x32">
+<link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <div class="logo-icon">🎓</div>
-      <div><div class="logo-text">کارآموزی</div><div class="logo-sub">سیستم مدیریت</div></div>
+      <div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"></div>
+      <div><div class="logo-text">پرسنلی</div><div class="logo-sub">سیستم مدیریت</div></div>
     </div>
     <nav class="sidebar-nav">
-      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">📊</span><span class="nav-label">داشبورد</span></a>
-      <a class="nav-item active" href="/users.html" data-permission="users.view"><span class="nav-icon">👥</span><span class="nav-label">کاربران</span></a>
-      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span></a>
-      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">✅</span><span class="nav-label">وظایف</span></a>
-      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span></a>
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">&#x1F4CA;</span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item active" href="/users.html" data-permission="users.view"><span class="nav-icon">&#x1F465;</span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">&#x1F4C1;</span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">&#x2705;</span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">&#x1F4C8;</span><span class="nav-label">گزارش‌ها</span></a>
     </nav>
     <div class="sidebar-footer">
-      <a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">🚪</span><span class="nav-label">خروج</span></a>
+      <a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">&#x1F6AA;</span><span class="nav-label">خروج</span></a>
     </div>
   </aside>
 
   <div class="main-content" id="main-content">
     <header class="header" id="header">
       <div class="header-left">
-        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <button class="sidebar-toggle" id="sidebar-toggle">&#x2630;</button>
         <h1 class="page-title">مدیریت کاربران</h1>
       </div>
-      <div class="header-right">
+      <div class="header-right header-actions">
+        <div class="header-brand"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت فناوری ره آورد رایان تینا"><span>ره آورد رایان تینا</span></div>
+        <div class="notification-wrap"><button type="button" id="notification-toggle" class="notification-toggle" aria-label="اعلان‌ها" aria-expanded="false" aria-controls="notification-panel"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-dot" id="notification-dot"></span></button><section id="notification-panel" class="notification-panel hidden" aria-label="اعلان‌ها"><div class="notification-panel-header"><span>اعلان‌ها</span><button type="button" class="btn btn-sm btn-secondary" id="notification-clear">پاک کردن نشان</button></div><div id="notification-list" class="notification-empty"><p>اعلانی برای نمایش وجود ندارد.</p></div></section></div>
         <button class="btn btn-primary" id="btn-add-user" data-permission="users.create">
           + کاربر جدید
         </button>
@@ -52,7 +54,7 @@
       <div class="card mb-4">
         <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
           <div class="search-bar" style="flex:1;min-width:200px">
-            <span>🔍</span>
+            <span>&#x1F50D;</span>
             <input type="text" id="search-input" placeholder="جستجو بر اساس نام یا نام کاربری...">
           </div>
           <select class="form-control" id="filter-role" style="width:140px">
@@ -87,7 +89,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 class="modal-title" id="user-modal-title">کاربر جدید</h3>
-      <button class="modal-close" onclick="Modal.close('user-modal')">✕</button>
+      <button class="modal-close" onclick="Modal.close('user-modal')">&#x2715;</button>
     </div>
     <div class="modal-body">
       <form id="user-form">
@@ -150,7 +152,7 @@
   <div class="modal modal-sm">
     <div class="modal-header">
       <h3 class="modal-title">بازنشانی رمز عبور</h3>
-      <button class="modal-close" onclick="Modal.close('reset-modal')">✕</button>
+      <button class="modal-close" onclick="Modal.close('reset-modal')">&#x2715;</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -215,7 +217,7 @@ async function loadUsers() {
     const { items, total, pages } = res.data;
 
     if (!items.length) {
-      container.innerHTML = '<div class="empty-state" style="padding:48px"><div class="empty-state-icon">👥</div><div class="empty-state-title">کاربری یافت نشد</div></div>';
+      container.innerHTML = '<div class="empty-state" style="padding:48px"><div class="empty-state-icon">&#x1F465;</div><div class="empty-state-title">کاربری یافت نشد</div></div>';
       document.getElementById('pagination').innerHTML = '';
       return;
     }
@@ -249,12 +251,12 @@ async function loadUsers() {
               <td>${u.start_date ? formatDate(u.start_date) : '—'}</td>
               <td>
                 <div style="display:flex;gap:6px">
-                  <a href="/user-details.html?id=${u.id}" class="btn btn-sm btn-secondary" title="جزئیات">👁</a>
-                  <button class="btn btn-sm btn-secondary" onclick="openEditModal(${u.id})" title="ویرایش">✏️</button>
-                  <button class="btn btn-sm btn-secondary" onclick="openResetModal(${u.id})" title="بازنشانی رمز">🔑</button>
-                  <a href="/user-permissions.html?id=${u.id}" class="btn btn-sm btn-secondary" title="دسترسی‌ها">🔐</a>
-                  <button class="btn btn-sm ${u.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleStatus(${u.id},${u.is_active})" title="${u.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">${u.is_active ? '🚫' : '✅'}</button>
-                  <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id},'${u.full_name}')" title="حذف">🗑</button>
+                  <a href="/user-details.html?id=${u.id}" class="btn btn-sm btn-secondary" title="جزئیات">&#x1F441;</a>
+                  <button class="btn btn-sm btn-secondary" onclick="openEditModal(${u.id})" title="ویرایش">&#x270F;️</button>
+                  <button class="btn btn-sm btn-secondary" onclick="openResetModal(${u.id})" title="بازنشانی رمز">&#x1F511;</button>
+                  <a href="/user-permissions.html?id=${u.id}" class="btn btn-sm btn-secondary" title="دسترسی‌ها">&#x1F510;</a>
+                  <button class="btn btn-sm ${u.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleStatus(${u.id},${u.is_active})" title="${u.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">${u.is_active ? '&#x1F6AB;' : '&#x2705;'}</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id},'${u.full_name}')" title="حذف">&#x1F5D1;</button>
                 </div>
               </td>
             </tr>
