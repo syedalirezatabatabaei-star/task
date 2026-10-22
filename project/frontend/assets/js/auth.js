@@ -36,7 +36,7 @@ const Auth = (() => {
 
     // Local-only demo mode lets the frontend be tested before the backend is ready.
     if (isLocalDemoMode()) {
-      if (!Api.getUser()) {
+      if (!Api.getCurrentUser()) {
         Api.setUser({ id: 0, username: 'admin', full_name: 'مدیر آزمایشی', role: 'ADMIN', permissions: [] });
       }
       Api.setPermissions([]);
@@ -65,7 +65,7 @@ const Auth = (() => {
   }
 
   function renderUserInfo() {
-    const user = Api.getUser();
+    const user = Api.getCurrentUser();
     if (!user) return;
 
     // Header user
@@ -74,7 +74,7 @@ const Auth = (() => {
     const avatarEl = document.getElementById('header-user-avatar');
 
     if (nameEl) nameEl.textContent = user.full_name || user.username;
-    if (roleEl) roleEl.textContent = user.role === 'ADMIN' ? 'مدیر سیستم' : 'کاربر';
+    if (roleEl) roleEl.textContent = user.role === 'ADMIN' ? 'پنل مدیریت' : 'پرسنل';
     if (avatarEl) {
       const name = user.full_name || user.username;
       avatarEl.textContent = name.charAt(0);
@@ -125,7 +125,7 @@ const Auth = (() => {
   }
 
   function hideUnauthorizedNavItems() {
-    const user = Api.getUser();
+    const user = Api.getCurrentUser();
     if (!user) return;
     if (user.role === 'ADMIN') return; // Admin sees everything
 
