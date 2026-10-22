@@ -2,20 +2,17 @@
    TASK MANAGEMENT SYSTEM - DESIGN SYSTEM
    RTL Persian UI | Modern SaaS Dashboard
    ============================================= */
-
-200;300;400;500;600;700;800;900&display=swap');
-
 /* ??? CSS Variables ??????????????????????????? */
-@font-face { font-family:'TaskFont'; src:url('/assets/Font/yRmh9nfC') format('woff2'); font-style:normal; font-weight:100 900; font-display:swap; }
+@font-face { font-family:'TaskFont'; src:url('/assets/Font/yRmh9nfC'); font-style:normal; font-weight:100 900; font-display:swap; }
 
 :root {
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --primary-light: #818cf8;
-  --primary-bg: #eef2ff;
+  --primary: #0b3c78;
+  --primary-dark: #071a3d;
+  --primary-light: #287bb5;
+  --primary-bg: #e8f2fc;
 
-  --secondary: #8b5cf6;
-  --accent: #06b6d4;
+  --secondary: #1677bd;
+  --accent: #2b91c9;
 
   --background: #f8fafc;
   --surface: #ffffff;
@@ -1375,5 +1372,5 @@ body { overflow-x:hidden; }
 .notification-empty svg { display:block; margin:0 auto 10px; color:var(--primary); }
 .sidebar-logo .logo-icon { background:transparent; }
 .sidebar-logo .logo-icon img { width:100%; height:100%; object-fit:contain; }
-@media(max-width:768px){.header{padding:0 12px;gap:8px}.header-left,.header-right{gap:8px;min-width:0}.header-brand span{display:none}.header-brand img{width:30px;height:30px}.header-user{padding:4px;gap:6px}.user-info{display:none}.page-content{padding:12px}.grid-2,.grid-3,.grid-4{grid-template-columns:minmax(0,1fr)}.card{min-width:0;overflow-wrap:anywhere}.table-container,.table-responsive{max-width:100%;overflow-x:auto}.notification-panel{position:fixed;top:72px;left:12px;right:12px;width:auto}}
-@media(max-width:380px){.page-title{font-size:14px}.sidebar-toggle{width:32px;height:32px}.notification-toggle{width:34px;height:34px}.user-avatar{width:30px;height:30px}}
+@media(max-width:768px){.header{padding:0 12px;gap:8px}.header-left,.header-right{gap:8px;min-width:0}.header-brand span{display:none}.header-brand img{width:30px;height:30px}.header-user{padding:4px;gap:6px}.user-info{display:none}.page-content{padding:12px}.grid-2,.grid-3{grid-template-columns:minmax(0,1fr)}.grid-4{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{min-width:0;overflow-wrap:anywhere}.table-container,.table-responsive{max-width:100%;overflow-x:auto}.notification-panel{position:fixed;top:72px;left:12px;right:12px;width:auto}}
+@media(max-width:380px){.page-title{font-size:14px}.sidebar-toggle{width:32px;height:32px}.notification-toggle{width:34px;height:34px}.user-avatar{width:30px;height:30px}.grid-4{grid-template-columns:minmax(0,1fr)}.stat-card{flex-direction:row}}
