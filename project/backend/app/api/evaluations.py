@@ -92,7 +92,10 @@ def update_evaluation(
     if current_user.role != UserRole.ADMIN and evaluation.evaluator_id != current_user.id:
         raise HTTPException(status_code=403, detail={"success": False, "message": "فقط ارزیاب ثبت‌کننده می‌تواند ارزیابی را ویرایش کند"})
 
-    for field, value in body.model_dump(exclude_unset=True).items():
+    updates = body.model_dump(exclude_unset=True)
+    if "score" in updates and updates["score"] is None:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "نمره ارزیابی الزامی است"})
+    for field, value in updates.items():
         setattr(evaluation, field, value)
 
     db.commit()
