@@ -41,6 +41,10 @@ def create_admin():
         print("خطا: رمز عبور باید حداقل ۸ کاراکتر باشد.")
         sys.exit(1)
 
+    if len(password.encode("utf-8")) > 72:
+        print("خطا: رمز عبور برای الگوریتم bcrypt نباید بیشتر از ۷۲ بایت باشد. مقدار ADMIN_PASSWORD را در فایل .env کوتاه‌تر کنید.")
+        sys.exit(1)
+
     db = SessionLocal()
     try:
         existing = db.query(User).filter(User.username == username).first()
