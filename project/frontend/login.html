@@ -171,15 +171,10 @@
   </main>
 
   <script>
-    const API_BASE = window.API_BASE_URL || 'http://localhost:8000/api/v1';
-    const isLocalDemoHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
-    const demoRequested = new URLSearchParams(window.location.search).get('demo') === '1';
-    if (demoRequested) sessionStorage.setItem('task_demo_enabled', 'true');
-
-// Do not auto-redirect based on an old token; let the user choose demo or real login.
-    if (localStorage.getItem('task_demo_mode') === 'true'
-        && (isLocalDemoHost || sessionStorage.getItem('task_demo_enabled') === 'true')) {
-      window.location.href = '/dashboard.html';
+    const API_BASE = window.API_BASE_URL || '/api/v1';
+    if (!localStorage.getItem('access_token')) {
+      localStorage.removeItem('current_user');
+      localStorage.removeItem('user_permissions');
     }
 
     const form = document.getElementById('login-form');
@@ -222,23 +217,6 @@
 
       if (!username || !password) {
         showError('لطفاً نام کاربری و رمز عبور را وارد کنید.');
-        return;
-      }
-
-      // Local-only demo login for frontend development; never enabled on public hosts.
-      const demoAllowed = isLocalDemoHost || sessionStorage.getItem('task_demo_enabled') === 'true';
-      if (demoAllowed && username === 'admin' && password === 'admin') {
-        localStorage.setItem('task_demo_mode', 'true');
-        localStorage.setItem('current_user', JSON.stringify({
-          id: 0,
-          username: 'admin',
-          full_name: 'مدیر آزمایشی',
-          role: 'ADMIN',
-          permissions: []
-        }));
-        localStorage.setItem('user_permissions', JSON.stringify([]));
-        localStorage.removeItem('access_token');
-        window.location.href = '/dashboard.html';
         return;
       }
 
