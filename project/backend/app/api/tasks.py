@@ -43,9 +43,12 @@ def list_tasks(
 ):
     query = db.query(Task)
 
-    # Non-admins only see their own assigned tasks
+    # Non-admins only see tasks assigned to them inside projects they belong to.
     if current_user.role != UserRole.ADMIN:
-        query = query.filter(Task.assigned_to == current_user.id)
+        query = query.join(
+            ProjectMember,
+            (ProjectMember.project_id == Task.project_id) & (ProjectMember.user_id == current_user.id),
+        ).filter(Task.assigned_to == current_user.id)
 
     if project_id:
         query = query.filter(Task.project_id == project_id)
@@ -145,7 +148,7 @@ def get_task(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
     return {"success": True, "data": _task_dict(task, db)}
 
 
@@ -293,6 +296,7 @@ def submit_task(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
+    _check_task_access(task, current_user, db)
 
     # Only the assignee can submit
     if task.assigned_to != current_user.id and current_user.role != UserRole.ADMIN:
@@ -334,13 +338,22 @@ def _get_task_or_404(task_id: int, db: Session) -> Task:
     return task
 
 
-def _check_task_access(task: Task, user: User):
+def _check_task_access(task: Task, user: User, db: Session):
     if user.role == UserRole.ADMIN:
         return
     if task.assigned_to != user.id:
         raise HTTPException(
             status_code=403,
-            detail={"success": False, "message": "دسترسی به این وظیفه مجاز نیست", "code": "ACCESS_DENIED"},
+            detail={"success": False, "message": "این وظیفه به شما تخصیص داده نشده است", "code": "ACCESS_DENIED"},
+        )
+    membership = db.query(ProjectMember.id).filter(
+        ProjectMember.project_id == task.project_id,
+        ProjectMember.user_id == user.id,
+    ).first()
+    if not membership:
+        raise HTTPException(
+            status_code=403,
+            detail={"success": False, "message": "شما به این پروژه دسترسی ندارید", "code": "PROJECT_ACCESS_DENIED"},
         )
 
 
