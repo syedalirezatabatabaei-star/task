@@ -215,7 +215,7 @@ def delete_task(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
     task_title = task.title
     db.delete(task)
     db.commit()
@@ -237,7 +237,7 @@ def update_task_status(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
 
     allowed = VALID_TRANSITIONS.get(task.status, [])
     if body.status not in allowed:
@@ -275,7 +275,7 @@ def update_progress(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
     task.progress = body.progress
     db.commit()
     log_action(
