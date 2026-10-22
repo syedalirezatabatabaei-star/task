@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, text
 
 load_dotenv("/app/.env")
 
-REQUIRED = ("SECRET_KEY", "JWT_SECRET_KEY", "MYSQL_ROOT_PASSWORD", "MYSQL_PASSWORD", "ADMIN_USERNAME", "ADMIN_PASSWORD")
+REQUIRED = ("SECRET_KEY", "JWT_SECRET_KEY", "MYSQL_PASSWORD", "ADMIN_USERNAME", "ADMIN_PASSWORD")
 PLACEHOLDERS = {"change-me", "change-me-admin-password", "change-me-to-a-long-random-string", "change-me-to-another-long-random-string", "rootpassword"}
 
 def validate_environment() -> None:
