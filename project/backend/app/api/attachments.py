@@ -106,7 +106,7 @@ def download_attachment(
     if not att:
         raise HTTPException(status_code=404, detail={"success": False, "message": "پیوست یافت نشد"})
     task = _get_task_or_404(att.task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
     if not os.path.isfile(att.file_path):
         raise HTTPException(status_code=404, detail={"success": False, "message": "فایل روی سرور موجود نیست"})
     return FileResponse(att.file_path, media_type="application/octet-stream", filename=att.original_filename, content_disposition_type="attachment")
