@@ -161,6 +161,12 @@ def update_task(
     _check_task_access(task, current_user)
 
     updates = body.model_dump(exclude_unset=True)
+    if "title" in updates and updates["title"] is None:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "عنوان وظیفه نمی‌تواند خالی باشد"})
+    effective_start = updates.get("start_date", task.start_date)
+    effective_deadline = updates.get("deadline", task.deadline)
+    if effective_start and effective_deadline and effective_deadline < effective_start:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "مهلت انجام نمی‌تواند قبل از تاریخ شروع باشد"})
     if updates.get("stage_id") is not None:
         stage = db.query(ProjectStage).filter(
             ProjectStage.id == updates["stage_id"],
