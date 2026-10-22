@@ -235,7 +235,7 @@ function priorityBadge(priority) {
 }
 
 function projectStatusBadge(status) {
-  const label = PROJECT_STATUS_LABELS[status] || status;
+  const label = PROJECT_STATUS_LABELS[status] || escapeHtml(status);
   const map = { PLANNED: 'badge-info', ACTIVE: 'badge-success', COMPLETED: 'badge-primary', ARCHIVED: 'badge-gray' };
   return `<span class="badge ${map[status] || 'badge-gray'}">${label}</span>`;
 }
