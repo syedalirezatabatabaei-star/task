@@ -40,6 +40,9 @@ def create_evaluation(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
+    _check_task_access(task, current_user)
+    if current_user.role != UserRole.ADMIN and task.assigned_to == current_user.id:
+        raise HTTPException(status_code=403, detail={"success": False, "message": "ارزیابی وظیفه توسط ارزیاب/مدیر انجام می‌شود", "code": "EVALUATOR_REQUIRED"})
 
     if task.status not in [TaskStatus.SUBMITTED, TaskStatus.APPROVED]:
         raise HTTPException(
@@ -83,13 +86,17 @@ def update_evaluation(
     evaluation = db.query(Evaluation).filter(Evaluation.id == evaluation_id).first()
     if not evaluation:
         raise HTTPException(status_code=404, detail={"success": False, "message": "ارزیابی یافت نشد"})
+    task = _get_task_or_404(evaluation.task_id, db)
+    _check_task_access(task, current_user)
+    if current_user.role != UserRole.ADMIN and evaluation.evaluator_id != current_user.id:
+        raise HTTPException(status_code=403, detail={"success": False, "message": "فقط ارزیاب ثبت‌کننده می‌تواند ارزیابی را ویرایش کند"})
 
-    for field, value in body.model_dump(exclude_none=True).items():
+    for field, value in body.model_dump(exclude_unset=True).items():
         setattr(evaluation, field, value)
 
     db.commit()
     db.refresh(evaluation)
-
+    log_action(db=db, user_id=current_user.id, action="EVALUATION_UPDATED", entity_type="evaluation", entity_id=evaluation.id, description=f"ارزیابی وظیفه {task.id} ویرایش شد", ip_address=get_client_ip(request))
     return {"success": True, "data": _eval_dict(evaluation)}
 
 
