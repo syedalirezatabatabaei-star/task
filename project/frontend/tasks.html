@@ -13,25 +13,25 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"></div><div><div class="logo-text">مدیریت تسک</div><div class="logo-sub">سیستم مدیریت</div></div></div>
     <nav class="sidebar-nav">
-      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">&#x1F4CA;</span><span class="nav-label">داشبورد</span></a>
-      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">&#x1F465;</span><span class="nav-label">کاربران</span></a>
-      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">&#x1F4C1;</span><span class="nav-label">پروژه‌ها</span></a>
-      <a class="nav-item active" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon">&#x2705;</span><span class="nav-label">وظایف</span></a>
-      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">&#x1F4C8;</span><span class="nav-label">گزارش‌ها</span></a>
-    </nav>
-    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">&#x1F6AA;</span><span class="nav-label">خروج</span></a></div>
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item active" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M17 9h2v2"/></svg></span><span class="nav-label">گزارش‌ها</span></a>
+    <a class="nav-item" href="/notifications.html" data-admin-only="true"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="nav-label">مدیریت اعلان‌ها</span></a></nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon"></span><span class="nav-label">خروج</span></a></div>
   </aside>
   <div class="main-content" id="main-content">
     <header class="header" id="header">
       <div class="header-left">
-        <button class="sidebar-toggle" id="sidebar-toggle">&#x2630;</button>
+        <button class="sidebar-toggle" id="sidebar-toggle"></button>
         <h1 class="page-title">وظایف</h1>
       </div>
       <div class="header-right header-actions">
         <div class="header-brand"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت فناوری ره آورد رایان تینا"><span>ره آورد رایان تینا</span></div>
         <div class="notification-wrap"><button type="button" id="notification-toggle" class="notification-toggle" aria-label="اعلان‌ها" aria-expanded="false" aria-controls="notification-panel"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-dot" id="notification-dot"></span></button><section id="notification-panel" class="notification-panel hidden" aria-label="اعلان‌ها"><div class="notification-panel-header"><span>اعلان‌ها</span><button type="button" class="btn btn-sm btn-secondary" id="notification-clear">پاک کردن نشان</button></div><div id="notification-list" class="notification-empty"><p>اعلانی برای نمایش وجود ندارد.</p></div></section></div>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-secondary btn-sm" id="btn-list-view" title="نمایش لیستی">&#x2630; لیست</button>
+          <button class="btn btn-secondary btn-sm" id="btn-list-view" title="نمایش لیستی"> لیست</button>
           <button class="btn btn-ghost btn-sm" id="btn-kanban-view" title="نمایش کانبان">⬜ کانبان</button>
         </div>
         <button class="btn btn-primary" id="btn-add-task" data-permission="tasks.create">+ وظیفه جدید</button>
@@ -45,7 +45,7 @@
       <div class="card mb-4">
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           <div class="search-bar" style="flex:1;min-width:180px">
-            <span>&#x1F50D;</span><input type="text" id="search-input" placeholder="جستجو در وظایف...">
+            <span></span><input type="text" id="search-input" placeholder="جستجو در وظایف...">
           </div>
           <select class="form-control" id="filter-status" style="width:145px">
             <option value="">همه وضعیت‌ها</option>
@@ -89,7 +89,7 @@
   <div class="modal modal-lg">
     <div class="modal-header">
       <h3 class="modal-title" id="task-modal-title">وظیفه جدید</h3>
-      <button class="modal-close" onclick="Modal.close('task-modal')">&#x2715;</button>
+      <button class="modal-close" onclick="Modal.close('task-modal')"></button>
     </div>
     <div class="modal-body">
       <form id="task-form">
@@ -150,7 +150,7 @@
   <div class="modal modal-sm">
     <div class="modal-header">
       <h3 class="modal-title">ارسال وظیفه</h3>
-      <button class="modal-close" onclick="Modal.close('submit-modal')">&#x2715;</button>
+      <button class="modal-close" onclick="Modal.close('submit-modal')"></button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -244,7 +244,7 @@ async function loadList() {
     const res = await Api.getTasks(getFilters());
     const { items, total, pages } = res.data;
     if (!items.length) {
-      container.innerHTML = '<div class="empty-state" style="padding:48px"><div class="empty-state-icon">&#x2705;</div><div class="empty-state-title">وظیفه‌ای یافت نشد</div></div>';
+      container.innerHTML = '<div class="empty-state" style="padding:48px"><div class="empty-state-icon"></div><div class="empty-state-title">وظیفه‌ای یافت نشد</div></div>';
       document.getElementById('pagination').innerHTML = '';
       return;
     }
@@ -269,11 +269,11 @@ async function loadList() {
               <td style="font-size:12px;${overdue?'color:var(--danger);font-weight:600':''}">${t.deadline?formatDate(t.deadline):'—'}</td>
               <td>
                 <div style="display:flex;gap:4px">
-                  <a href="/task-details.html?id=${t.id}" class="btn btn-sm btn-secondary">&#x1F441;</a>
-                  ${isAdmin ? `<button class="btn btn-sm btn-secondary" onclick="openEditModal(${t.id})">&#x270F;️</button>` : ''}
+                  <a href="/task-details.html?id=${t.id}" class="btn btn-sm btn-secondary"></a>
+                  ${isAdmin ? `<button class="btn btn-sm btn-secondary" onclick="openEditModal(${t.id})">️</button>` : ''}
                   ${['TODO','IN_PROGRESS','NEEDS_REVISION'].includes(t.status) && t.assigned_to == Api.getCurrentUser()?.id
-                    ? `<button class="btn btn-sm btn-primary" onclick="openSubmitModal(${t.id})">&#x1F4E4; ارسال</button>` : ''}
-                  ${isAdmin ? `<button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id},'${t.title}')">&#x1F5D1;</button>` : ''}
+                    ? `<button class="btn btn-sm btn-primary" onclick="openSubmitModal(${t.id})"> ارسال</button>` : ''}
+                  ${isAdmin ? `<button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id},'${t.title}')"></button>` : ''}
                 </div>
               </td>
             </tr>`;
@@ -351,8 +351,8 @@ function kanbanCard(t) {
       <div style="font-size:11px;color:var(--text-muted)">${t.project_name||''}</div>
       <div class="kanban-card-meta">
         ${priorityBadge(t.priority)}
-        ${t.assignee_name ? `<span style="font-size:11px;color:var(--text-muted)">&#x1F464; ${t.assignee_name}</span>` : ''}
-        ${t.deadline ? `<span style="font-size:11px;${overdue?'color:var(--danger);font-weight:600':'color:var(--text-muted)'}">&#x1F4C5; ${formatDate(t.deadline)}</span>` : ''}
+        ${t.assignee_name ? `<span style="font-size:11px;color:var(--text-muted)"> ${t.assignee_name}</span>` : ''}
+        ${t.deadline ? `<span style="font-size:11px;${overdue?'color:var(--danger);font-weight:600':'color:var(--text-muted)'}"> ${formatDate(t.deadline)}</span>` : ''}
       </div>
       <div style="margin-top:8px">${progressBar(t.progress)}</div>
     </div>`;
