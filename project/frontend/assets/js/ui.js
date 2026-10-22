@@ -2,6 +2,10 @@
  * UI Component helpers: Toast, Modal, Confirm, Pagination, Tabs
  */
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>\"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[char]));
+}
+
 // ─── Toast ──────────────────────────────────────
 const Toast = (() => {
   let container;
@@ -29,8 +33,8 @@ const Toast = (() => {
     toast.innerHTML = `
       <span class="toast-icon">${icons[type] || '&#x1F4E2;'}</span>
       <div class="toast-body">
-        <div class="toast-title">${titles[type] || ''}</div>
-        <div class="toast-message">${message}</div>
+        <div class="toast-title">${escapeHtml(titles[type] || '')}</div>
+        <div class="toast-message">${escapeHtml(message)}</div>
       </div>
       <button class="toast-dismiss" onclick="this.closest('.toast').remove()">&#x2715;</button>
     `;
@@ -90,11 +94,11 @@ function confirmAction(message, onConfirm, title = 'تأیید عملیات') {
   div.innerHTML = `
     <div class="modal modal-sm">
       <div class="modal-header">
-        <h3 class="modal-title">${title}</h3>
+        <h3 class="modal-title">${escapeHtml(title)}</h3>
         <button class="modal-close" onclick="document.getElementById('${id}').remove()">&#x2715;</button>
       </div>
       <div class="modal-body">
-        <p style="font-size:15px; color: var(--text-secondary); line-height:1.7">${message}</p>
+        <p style="font-size:15px; color: var(--text-secondary); line-height:1.7">${escapeHtml(message)}</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="document.getElementById('${id}').remove()">انصراف</button>
@@ -219,13 +223,13 @@ const PROJECT_STATUS_LABELS = {
 };
 
 function statusBadge(status) {
-  const label = STATUS_LABELS[status] || status;
+  const label = STATUS_LABELS[status] || escapeHtml(status);
   const cls = `status-${status.toLowerCase()}`;
   return `<span class="badge ${cls}">${label}</span>`;
 }
 
 function priorityBadge(priority) {
-  const label = PRIORITY_LABELS[priority] || priority;
+  const label = PRIORITY_LABELS[priority] || escapeHtml(priority);
   const cls = `priority-${priority.toLowerCase()}`;
   return `<span class="badge ${cls}">${label}</span>`;
 }
