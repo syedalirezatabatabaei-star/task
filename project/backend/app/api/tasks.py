@@ -11,7 +11,7 @@ from app.models.task import Task, TaskStatus, TaskPriority
 from app.models.project_stage import ProjectStage
 from app.models.evaluation import Evaluation
 from app.schemas.task import TaskCreate, TaskUpdate, TaskStatusUpdate, TaskProgressUpdate, TaskSubmit
-from app.api.deps import get_current_user, require_permission, get_client_ip
+from app.api.deps import get_current_user, require_permission, get_client_ip, get_user_permission_codes
 from app.services.audit_service import log_action
 from app.core import permissions as P
 
@@ -168,6 +168,9 @@ def update_task(
         ).first()
         if not stage:
             raise HTTPException(status_code=400, detail={"success": False, "message": "مرحله انتخاب‌شده متعلق به این پروژه نیست", "code": "INVALID_STAGE"})
+    if "assigned_to" in updates and current_user.role != UserRole.ADMIN:
+        if P.TASKS_ASSIGN not in get_user_permission_codes(current_user, db):
+            raise HTTPException(status_code=403, detail={"success": False, "message": "اجازه تخصیص وظیفه را ندارید", "code": "TASK_ASSIGN_DENIED"})
     if updates.get("assigned_to") is not None:
         assignee = db.query(User).filter(User.id == updates["assigned_to"], User.is_active == True).first()
         if not assignee:
