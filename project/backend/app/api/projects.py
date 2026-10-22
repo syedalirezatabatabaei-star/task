@@ -71,13 +71,14 @@ def create_project(
         created_by=current_user.id,
     )
     db.add(project)
-    db.commit()
-    db.refresh(project)
+    db.flush()
 
-    # Auto-add creator as member
+    # Add the creator in the same transaction so a failed membership insert
+    # cannot leave an orphan project behind.
     member = ProjectMember(project_id=project.id, user_id=current_user.id, project_role="مدیر پروژه")
     db.add(member)
     db.commit()
+    db.refresh(project)
 
     log_action(
         db=db, user_id=current_user.id, action="PROJECT_CREATED",
