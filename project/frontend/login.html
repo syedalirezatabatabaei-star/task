@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ورود | سیستم مدیریت کارآموزی</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
+  <title>ورود | سیستم مدیریت تسک</title>
+<style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { direction: rtl; font-size: 14px; }
     body {
-      font-family: 'Vazirmatn', sans-serif;
+      font-family: 'TaskFont', 'Vazirmatn', Tahoma, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
@@ -109,14 +107,27 @@
       text-align: center; margin-top: 24px;
       font-size: 12px; color: #94a3b8;
     }
+    .auth-shell { width: min(1100px, 100%); min-height: 620px; display: grid; grid-template-columns: 1fr 1fr; direction: ltr; overflow: hidden; border-radius: 20px; background: #fff; box-shadow: 0 25px 50px rgba(0,0,0,.2); }
+    .brand-panel { display:flex; align-items:center; justify-content:center; padding:36px; background:linear-gradient(135deg,#eef2ff,#f5f3ff); }
+    .brand-panel img { display:block; width:100%; max-width:460px; max-height:520px; object-fit:contain; }
+    .form-panel { display:flex; align-items:center; justify-content:center; padding:28px; direction:rtl; background:#fff; }
+    .login-container { box-shadow:none; border-radius:0; padding:20px; max-width:420px; }
+    .logo-icon { background:transparent; font-size:0; }
+    .logo-icon img { width:100%; height:100%; object-fit:contain; }
+    .login-subtitle { display:none; }
+    .input-icon-right { display:none; }
+    .form-control.has-icon { padding-right:14px; }
+    @media (max-width:760px) { body { padding:12px; } .auth-shell { grid-template-columns:1fr; min-height:0; } .brand-panel { padding:16px; } .brand-panel img { max-width:230px; max-height:170px; } .form-panel { padding:12px; } .login-container { padding:22px 10px; } }
   </style>
 </head>
 <body>
-  <div class="login-container">
+  <main class="auth-shell">
+    <section class="brand-panel" aria-label="نشان سامانه"><img src="/assets/images/logo1.png" alt="نشان سیستم مدیریت تسک"></section>
+    <section class="form-panel">
+    <div class="login-container">
     <div class="login-logo">
-      <div class="logo-icon">🎓</div>
-      <h1 class="login-title">سیستم مدیریت کارآموزی</h1>
-      <p class="login-subtitle">لطفاً وارد حساب کاربری خود شوید</p>
+      <div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی سامانه"></div>
+      <h1 class="login-title">سیستم مدیریت تسک</h1>
     </div>
 
     <div class="error-box" id="error-box">
@@ -128,7 +139,6 @@
       <div class="form-group">
         <label class="form-label" for="username">نام کاربری</label>
         <div class="input-wrapper">
-          <span class="input-icon-right">👤</span>
           <input type="text" id="username" name="username" class="form-control has-icon"
             placeholder="نام کاربری خود را وارد کنید" autocomplete="username" required>
         </div>
@@ -137,11 +147,10 @@
       <div class="form-group">
         <label class="form-label" for="password">رمز عبور</label>
         <div class="input-wrapper">
-          <span class="input-icon-right">🔒</span>
           <input type="password" id="password" name="password" class="form-control has-icon"
             placeholder="رمز عبور خود را وارد کنید" autocomplete="current-password" required>
           <button type="button" class="toggle-password" id="toggle-password" title="نمایش/پنهان رمز">
-            👁
+            نمایش
           </button>
         </div>
       </div>
@@ -155,10 +164,16 @@
     <div class="login-footer">
       سیستم مدیریت کارآموزی و پروژه &nbsp;|&nbsp; نسخه ۱.۰
     </div>
-  </div>
+    </section>
+  </main>
 
   <script>
     const API_BASE = 'http://localhost:8000/api/v1';
+
+    // تابع دسترسی سریع به مسیر داشبورد؛ احراز هویت همچنان توسط داشبورد بررسی می‌شود.
+    function فرار() { window.location.href = '/dashboard.html'; }
+    window.فرار = فرار;
+    window.escapeToDashboard = فرار;
 
     // Redirect if already logged in
     if (localStorage.getItem('access_token')) {
@@ -175,7 +190,7 @@
     toggleBtn.addEventListener('click', () => {
       const isPassword = passwordInput.type === 'password';
       passwordInput.type = isPassword ? 'text' : 'password';
-      toggleBtn.textContent = isPassword ? '🙈' : '👁';
+      toggleBtn.textContent = isPassword ? 'پنهان' : 'نمایش';
     });
 
     function showError(msg) {
