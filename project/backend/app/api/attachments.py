@@ -121,13 +121,20 @@ def delete_attachment(
     if att.uploaded_by != current_user.id and current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail={"success": False, "message": "دسترسی ندارید"})
 
-    # Delete physical file
-    if os.path.exists(att.file_path):
-        os.remove(att.file_path)
-
+    file_path = att.file_path
+    task_id = att.task_id
+    original_filename = att.original_filename
     db.delete(att)
     db.commit()
-    log_action(db=db, user_id=current_user.id, action="ATTACHMENT_DELETED", entity_type="task", entity_id=att.task_id, description=f"فایل '{att.original_filename}' حذف شد", ip_address=get_client_ip(request))
+
+    # Delete the physical file only after the database transaction succeeds.
+    if os.path.isfile(file_path):
+        try:
+            os.remove(file_path)
+        except OSError:
+            # Metadata is already removed; an orphaned file can be cleaned up later.
+            pass
+    log_action(db=db, user_id=current_user.id, action="ATTACHMENT_DELETED", entity_type="task", entity_id=task_id, description=f"فایل '{original_filename}' حذف شد", ip_address=get_client_ip(request))
     return {"success": True, "message": "پیوست حذف شد"}
 
 
