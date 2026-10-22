@@ -7,7 +7,7 @@ from app.core.database import get_db
 from app.models.user import User, UserRole
 from app.models.project import Project, ProjectStatus, ProjectMember
 from app.models.task import Task, TaskStatus
-from app.api.deps import get_current_user, require_permission
+from app.api.deps import get_current_user, require_permission, require_admin
 from app.core import permissions as P
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 @router.get("/admin", summary="داشبورد مدیر")
 def admin_dashboard(
-    current_user: User = Depends(require_permission(P.DASHBOARD_VIEW)),
+    current_user: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
     today = date.today()
