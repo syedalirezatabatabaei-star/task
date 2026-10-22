@@ -54,6 +54,11 @@ async def upload_attachment(
             status_code=413,
             detail={"success": False, "message": "حجم فایل بیش از حد مجاز است", "code": "FILE_TOO_LARGE"},
         )
+    if not _matches_file_signature(content, file.content_type):
+        raise HTTPException(
+            status_code=415,
+            detail={"success": False, "message": "محتوای فایل با نوع اعلام‌شده مطابقت ندارد", "code": "INVALID_FILE_SIGNATURE"},
+        )
 
     # Sanitize and store with UUID name
     original_name = os.path.basename(file.filename or "file")
@@ -136,6 +141,33 @@ def delete_attachment(
             pass
     log_action(db=db, user_id=current_user.id, action="ATTACHMENT_DELETED", entity_type="task", entity_id=task_id, description=f"فایل '{original_filename}' حذف شد", ip_address=get_client_ip(request))
     return {"success": True, "message": "پیوست حذف شد"}
+
+
+def _matches_file_signature(content: bytes, mime_type: str | None) -> bool:
+    signatures = {
+        "image/jpeg": lambda b: b.startswith(b"\xff\xd8\xff"),
+        "image/png": lambda b: b.startswith(b"\x89PNG\r\n\x1a\n"),
+        "image/gif": lambda b: b.startswith((b"GIF87a", b"GIF89a")),
+        "image/webp": lambda b: len(b) >= 12 and b.startswith(b"RIFF") and b[8:12] == b"WEBP",
+        "application/pdf": lambda b: b.startswith(b"%PDF-"),
+        "application/zip": lambda b: b.startswith(b"PK\x03\x04"),
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": lambda b: b.startswith(b"PK\x03\x04"),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": lambda b: b.startswith(b"PK\x03\x04"),
+        "application/msword": lambda b: b.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"),
+        "application/vnd.ms-excel": lambda b: b.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"),
+        "application/x-rar-compressed": lambda b: b.startswith((b"Rar!\x1a\x07\x00", b"Rar!\x1a\x07\x01\x00")),
+        "text/plain": lambda b: b"\x00" not in b and _is_utf8(b),
+    }
+    validator = signatures.get(mime_type or "")
+    return bool(content) and validator is not None and validator(content)
+
+
+def _is_utf8(content: bytes) -> bool:
+    try:
+        content.decode("utf-8")
+        return True
+    except UnicodeDecodeError:
+        return False
 
 
 def _get_task_or_404(task_id: int, db: Session) -> Task:
