@@ -110,7 +110,7 @@
         { label:'کل وظایف', value: s.total_tasks, icon:'' },
         { label:'انجام‌شده', value: s.done + s.approved, icon:'' },
         { label:'نرخ تکمیل', value: s.completion_rate + '%', icon:'' },
-        { label:'میانگین نمره', value: s.average_score ?? '—', icon:'⭐' },
+        { label:'میانگین نمره', value: s.average_score ?? '—', icon:'' },
       ].map(s => `<div class="stat-card"><div class="stat-info"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div><div class="stat-icon" style="background:var(--surface-2);font-size:20px">${s.icon}</div></div>`).join('');
     }
 
