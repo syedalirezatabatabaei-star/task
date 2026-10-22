@@ -12,18 +12,18 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo"><div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"></div><div><div class="logo-text">مدیریت تسک</div><div class="logo-sub">سیستم مدیریت</div></div></div>
     <nav class="sidebar-nav">
-      <a class="nav-item" href="/dashboard.html"><span class="nav-icon">&#x1F4CA;</span><span class="nav-label">داشبورد</span></a>
-      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">&#x1F465;</span><span class="nav-label">کاربران</span></a>
-      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon">&#x1F4C1;</span><span class="nav-label">پروژه‌ها</span></a>
-      <a class="nav-item active" href="/tasks.html"><span class="nav-icon">&#x2705;</span><span class="nav-label">وظایف</span></a>
-      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon">&#x1F4C8;</span><span class="nav-label">گزارش‌ها</span></a>
-    </nav>
-    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon">&#x1F6AA;</span><span class="nav-label">خروج</span></a></div>
+      <a class="nav-item" href="/dashboard.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-label">داشبورد</span></a>
+      <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="nav-label">کاربران</span></a>
+      <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="nav-label">پروژه‌ها</span></a>
+      <a class="nav-item active" href="/tasks.html"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label">وظایف</span></a>
+      <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M17 9h2v2"/></svg></span><span class="nav-label">گزارش‌ها</span></a>
+    <a class="nav-item" href="/notifications.html" data-admin-only="true"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="nav-label">مدیریت اعلان‌ها</span></a></nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon"></span><span class="nav-label">خروج</span></a></div>
   </aside>
   <div class="main-content" id="main-content">
     <header class="header" id="header">
       <div class="header-left">
-        <button class="sidebar-toggle" id="sidebar-toggle">&#x2630;</button>
+        <button class="sidebar-toggle" id="sidebar-toggle"></button>
         <a href="/tasks.html" class="btn btn-ghost btn-sm">← وظایف</a>
         <h1 class="page-title" id="task-title">جزئیات وظیفه</h1>
       </div>
@@ -49,7 +49,7 @@
             <!-- Attachments -->
             <div class="card mb-4">
               <div class="card-header">
-                <div class="card-title">&#x1F4CE; پیوست‌ها</div>
+                <div class="card-title"> پیوست‌ها</div>
                 <button class="btn btn-sm btn-primary" id="btn-upload" data-permission="attachments.upload">آپلود فایل</button>
               </div>
               <input type="file" id="file-input" style="display:none">
@@ -80,7 +80,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 class="modal-title" id="eval-modal-title">ارزیابی وظیفه</h3>
-      <button class="modal-close" onclick="Modal.close('eval-modal')">&#x2715;</button>
+      <button class="modal-close" onclick="Modal.close('eval-modal')"></button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -112,7 +112,7 @@
   <div class="modal modal-sm">
     <div class="modal-header">
       <h3 class="modal-title">ارسال وظیفه</h3>
-      <button class="modal-close" onclick="Modal.close('submit-modal')">&#x2715;</button>
+      <button class="modal-close" onclick="Modal.close('submit-modal')"></button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -193,8 +193,8 @@ async function loadTask() {
       <div style="margin-top:16px">${progressBar(task.progress)}</div>`;
 
     document.getElementById('task-actions-card').innerHTML = `
-      <div class="card-title" style="margin-bottom:12px">&#x26A1; عملیات</div>
-      ${canSubmit ? `<button class="btn btn-primary w-full mb-4" id="btn-submit-task">&#x1F4E4; ارسال وظیفه</button>` : ''}
+      <div class="card-title" style="margin-bottom:12px"> عملیات</div>
+      ${canSubmit ? `<button class="btn btn-primary w-full mb-4" id="btn-submit-task"> ارسال وظیفه</button>` : ''}
       ${isAdmin ? `
         <div style="display:flex;flex-direction:column;gap:8px">
           <label class="form-label" style="margin-bottom:0">تغییر وضعیت</label>
@@ -211,7 +211,7 @@ async function loadTask() {
       ` : ''}`;
 
     document.getElementById('task-meta-card').innerHTML = `
-      <div class="card-title" style="margin-bottom:12px">&#x1F4CB; اطلاعات</div>
+      <div class="card-title" style="margin-bottom:12px"> اطلاعات</div>
       <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">پروژه</span><span style="font-weight:600">${task.project_name||'—'}</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">مرحله</span><span>${task.stage_name||'—'}</span></div>
@@ -246,12 +246,12 @@ async function loadAttachments() {
     if (!atts.length) { el.innerHTML = '<div class="empty-state" style="padding:20px"><p>پیوستی وجود ندارد</p></div>'; return; }
     el.innerHTML = atts.map(a => `
       <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:20px">&#x1F4C4;</span>
+        <span style="font-size:20px"></span>
         <div style="flex:1">
           <div style="font-size:13px;font-weight:600">${a.original_filename}</div>
           <div style="font-size:11px;color:var(--text-muted)">${formatFileSize(a.file_size)} | ${formatDateTime(a.created_at)}</div>
         </div>
-        <button class="btn btn-sm btn-danger" onclick="deleteAtt(${a.id})" data-permission="attachments.upload">&#x1F5D1;</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteAtt(${a.id})" data-permission="attachments.upload"></button>
       </div>`).join('');
   } catch {}
 }
@@ -268,8 +268,8 @@ async function loadEvaluations() {
           <span style="font-weight:700;font-size:14px">ارزیابی توسط: ${e.evaluator_name||'ناشناس'}</span>
           <span style="font-size:24px;font-weight:900;color:${e.score>=70?'var(--success)':e.score>=50?'var(--warning)':'var(--danger)'}">${e.score}</span>
         </div>
-        ${e.strengths ? `<div style="font-size:13px;color:var(--success);margin-bottom:4px">&#x2705; نقاط قوت: ${e.strengths}</div>` : ''}
-        ${e.weaknesses ? `<div style="font-size:13px;color:var(--danger);margin-bottom:4px">&#x26A0;️ نقاط ضعف: ${e.weaknesses}</div>` : ''}
+        ${e.strengths ? `<div style="font-size:13px;color:var(--success);margin-bottom:4px"> نقاط قوت: ${e.strengths}</div>` : ''}
+        ${e.weaknesses ? `<div style="font-size:13px;color:var(--danger);margin-bottom:4px">️ نقاط ضعف: ${e.weaknesses}</div>` : ''}
         ${e.comment ? `<div style="font-size:13px;color:var(--text-secondary)">${e.comment}</div>` : ''}
         <div style="font-size:11px;color:var(--text-muted);margin-top:4px">${formatDateTime(e.created_at)}</div>
       </div>`).join('');
