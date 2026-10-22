@@ -161,7 +161,7 @@ def update_task(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
 
     updates = body.model_dump(exclude_unset=True)
     if "title" in updates and updates["title"] is None:
