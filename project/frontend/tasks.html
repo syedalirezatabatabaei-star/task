@@ -32,7 +32,7 @@
         <div class="notification-wrap"><button type="button" id="notification-toggle" class="notification-toggle" aria-label="اعلان‌ها" aria-expanded="false" aria-controls="notification-panel"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-dot" id="notification-dot"></span></button><section id="notification-panel" class="notification-panel hidden" aria-label="اعلان‌ها"><div class="notification-panel-header"><span>اعلان‌ها</span><button type="button" class="btn btn-sm btn-secondary" id="notification-clear">پاک کردن نشان</button></div><div id="notification-list" class="notification-empty"><p>اعلانی برای نمایش وجود ندارد.</p></div></section></div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-secondary btn-sm" id="btn-list-view" title="نمایش لیستی"> لیست</button>
-          <button class="btn btn-ghost btn-sm" id="btn-kanban-view" title="نمایش کانبان">⬜ کانبان</button>
+          <button class="btn btn-ghost btn-sm" id="btn-kanban-view" title="نمایش کانبان"> کانبان</button>
         </div>
         <button class="btn btn-primary" id="btn-add-task" data-permission="tasks.create">+ وظیفه جدید</button>
         <div class="header-user"><div class="user-avatar" id="header-user-avatar">م</div><div class="user-info"><div class="user-name" id="header-user-name">...</div><div class="user-role" id="header-user-role">...</div></div></div>
@@ -270,7 +270,7 @@ async function loadList() {
               <td>
                 <div style="display:flex;gap:4px">
                   <a href="/task-details.html?id=${t.id}" class="btn btn-sm btn-secondary"></a>
-                  ${isAdmin ? `<button class="btn btn-sm btn-secondary" onclick="openEditModal(${t.id})">️</button>` : ''}
+                  ${isAdmin ? `<button class="btn btn-sm btn-secondary" onclick="openEditModal(${t.id})"></button>` : ''}
                   ${['TODO','IN_PROGRESS','NEEDS_REVISION'].includes(t.status) && t.assigned_to == Api.getCurrentUser()?.id
                     ? `<button class="btn btn-sm btn-primary" onclick="openSubmitModal(${t.id})"> ارسال</button>` : ''}
                   ${isAdmin ? `<button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id},'${t.title}')"></button>` : ''}
