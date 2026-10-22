@@ -9,7 +9,7 @@ from app.api import auth, users, permissions, projects, stages, tasks, evaluatio
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="سیستم مدیریت کارآموزی و پروژه",
+    description="سیستم مدیریت تسک و پروژه",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -48,7 +48,7 @@ app.include_router(audit.router, prefix=PREFIX)
 
 @app.get("/", tags=["Health"])
 def root():
-    return {"message": "سیستم مدیریت کارآموزی", "status": "running", "version": "1.0.0"}
+    return {"message": "سیستم مدیریت تسک", "status": "running", "version": "1.0.0"}
 
 
 @app.get("/health", tags=["Health"])
