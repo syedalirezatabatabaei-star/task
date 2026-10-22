@@ -12,7 +12,9 @@ services:
     volumes:
       - uploads_data:/app/uploads
     networks:
-      - task_net
+      task_net:
+        aliases:
+          - backend
     expose:
       - "8000"
 
@@ -25,8 +27,21 @@ services:
       - task_net
     depends_on:
       - backend
+    expose:
+      - "80"
+
+  nginx:
+    image: nginx:alpine
+    container_name: task_nginx
+    restart: unless-stopped
+    depends_on:
+      - frontend
     ports:
       - "127.0.0.1:1597:80"
+    volumes:
+      - ./nginx-task.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - task_net
 
 volumes:
   uploads_data:
