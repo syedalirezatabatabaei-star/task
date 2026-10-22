@@ -172,8 +172,9 @@
   <script>
     const API_BASE = 'http://localhost:8000/api/v1';
 
-// Redirect if already logged in
-    if (localStorage.getItem('access_token')) {
+// Do not auto-redirect based on an old token; let the user choose demo or real login.
+    if (localStorage.getItem('task_demo_mode') === 'true'
+        && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) {
       window.location.href = '/dashboard.html';
     }
 
