@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models.user import User, UserRole
 from app.models.task import Task
+from app.models.project import ProjectMember
 from app.models.attachment import Attachment
 from app.api.deps import get_current_user, require_permission, get_client_ip
 from app.services.audit_service import log_action
@@ -23,7 +24,7 @@ def list_attachments(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_task_access(task, current_user, db)
 
     attachments = db.query(Attachment).filter(Attachment.task_id == task_id).all()
     return {"success": True, "data": [_att_dict(a) for a in attachments]}
@@ -177,11 +178,17 @@ def _get_task_or_404(task_id: int, db: Session) -> Task:
     return task
 
 
-def _check_task_access(task: Task, user: User):
+def _check_task_access(task: Task, user: User, db: Session):
     if user.role == UserRole.ADMIN:
         return
     if task.assigned_to != user.id:
-        raise HTTPException(status_code=403, detail={"success": False, "message": "دسترسی ندارید"})
+        raise HTTPException(status_code=403, detail={"success": False, "message": "این وظیفه به شما تخصیص داده نشده است", "code": "ACCESS_DENIED"})
+    membership = db.query(ProjectMember.id).filter(
+        ProjectMember.project_id == task.project_id,
+        ProjectMember.user_id == user.id,
+    ).first()
+    if not membership:
+        raise HTTPException(status_code=403, detail={"success": False, "message": "شما به این پروژه دسترسی ندارید", "code": "PROJECT_ACCESS_DENIED"})
 
 
 def _att_dict(a: Attachment) -> dict:
