@@ -1398,3 +1398,10 @@ body { overflow-x:hidden; }
 .notification-scope { display:flex; flex-wrap:wrap; gap:16px; margin:12px 0 18px; }
 .notification-scope label { display:flex; align-items:center; gap:8px; }
 .notification-admin-note { color:var(--text-muted); font-size:12px; margin-top:8px; line-height:1.8; }
+
+.jalali-date-wrap { position:relative; display:block; width:100%; }
+.jalali-date-wrap input[type="date"] { color:transparent !important; -webkit-text-fill-color:transparent; caret-color:transparent; position:relative; z-index:1; background-color:transparent; }
+.jalali-date-wrap input[type="date"]::-webkit-datetime-edit { color:transparent; -webkit-text-fill-color:transparent; }
+.jalali-date-wrap input[type="date"]::-webkit-calendar-picker-indicator { opacity:.75; cursor:pointer; }
+.jalali-date-display { position:absolute; inset:0; display:flex; align-items:center; padding:0 14px; pointer-events:none; color:var(--text); z-index:0; overflow:hidden; white-space:nowrap; }
+.jalali-date-wrap input[type="date"]:disabled + .jalali-date-display { color:var(--text-muted); }
