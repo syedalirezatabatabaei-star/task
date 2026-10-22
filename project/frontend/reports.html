@@ -175,10 +175,10 @@ async function loadUserReport() {
       { label:'کل وظایف', value: stats.total_tasks, icon:'' },
       { label:'انجام‌شده', value: stats.done + stats.approved, icon:'' },
       { label:'نرخ تکمیل', value: stats.completion_rate + '%', icon:'' },
-      { label:'میانگین نمره', value: stats.average_score ?? '—', icon:'⭐' },
+      { label:'میانگین نمره', value: stats.average_score ?? '—', icon:'' },
       { label:'در حال انجام', value: stats.in_progress, icon:'' },
-      { label:'نیاز به اصلاح', value: stats.needs_revision, icon:'️' },
-      { label:'عقب‌افتاده', value: stats.overdue, icon:'⏰' },
+      { label:'نیاز به اصلاح', value: stats.needs_revision, icon:'' },
+      { label:'عقب‌افتاده', value: stats.overdue, icon:'' },
       { label:'ارسال‌شده', value: stats.submitted, icon:'' },
     ].map(s => `
       <div class="stat-card">
@@ -234,7 +234,7 @@ async function loadProjectReport() {
     document.getElementById('project-stat-cards').innerHTML = [
       { label:'کل وظایف', value: ts.total, icon:'' },
       { label:'انجام‌شده', value: (ts.by_status?.DONE||0) + (ts.by_status?.APPROVED||0), icon:'' },
-      { label:'عقب‌افتاده', value: ts.overdue, icon:'⏰' },
+      { label:'عقب‌افتاده', value: ts.overdue, icon:'' },
     ].map(s => `
       <div class="stat-card">
         <div class="stat-info"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>
