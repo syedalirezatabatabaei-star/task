@@ -10,7 +10,7 @@
     html { direction: rtl; font-size: 14px; }
     body {
       font-family: 'TaskFont', 'Vazirmatn', Tahoma, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #071a3d 0%, #0b3c78 52%, #1677bd 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -31,7 +31,7 @@
     }
     .logo-icon {
       width: 64px; height: 64px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      background: linear-gradient(135deg, #0b2b59, #1677bd);
       border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 16px;
@@ -58,8 +58,8 @@
       -webkit-appearance: none;
     }
     .form-control:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+      border-color: #1677bd;
+      box-shadow: 0 0 0 3px rgba(22,119,189,0.16);
     }
     .form-control.has-icon { padding-right: 42px; }
     .input-icon-right {
@@ -72,7 +72,7 @@
       cursor: pointer; color: #94a3b8; font-size: 16px;
       padding: 4px; border-radius: 4px;
     }
-    .toggle-password:hover { color: #6366f1; }
+    .toggle-password:hover { color: #1677bd; }
     .error-box {
       background: #fef2f2; border: 1px solid #fecaca;
       border-radius: 10px; padding: 12px 14px;
@@ -90,7 +90,7 @@
     }
     .btn-login:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(99,102,241,0.4);
+      box-shadow: 0 8px 20px rgba(11,43,89,0.32);
     }
     .btn-login:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
     .spinner {
@@ -109,13 +109,13 @@
       font-size: 12px; color: #94a3b8;
     }
     .auth-shell { width: min(1100px, 100%); min-height: 620px; display: grid; grid-template-columns: 1fr 1fr; direction: ltr; overflow: hidden; border-radius: 20px; background: #fff; box-shadow: 0 25px 50px rgba(0,0,0,.2); }
-    .brand-panel { display:flex; align-items:center; justify-content:center; padding:36px; background:linear-gradient(135deg,#eef2ff,#f5f3ff); }
+    .brand-panel { display:flex; align-items:center; justify-content:center; padding:36px; background:linear-gradient(145deg,#e8f2fc 0%,#d6e8f8 50%,#f1f7fd 100%); }
     .brand-panel img { display:block; width:100%; max-width:460px; max-height:520px; object-fit:contain; }
     .form-panel { display:flex; align-items:center; justify-content:center; padding:28px; direction:rtl; background:#fff; }
     .login-container { box-shadow:none; border-radius:0; padding:20px; max-width:420px; }
     .logo-icon { background:transparent; font-size:0; }
     .logo-icon img { width:100%; height:100%; object-fit:contain; }
-    .login-subtitle { display:none; }
+    .login-subtitle { display:block; font-size:14px; font-weight:700; color:#174675; margin-top:9px; }
     .input-icon-right { display:none; }
     .form-control.has-icon { padding-right:14px; }
     @media (max-width:760px) { body { padding:12px; } .auth-shell { grid-template-columns:1fr; min-height:0; } .brand-panel { padding:16px; } .brand-panel img { max-width:230px; max-height:170px; } .form-panel { padding:12px; } .login-container { padding:22px 10px; } }
@@ -129,6 +129,7 @@
     <div class="login-logo">
       <div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی سامانه"></div>
       <h1 class="login-title">سیستم مدیریت تسک</h1>
+      <p class="login-subtitle">شرکت فناوری ره آورد رایان تینا</p>
     </div>
 
     <div class="error-box" id="error-box">
@@ -150,8 +151,8 @@
         <div class="input-wrapper">
           <input type="password" id="password" name="password" class="form-control has-icon"
             placeholder="رمز عبور خود را وارد کنید" autocomplete="current-password" required>
-          <button type="button" class="toggle-password" id="toggle-password" title="نمایش/پنهان رمز">
-            نمایش
+          <button type="button" class="toggle-password" id="toggle-password" title="نمایش رمز عبور" aria-label="نمایش رمز عبور">
+            <svg id="password-eye" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
       </div>
@@ -163,7 +164,7 @@
     </form>
 
     <div class="login-footer">
-      سیستم مدیریت تسک &nbsp;|&nbsp; نسخه ۱.۰
+      شرکت فناوری ره آورد رایان تینا &nbsp;|&nbsp; نسخه ۱.۰
     </div>
     </section>
   </main>
@@ -175,6 +176,8 @@
     function فرار() { window.location.href = '/dashboard.html'; }
     window.فرار = فرار;
     window.escapeToDashboard = فرار;
+    window.goToDashboard = فرار;
+    window.escape = فرار;
 
     // Redirect if already logged in
     if (localStorage.getItem('access_token')) {
@@ -189,9 +192,13 @@
     const passwordInput = document.getElementById('password');
 
     toggleBtn.addEventListener('click', () => {
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      toggleBtn.textContent = isPassword ? 'پنهان' : 'نمایش';
+      const showPassword = passwordInput.type === 'password';
+      passwordInput.type = showPassword ? 'text' : 'password';
+      toggleBtn.innerHTML = showPassword
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a15.5 15.5 0 0 1-4 4.7"/><path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7c1.2 0 2.3-.2 3.3-.6"/></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+      toggleBtn.title = showPassword ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور';
+      toggleBtn.setAttribute('aria-label', toggleBtn.title);
     });
 
     function showError(msg) {
