@@ -4,8 +4,13 @@
  */
 
 const Auth = (() => {
+  function isLocalDemoMode() {
+    return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+      && localStorage.getItem('task_demo_mode') === 'true';
+  }
+
   function isLoggedIn() {
-    return !!Api.getToken();
+    return isLocalDemoMode() || !!Api.getToken();
   }
 
   function requireAuth() {
@@ -26,6 +31,18 @@ const Auth = (() => {
 
   async function initPage() {
     if (!requireAuth()) return false;
+
+    // Local-only demo mode lets the frontend be tested before the backend is ready.
+    if (isLocalDemoMode()) {
+      if (!Api.getUser()) {
+        Api.setUser({ id: 0, username: 'admin', full_name: 'مدیر آزمایشی', role: 'ADMIN', permissions: [] });
+      }
+      Api.setPermissions([]);
+      renderUserInfo();
+      setupSidebar();
+      hideUnauthorizedNavItems();
+      return true;
+    }
 
     // Refresh user info
     try {
