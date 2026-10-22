@@ -10,7 +10,7 @@
 <body>
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><div class="logo-icon">&#x1F393;</div><div><div class="logo-text">مدیریت تسک</div><div class="logo-sub">سیستم مدیریت</div></div></div>
+    <div class="sidebar-logo"><div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"></div><div><div class="logo-text">مدیریت تسک</div><div class="logo-sub">سیستم مدیریت</div></div></div>
     <nav class="sidebar-nav">
       <a class="nav-item" href="/dashboard.html"><span class="nav-icon">&#x1F4CA;</span><span class="nav-label">داشبورد</span></a>
       <a class="nav-item" href="/users.html" data-permission="users.view"><span class="nav-icon">&#x1F465;</span><span class="nav-label">کاربران</span></a>
@@ -27,7 +27,14 @@
         <a href="/projects.html" class="btn btn-ghost btn-sm">← پروژه‌ها</a>
         <h1 class="page-title" id="project-title">جزئیات پروژه</h1>
       </div>
-      <div class="header-right">
+      <div class="header-right header-actions">
+        <div class="header-brand"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت فناوری ره آورد رایان تینا"><span>ره آورد رایان تینا</span></div>
+        <div class="notification-wrap">
+          <button type="button" id="notification-toggle" class="notification-toggle" aria-label="اعلان‌ها" aria-expanded="false" aria-controls="notification-panel">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-dot" id="notification-dot"></span>
+          </button>
+          <section id="notification-panel" class="notification-panel hidden" aria-label="اعلان‌ها"><div class="notification-panel-header"><span>اعلان‌ها</span><button type="button" class="btn btn-sm btn-secondary" id="notification-clear">پاک کردن نشان</button></div><div id="notification-list" class="notification-empty"><p>اعلانی برای نمایش وجود ندارد.</p></div></section>
+        </div>
         <div class="header-user"><div class="user-avatar" id="header-user-avatar">م</div><div class="user-info"><div class="user-name" id="header-user-name">...</div><div class="user-role" id="header-user-role">...</div></div></div>
       </div>
     </header>
