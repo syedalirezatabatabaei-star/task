@@ -98,6 +98,20 @@ class StageBase(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
+    @field_validator('name')
+    @classmethod
+    def validate_stage_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError('نام مرحله نمی‌تواند خالی باشد')
+        return value
+
+    @model_validator(mode='after')
+    def validate_dates(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValueError('تاریخ پایان مرحله نمی‌تواند قبل از شروع باشد')
+        return self
+
 
 class StageCreate(StageBase):
     pass
