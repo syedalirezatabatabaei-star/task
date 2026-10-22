@@ -21,7 +21,7 @@ def list_evaluations(
     db: Session = Depends(get_db),
 ):
     task = _get_task_or_404(task_id, db)
-    _check_task_access(task, current_user)
+    _check_evaluation_access(task, current_user, db)
 
     evaluations = (
         db.query(Evaluation)
