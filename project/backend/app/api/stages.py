@@ -81,7 +81,14 @@ def update_stage(
     project = _get_project_or_404(stage.project_id, db)
     _check_access(project, current_user, db)
 
-    for field, value in body.model_dump(exclude_unset=True).items():
+    updates = body.model_dump(exclude_unset=True)
+    if "name" in updates and (updates["name"] is None or not updates["name"].strip()):
+        raise HTTPException(status_code=422, detail={"success": False, "message": "نام مرحله نمی‌تواند خالی باشد"})
+    effective_start = updates.get("start_date", stage.start_date)
+    effective_end = updates.get("end_date", stage.end_date)
+    if effective_start and effective_end and effective_end < effective_start:
+        raise HTTPException(status_code=422, detail={"success": False, "message": "تاریخ پایان مرحله نمی‌تواند قبل از شروع باشد"})
+    for field, value in updates.items():
         setattr(stage, field, value)
 
     db.commit()
