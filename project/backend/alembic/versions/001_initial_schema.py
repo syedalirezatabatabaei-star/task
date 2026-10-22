@@ -35,12 +35,12 @@ def create_index_if_missing(index_name: str, table_name: str, columns, **kwargs)
     if index_name in existing:
         print(f"Alembic: index {index_name!r} already exists; skipping creation.", flush=True)
         return None
-    return create_index_if_missing(index_name, table_name, columns, **kwargs)
+    return op.create_index(index_name, table_name, columns, **kwargs)
 
 
 def upgrade() -> None:
     # users
-    create_table_if_missing(\"users\",
+    create_table_if_missing("users",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("username", sa.String(100), nullable=False),
         sa.Column("password_hash", sa.String(255), nullable=False),
@@ -61,7 +61,7 @@ def upgrade() -> None:
     create_index_if_missing("ix_users_username", "users", ["username"])
 
     # permissions
-    create_table_if_missing(\"permissions\",
+    create_table_if_missing("permissions",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False, sqlite_autoincrement=True),
         sa.Column("code", sa.String(100), nullable=False),
         sa.Column("name", sa.String(150), nullable=False),
@@ -72,7 +72,7 @@ def upgrade() -> None:
     create_index_if_missing("ix_permissions_code", "permissions", ["code"])
 
     # user_permissions
-    create_table_if_missing(\"user_permissions\",
+    create_table_if_missing("user_permissions",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("permission_id", sa.BigInteger(), nullable=False),
@@ -84,7 +84,7 @@ def upgrade() -> None:
     )
 
     # projects
-    create_table_if_missing(\"projects\",
+    create_table_if_missing("projects",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
@@ -100,7 +100,7 @@ def upgrade() -> None:
     )
 
     # project_members
-    create_table_if_missing(\"project_members\",
+    create_table_if_missing("project_members",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("project_id", sa.BigInteger(), nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=False),
@@ -113,7 +113,7 @@ def upgrade() -> None:
     )
 
     # project_stages
-    create_table_if_missing(\"project_stages\",
+    create_table_if_missing("project_stages",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("project_id", sa.BigInteger(), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
@@ -128,7 +128,7 @@ def upgrade() -> None:
     )
 
     # tasks
-    create_table_if_missing(\"tasks\",
+    create_table_if_missing("tasks",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("project_id", sa.BigInteger(), nullable=False),
         sa.Column("stage_id", sa.BigInteger(), nullable=True),
@@ -153,7 +153,7 @@ def upgrade() -> None:
     )
 
     # evaluations
-    create_table_if_missing(\"evaluations\",
+    create_table_if_missing("evaluations",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("task_id", sa.BigInteger(), nullable=False),
         sa.Column("evaluator_id", sa.BigInteger(), nullable=True),
@@ -169,7 +169,7 @@ def upgrade() -> None:
     )
 
     # attachments
-    create_table_if_missing(\"attachments\",
+    create_table_if_missing("attachments",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("task_id", sa.BigInteger(), nullable=False),
         sa.Column("uploaded_by", sa.BigInteger(), nullable=True),
@@ -185,7 +185,7 @@ def upgrade() -> None:
     )
 
     # audit_logs
-    create_table_if_missing(\"audit_logs\",
+    create_table_if_missing("audit_logs",
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=True),
         sa.Column("action", sa.String(100), nullable=False),
