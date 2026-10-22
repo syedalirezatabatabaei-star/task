@@ -50,14 +50,13 @@ def create_admin():
         existing = db.query(User).filter(User.username == username).first()
         if existing:
             if existing.role == UserRole.ADMIN:
-                print(f"کاربر مدیر '{username}' قبلاً وجود دارد.")
-            else:
-                print(f"کاربر '{username}' وجود دارد اما مدیر نیست. در حال ارتقا...")
-                existing.role = UserRole.ADMIN
-                existing.is_active = True
-                db.commit()
-                print(f"کاربر '{username}' به مدیر ارتقا یافت.")
-            return
+                print(f"کاربر مدیر '{username}' قبلاً وجود دارد؛ تغییری اعمال نشد.")
+                return
+            print(
+                f"خطا: نام کاربری '{username}' از قبل متعلق به یک کاربر غیرمدیر است. "
+                "برای جلوگیری از ارتقای ناخواسته حساب، ADMIN_USERNAME را به نام کاربری جدید تغییر دهید."
+            )
+            sys.exit(2)
 
         admin = User(
             username=username,
