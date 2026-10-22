@@ -1,12 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>داشبورد | سیستم مدیریت کارآموزی</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/main.css">
+  <title>داشبورد | سیستم مدیریت تسک</title>
+  <link rel="icon" type="image/jpeg" href="/assets/images/logo.jpg" sizes="32x32">
+<link rel="stylesheet" href="/assets/css/main.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -15,32 +14,32 @@
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <div class="logo-icon">🎓</div>
+      <div class="logo-icon"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"></div>
       <div>
-        <div class="logo-text">کارآموزی</div>
+        <div class="logo-text">مدیریت تسک</div>
         <div class="logo-sub">سیستم مدیریت</div>
       </div>
     </div>
     <nav class="sidebar-nav">
       <a class="nav-item active" href="/dashboard.html">
-        <span class="nav-icon">📊</span><span class="nav-label">داشبورد</span>
+        <span class="nav-icon" aria-hidden="true">&#x25A6;</span><span class="nav-label">داشبورد</span>
       </a>
       <a class="nav-item" href="/users.html" data-permission="users.view">
-        <span class="nav-icon">👥</span><span class="nav-label">کاربران</span>
+        <span class="nav-icon" aria-hidden="true">&#x2637;</span><span class="nav-label">کاربران</span>
       </a>
       <a class="nav-item" href="/projects.html" data-permission="projects.view">
-        <span class="nav-icon">📁</span><span class="nav-label">پروژه‌ها</span>
+        <span class="nav-icon" aria-hidden="true">&#x25A3;</span><span class="nav-label">پروژه‌ها</span>
       </a>
       <a class="nav-item" href="/tasks.html" data-permission="tasks.view">
-        <span class="nav-icon">✅</span><span class="nav-label">وظایف</span>
+        <span class="nav-icon" aria-hidden="true">&#x2713;</span><span class="nav-label">وظایف</span>
       </a>
       <a class="nav-item" href="/reports.html" data-permission="reports.view">
-        <span class="nav-icon">📈</span><span class="nav-label">گزارش‌ها</span>
+        <span class="nav-icon" aria-hidden="true">&#x25A5;</span><span class="nav-label">گزارش‌ها</span>
       </a>
     </nav>
     <div class="sidebar-footer">
       <a class="nav-item" href="#" id="logout-btn">
-        <span class="nav-icon">🚪</span><span class="nav-label">خروج</span>
+        <span class="nav-icon" aria-hidden="true">&#x21AA;</span><span class="nav-label">خروج</span>
       </a>
     </div>
   </aside>
@@ -49,10 +48,21 @@
   <div class="main-content" id="main-content">
     <header class="header" id="header">
       <div class="header-left">
-        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <button class="sidebar-toggle" id="sidebar-toggle">&#x2630;</button>
         <h1 class="page-title" id="page-title">داشبورد</h1>
       </div>
-      <div class="header-right">
+      <div class="header-right header-actions">
+        <div class="header-brand"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت فناوری ره آورد رایان تینا"><span>ره آورد رایان تینا</span></div>
+        <div class="notification-wrap">
+          <button type="button" id="notification-toggle" class="notification-toggle" aria-label="اعلان‌ها" aria-expanded="false" aria-controls="notification-panel">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+            <span class="notification-dot" id="notification-dot"></span>
+          </button>
+          <section id="notification-panel" class="notification-panel hidden" aria-label="اعلان‌ها">
+            <div class="notification-panel-header"><span>اعلان‌ها</span><button type="button" class="btn btn-sm btn-secondary" id="notification-clear">پاک کردن نشان</button></div>
+            <div id="notification-list" class="notification-empty"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><p>اعلانی برای نمایش وجود ندارد.</p></div>
+          </section>
+        </div>
         <div class="header-user" id="header-user">
           <div class="user-avatar" id="header-user-avatar">م</div>
           <div class="user-info">
@@ -90,10 +100,10 @@
       </div>
 
       <!-- User Dashboard -->
-      <div id="user-dashboard" class="hidden">
+      <div id="personnel-dashboard" class="hidden">
         <div class="card mb-4" style="background: linear-gradient(135deg,#6366f1,#8b5cf6); color:white; border:none;">
           <div style="display:flex; align-items:center; gap:16px">
-            <div style="font-size:48px">👋</div>
+            <div style="font-size:48px">&#x1F44B;</div>
             <div>
               <div style="font-size:22px; font-weight:800;" id="user-greeting">سلام!</div>
               <div style="opacity:0.85; margin-top:4px">خوش آمدید. وظایف امروز خود را مشاهده کنید.</div>
@@ -143,14 +153,33 @@
     await Auth.logout();
   });
 
-  const user = Api.getUser();
+  const user = Api.getCurrentUser();
   const isAdmin = user?.role === 'ADMIN';
   const loading = document.getElementById('dashboard-loading');
+  const notificationToggle = document.getElementById('notification-toggle');
+  const notificationPanel = document.getElementById('notification-panel');
+  const notificationDot = document.getElementById('notification-dot');
+  notificationToggle?.addEventListener('click', () => {
+    const willOpen = notificationPanel.classList.contains('hidden');
+    notificationPanel.classList.toggle('hidden', !willOpen);
+    notificationToggle.setAttribute('aria-expanded', String(willOpen));
+  });
+  document.getElementById('notification-clear')?.addEventListener('click', () => {
+    notificationDot.style.display = 'none';
+    notificationPanel.classList.add('hidden');
+    notificationToggle.setAttribute('aria-expanded', 'false');
+  });
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.notification-wrap')) {
+      notificationPanel?.classList.add('hidden');
+      notificationToggle?.setAttribute('aria-expanded', 'false');
+    }
+  });
 
   if (isAdmin) {
     await loadAdminDashboard();
   } else {
-    await loadUserDashboard();
+    await loadPersonnelDashboard();
   }
 
   loading.classList.add('hidden');
@@ -162,14 +191,14 @@
       const d = res.data;
 
       document.getElementById('stat-cards-admin').innerHTML = [
-        { label: 'کاربران فعال',      value: d.active_users,         icon: '👥', color: '#eef2ff', iconColor: '#6366f1' },
-        { label: 'پروژه‌های فعال',    value: d.active_projects,      icon: '📁', color: '#ecfdf5', iconColor: '#10b981' },
-        { label: 'وظایف در جریان',   value: d.in_progress_tasks,    icon: '🔄', color: '#eff6ff', iconColor: '#3b82f6' },
-        { label: 'نیاز به بررسی',    value: d.submitted_tasks,      icon: '📬', color: '#fffbeb', iconColor: '#f59e0b' },
-        { label: 'انجام‌شده',        value: d.completed_tasks,       icon: '✅', color: '#ecfdf5', iconColor: '#10b981' },
+        { label: 'کاربران فعال',      value: d.active_users,         icon: '&#x1F465;', color: '#eef2ff', iconColor: '#6366f1' },
+        { label: 'پروژه‌های فعال',    value: d.active_projects,      icon: '&#x1F4C1;', color: '#ecfdf5', iconColor: '#10b981' },
+        { label: 'وظایف در جریان',   value: d.in_progress_tasks,    icon: '&#x1F504;', color: '#eff6ff', iconColor: '#3b82f6' },
+        { label: 'نیاز به بررسی',    value: d.submitted_tasks,      icon: '&#x1F4EC;', color: '#fffbeb', iconColor: '#f59e0b' },
+        { label: 'انجام‌شده',        value: d.completed_tasks,       icon: '&#x2705;', color: '#ecfdf5', iconColor: '#10b981' },
         { label: 'عقب‌افتاده',       value: d.overdue_tasks,         icon: '⏰', color: '#fef2f2', iconColor: '#ef4444' },
-        { label: 'کل وظایف',         value: d.total_tasks,           icon: '📋', color: '#f8fafc', iconColor: '#64748b' },
-        { label: 'کل کاربران',       value: d.total_users,           icon: '🧑‍💻', color: '#f5f3ff', iconColor: '#8b5cf6' },
+        { label: 'کل وظایف',         value: d.total_tasks,           icon: '&#x1F4CB;', color: '#f8fafc', iconColor: '#64748b' },
+        { label: 'کل کاربران',       value: d.total_users,           icon: '&#x1F9D1;‍&#x1F4BB;', color: '#f5f3ff', iconColor: '#8b5cf6' },
       ].map(s => `
         <div class="stat-card">
           <div class="stat-info">
@@ -218,18 +247,18 @@
     }
   }
 
-  async function loadUserDashboard() {
-    document.getElementById('user-dashboard').classList.remove('hidden');
+  async function loadPersonnelDashboard() {
+    document.getElementById('personnel-dashboard').classList.remove('hidden');
     try {
       const res = await Api.getUserDashboard();
       const d = res.data;
 
-      document.getElementById('user-greeting').textContent = `سلام ${d.user?.full_name || ''} 👋`;
+      document.getElementById('user-greeting').textContent = `سلام ${d.user?.full_name || ''}`;
 
       document.getElementById('stat-cards-user').innerHTML = [
-        { label: 'پروژه‌هایم',       value: d.my_project_count,      icon: '📁' },
-        { label: 'کل وظایفم',        value: d.tasks?.total,           icon: '📋' },
-        { label: 'در حال انجام',     value: d.tasks?.in_progress,     icon: '🔄' },
+        { label: 'پروژه‌هایم',       value: d.my_project_count,      icon: '&#x1F4C1;' },
+        { label: 'کل وظایفم',        value: d.tasks?.total,           icon: '&#x1F4CB;' },
+        { label: 'در حال انجام',     value: d.tasks?.in_progress,     icon: '&#x1F504;' },
         { label: 'میانگین نمره',     value: d.average_score != null ? d.average_score : '—', icon: '⭐' },
       ].map(s => `
         <div class="stat-card">
@@ -255,7 +284,7 @@
               </div>
             </a>
           `).join('')
-        : '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">🎉</div><p>ددلاین نزدیکی وجود ندارد</p></div>';
+        : '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">&#x1F389;</div><p>ددلاین نزدیکی وجود ندارد</p></div>';
       document.getElementById('upcoming-deadlines').innerHTML = upcomingHtml;
 
       // Recent evaluations
