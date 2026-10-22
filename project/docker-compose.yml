@@ -1,57 +1,60 @@
-version: "3.9"
-
 services:
   mysql:
     image: mysql:8.0
-    container_name: internship_mysql
+    container_name: task_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-internship_db}
-      MYSQL_USER: ${MYSQL_USER:-internship_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-internship_pass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in .env}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - internship_net
+      - task_net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$\{MYSQL_ROOT_PASSWORD\}\" --silent"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 12
+      start_period: 30s
 
   backend:
-    build: ./backend
-    container_name: internship_backend
+    build:
+      context: ./backend
+    container_name: task_backend
     restart: unless-stopped
-    env_file: .env
+    env_file:
+      - .env
     environment:
       MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
     volumes:
       - uploads_data:/app/uploads
     networks:
-      - internship_net
+      - task_net
     depends_on:
       mysql:
         condition: service_healthy
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
 
   frontend:
-    build: ./frontend
-    container_name: internship_frontend
+    build:
+      context: ./frontend
+    container_name: task_frontend
     restart: unless-stopped
     networks:
-      - internship_net
+      - task_net
     depends_on:
       - backend
     ports:
-      - "80:80"
+      - "127.0.0.1:1597:80"
 
 volumes:
   mysql_data:
   uploads_data:
 
 networks:
-  internship_net:
+  task_net:
     driver: bridge
