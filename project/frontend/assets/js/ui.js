@@ -289,6 +289,38 @@ function clearFieldErrors(formId) {
   form.querySelectorAll('.form-error').forEach(el => el.remove());
 }
 
+// ─── Jalali display for native date controls ──────
+(function initJalaliDateFields() {
+  const nativeValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  if (!nativeValue) return;
+  document.querySelectorAll('input[type="date"]').forEach(input => {
+    if (input.dataset.jalaliReady === 'true') return;
+    input.dataset.jalaliReady = 'true';
+    const wrapper = document.createElement('span');
+    wrapper.className = 'jalali-date-wrap';
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+    const display = document.createElement('span');
+    display.className = 'jalali-date-display';
+    display.setAttribute('aria-hidden', 'true');
+    wrapper.appendChild(display);
+    const sync = () => {
+      const value = nativeValue.get.call(input);
+      display.textContent = value ? formatDate(value) : 'انتخاب تاریخ شمسی';
+    };
+    Object.defineProperty(input, 'value', {
+      configurable: true,
+      enumerable: true,
+      get() { return nativeValue.get.call(this); },
+      set(value) { nativeValue.set.call(this, value); sync(); }
+    });
+    input.addEventListener('change', sync);
+    input.addEventListener('input', sync);
+    input.setAttribute('aria-label', input.getAttribute('aria-label') || 'تاریخ شمسی');
+    sync();
+  });
+})();
+
 // ─── Shared notification center ──────────────────
 (function initNotificationCenter() {
   document.querySelectorAll('[data-admin-only="true"]').forEach(el => { if (Api.getCurrentUser()?.role !== 'ADMIN') el.remove(); });
