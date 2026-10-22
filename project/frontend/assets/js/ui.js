@@ -180,13 +180,17 @@ function initTabs(containerId) {
 // ─── Format helpers ──────────────────────────────
 function formatDate(dateStr) {
   if (!dateStr) return '—';
-  const d = new Date(dateStr);
+  const d = /^\\d{4}-\\d{2}-\\d{2}$/.test(String(dateStr))
+    ? new Date(Number(dateStr.slice(0, 4)), Number(dateStr.slice(5, 7)) - 1, Number(dateStr.slice(8, 10)), 12)
+    : new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return '—';
   return d.toLocaleDateString('fa-IR-u-ca-persian-nu-arabext', { calendar: 'persian', numberingSystem: 'arabext', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function formatDateTime(dateStr) {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return '—';
   return d.toLocaleString('fa-IR-u-ca-persian-nu-arabext', { calendar: 'persian', numberingSystem: 'arabext', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
