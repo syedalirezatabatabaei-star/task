@@ -156,27 +156,7 @@
   const user = Api.getCurrentUser();
   const isAdmin = user?.role === 'ADMIN';
   const loading = document.getElementById('dashboard-loading');
-  const notificationToggle = document.getElementById('notification-toggle');
-  const notificationPanel = document.getElementById('notification-panel');
-  const notificationDot = document.getElementById('notification-dot');
-  notificationToggle?.addEventListener('click', () => {
-    const willOpen = notificationPanel.classList.contains('hidden');
-    notificationPanel.classList.toggle('hidden', !willOpen);
-    notificationToggle.setAttribute('aria-expanded', String(willOpen));
-  });
-  document.getElementById('notification-clear')?.addEventListener('click', () => {
-    notificationDot.style.display = 'none';
-    notificationPanel.classList.add('hidden');
-    notificationToggle.setAttribute('aria-expanded', 'false');
-  });
-  document.addEventListener('click', (event) => {
-    if (!event.target.closest('.notification-wrap')) {
-      notificationPanel?.classList.add('hidden');
-      notificationToggle?.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  if (isAdmin) {
+if (isAdmin) {
     await loadAdminDashboard();
   } else {
     await loadPersonnelDashboard();
