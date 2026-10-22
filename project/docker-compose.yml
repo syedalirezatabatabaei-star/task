@@ -1,24 +1,4 @@
 services:
-  mysql:
-    image: mysql:5.7
-    container_name: task_mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:?Set MYSQL_DATABASE in .env}
-      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in .env}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - task_net
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
-
   backend:
     build:
       context: ./backend
@@ -33,9 +13,6 @@ services:
       - uploads_data:/app/uploads
     networks:
       - task_net
-    depends_on:
-      mysql:
-        condition: service_healthy
     expose:
       - "8000"
 
@@ -52,9 +29,9 @@ services:
       - "127.0.0.1:1597:80"
 
 volumes:
-  mysql_data:
   uploads_data:
 
 networks:
   task_net:
-    driver: bridge
+    external: true
+    name: task_net
