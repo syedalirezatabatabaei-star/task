@@ -113,7 +113,7 @@ def create_task(
             ProjectMember.project_id == project.id,
             ProjectMember.user_id == body.assigned_to,
         ).first()
-        if not assignee_membership and current_user.role != UserRole.ADMIN:
+        if not assignee_membership:
             raise HTTPException(status_code=400, detail={"success": False, "message": "کاربر تخصیص‌یافته عضو پروژه نیست", "code": "ASSIGNEE_NOT_MEMBER"})
 
     task = Task(
@@ -188,7 +188,7 @@ def update_task(
             ProjectMember.project_id == task.project_id,
             ProjectMember.user_id == updates["assigned_to"],
         ).first()
-        if not member and current_user.role != UserRole.ADMIN:
+        if not member:
             raise HTTPException(status_code=400, detail={"success": False, "message": "کاربر تخصیص‌یافته عضو پروژه نیست", "code": "ASSIGNEE_NOT_MEMBER"})
 
     for field, value in updates.items():
