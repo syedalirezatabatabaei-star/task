@@ -287,6 +287,7 @@ function clearFieldErrors(formId) {
 
 // ─── Shared notification center ──────────────────
 (function initNotificationCenter() {
+  document.querySelectorAll('[data-admin-only="true"]').forEach(el => { if (Api.getCurrentUser()?.role !== 'ADMIN') el.remove(); });
   const toggle = document.getElementById('notification-toggle');
   const panel = document.getElementById('notification-panel');
   const list = document.getElementById('notification-list');
