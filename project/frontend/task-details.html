@@ -58,7 +58,7 @@
             <!-- Evaluations -->
             <div class="card" id="evaluations-section" data-permission="evaluations.view">
               <div class="card-header">
-                <div class="card-title">⭐ ارزیابی‌ها</div>
+                <div class="card-title"> ارزیابی‌ها</div>
                 <button class="btn btn-sm btn-primary" id="btn-add-eval" data-permission="evaluations.create">+ ارزیابی</button>
               </div>
               <div id="evaluations-list"></div>
@@ -188,7 +188,7 @@ async function loadTask() {
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
         ${statusBadge(task.status)}
         ${priorityBadge(task.priority)}
-        ${task.latest_score!=null ? `<span class="badge badge-warning">⭐ نمره: ${task.latest_score}</span>` : ''}
+        ${task.latest_score!=null ? `<span class="badge badge-warning"> نمره: ${task.latest_score}</span>` : ''}
       </div>
       <div style="margin-top:16px">${progressBar(task.progress)}</div>`;
 
@@ -269,7 +269,7 @@ async function loadEvaluations() {
           <span style="font-size:24px;font-weight:900;color:${e.score>=70?'var(--success)':e.score>=50?'var(--warning)':'var(--danger)'}">${e.score}</span>
         </div>
         ${e.strengths ? `<div style="font-size:13px;color:var(--success);margin-bottom:4px"> نقاط قوت: ${e.strengths}</div>` : ''}
-        ${e.weaknesses ? `<div style="font-size:13px;color:var(--danger);margin-bottom:4px">️ نقاط ضعف: ${e.weaknesses}</div>` : ''}
+        ${e.weaknesses ? `<div style="font-size:13px;color:var(--danger);margin-bottom:4px"> نقاط ضعف: ${e.weaknesses}</div>` : ''}
         ${e.comment ? `<div style="font-size:13px;color:var(--text-secondary)">${e.comment}</div>` : ''}
         <div style="font-size:11px;color:var(--text-muted);margin-top:4px">${formatDateTime(e.created_at)}</div>
       </div>`).join('');
