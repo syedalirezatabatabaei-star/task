@@ -146,8 +146,12 @@ def update_project(
     db: Session = Depends(get_db),
 ):
     project = _get_project_or_404(project_id, db)
+    _check_project_access(project, current_user, db)
 
-    for field, value in body.model_dump(exclude_none=True).items():
+    updates = body.model_dump(exclude_unset=True)
+    if updates.get('start_date') and updates.get('end_date') and updates['end_date'] < updates['start_date']:
+        raise HTTPException(status_code=422, detail={'success': False, 'message': 'تاریخ پایان نمی‌تواند قبل از شروع باشد'})
+    for field, value in updates.items():
         setattr(project, field, value)
 
     db.commit()
@@ -171,6 +175,7 @@ def delete_project(
     db: Session = Depends(get_db),
 ):
     project = _get_project_or_404(project_id, db)
+    _check_project_access(project, current_user, db)
 
     log_action(
         db=db, user_id=current_user.id, action="PROJECT_DELETED",
@@ -224,8 +229,9 @@ def add_member(
     db: Session = Depends(get_db),
 ):
     project = _get_project_or_404(project_id, db)
+    _check_project_access(project, current_user, db)
 
-    user = db.query(User).filter(User.id == body.user_id).first()
+    user = db.query(User).filter(User.id == body.user_id, User.is_active == True).first()
     if not user:
         raise HTTPException(status_code=404, detail={"success": False, "message": "کاربر یافت نشد"})
 
@@ -261,6 +267,8 @@ def remove_member(
     current_user: User = Depends(require_permission(P.PROJECTS_MEMBERS_MANAGE)),
     db: Session = Depends(get_db),
 ):
+    project = _get_project_or_404(project_id, db)
+    _check_project_access(project, current_user, db)
     member = db.query(ProjectMember).filter(
         ProjectMember.project_id == project_id,
         ProjectMember.user_id == user_id,
@@ -268,8 +276,15 @@ def remove_member(
     if not member:
         raise HTTPException(status_code=404, detail={"success": False, "message": "عضو یافت نشد"})
 
+    member_name = member.user.username if member.user else str(user_id)
     db.delete(member)
     db.commit()
+    log_action(
+        db=db, user_id=current_user.id, action="PROJECT_MEMBER_REMOVED",
+        entity_type="project", entity_id=project_id,
+        description=f"کاربر {member_name} از پروژه '{project.name}' حذف شد",
+        ip_address=get_client_ip(request),
+    )
     return {"success": True, "message": "عضو با موفقیت حذف شد"}
 
 
