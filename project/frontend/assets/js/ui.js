@@ -32,7 +32,7 @@ const Toast = (() => {
         <div class="toast-title">${titles[type] || ''}</div>
         <div class="toast-message">${message}</div>
       </div>
-      <button class="toast-dismiss" onclick="this.closest('.toast').remove()">✕</button>
+      <button class="toast-dismiss" onclick="this.closest('.toast').remove()">&#x2715;</button>
     `;
     c.appendChild(toast);
     if (duration > 0) {
@@ -91,7 +91,7 @@ function confirmAction(message, onConfirm, title = 'تأیید عملیات') {
     <div class="modal modal-sm">
       <div class="modal-header">
         <h3 class="modal-title">${title}</h3>
-        <button class="modal-close" onclick="document.getElementById('${id}').remove()">✕</button>
+        <button class="modal-close" onclick="document.getElementById('${id}').remove()">&#x2715;</button>
       </div>
       <div class="modal-body">
         <p style="font-size:15px; color: var(--text-secondary); line-height:1.7">${message}</p>
