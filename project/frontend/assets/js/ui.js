@@ -19,7 +19,7 @@ const Toast = (() => {
     return container;
   }
 
-  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  const icons = { success: '&#x2713;', error: '&#x2716;', warning: '&#x26A0;', info: '&#x2139;' };
   const titles = { success: 'موفق', error: 'خطا', warning: 'هشدار', info: 'اطلاع' };
 
   function show(type, message, duration = 4000) {
@@ -27,7 +27,7 @@ const Toast = (() => {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `
-      <span class="toast-icon">${icons[type] || '📢'}</span>
+      <span class="toast-icon">${icons[type] || '&#x1F4E2;'}</span>
       <div class="toast-body">
         <div class="toast-title">${titles[type] || ''}</div>
         <div class="toast-message">${message}</div>
