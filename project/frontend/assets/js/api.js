@@ -193,5 +193,11 @@ const Api = (() => {
 
     // ─── Audit Logs ────────────────────────────
     getAuditLogs: (params = {}) => request('GET', '/audit-logs?' + new URLSearchParams(params)),
+
+    // ─── Notifications ─────────────────────────
+    getNotifications: () => request('GET', '/notifications'),
+    markNotificationRead: (id) => request('PATCH', `/notifications/${id}/read`),
+    markAllNotificationsRead: () => request('PATCH', '/notifications/read-all'),
+    publishAnnouncement: (data) => request('POST', '/notifications/announcements', data),
   };
 })();
