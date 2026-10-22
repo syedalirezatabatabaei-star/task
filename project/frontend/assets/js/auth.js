@@ -5,8 +5,10 @@
 
 const Auth = (() => {
   function isLocalDemoMode() {
-    return ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
-      && localStorage.getItem('task_demo_mode') === 'true';
+    const isLocalHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+    const demoExplicitlyEnabled = sessionStorage.getItem('task_demo_enabled') === 'true';
+    return localStorage.getItem('task_demo_mode') === 'true'
+      && (isLocalHost || demoExplicitlyEnabled);
   }
 
   function isLoggedIn() {
@@ -138,6 +140,8 @@ const Auth = (() => {
   async function logout() {
     try { await Api.logout(); } catch {}
     Api.clearAuth();
+    localStorage.removeItem('task_demo_mode');
+    sessionStorage.removeItem('task_demo_enabled');
     window.location.href = '/login.html';
   }
 
