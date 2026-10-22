@@ -116,6 +116,39 @@ const Auth = (() => {
       overlay.classList.remove('active');
     });
 
+    // Notifications dropdown (UI placeholder until a backend notifications endpoint is available).
+    const notificationToggle = document.getElementById('notification-toggle');
+    const notificationPanel = document.getElementById('notification-panel');
+    const notificationDot = document.getElementById('notification-dot');
+    notificationToggle?.addEventListener('click', () => {
+      const open = notificationPanel?.classList.contains('hidden');
+      notificationPanel?.classList.toggle('hidden', !open);
+      notificationToggle.setAttribute('aria-expanded', String(!!open));
+    });
+    document.getElementById('notification-clear')?.addEventListener('click', () => {
+      if (notificationDot) notificationDot.style.display = 'none';
+      notificationPanel?.classList.add('hidden');
+      notificationToggle?.setAttribute('aria-expanded', 'false');
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('.notification-wrap')) {
+        notificationPanel?.classList.add('hidden');
+        notificationToggle?.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        notificationPanel?.classList.add('hidden');
+        notificationToggle?.setAttribute('aria-expanded', 'false');
+      }
+    });
+    sidebar.querySelectorAll('a.nav-item').forEach(link => link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('mobile-open');
+        overlay?.classList.remove('active');
+      }
+    }));
+
     // Mark active nav item
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.nav-item').forEach(item => {
