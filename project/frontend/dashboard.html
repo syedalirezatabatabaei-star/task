@@ -176,9 +176,9 @@ if (isAdmin) {
         { label: 'وظایف در جریان',   value: d.in_progress_tasks,    icon: '', color: '#eff6ff', iconColor: '#3b82f6' },
         { label: 'نیاز به بررسی',    value: d.submitted_tasks,      icon: '', color: '#fffbeb', iconColor: '#f59e0b' },
         { label: 'انجام‌شده',        value: d.completed_tasks,       icon: '', color: '#ecfdf5', iconColor: '#10b981' },
-        { label: 'عقب‌افتاده',       value: d.overdue_tasks,         icon: '⏰', color: '#fef2f2', iconColor: '#ef4444' },
+        { label: 'عقب‌افتاده',       value: d.overdue_tasks,         icon: '', color: '#fef2f2', iconColor: '#ef4444' },
         { label: 'کل وظایف',         value: d.total_tasks,           icon: '', color: '#f8fafc', iconColor: '#64748b' },
-        { label: 'کل کاربران',       value: d.total_users,           icon: '‍', color: '#f5f3ff', iconColor: '#8b5cf6' },
+        { label: 'کل کاربران',       value: d.total_users,           icon: '', color: '#f5f3ff', iconColor: '#8b5cf6' },
       ].map(s => `
         <div class="stat-card">
           <div class="stat-info">
@@ -239,7 +239,7 @@ if (isAdmin) {
         { label: 'پروژه‌هایم',       value: d.my_project_count,      icon: '' },
         { label: 'کل وظایفم',        value: d.tasks?.total,           icon: '' },
         { label: 'در حال انجام',     value: d.tasks?.in_progress,     icon: '' },
-        { label: 'میانگین نمره',     value: d.average_score != null ? d.average_score : '—', icon: '⭐' },
+        { label: 'میانگین نمره',     value: d.average_score != null ? d.average_score : '—', icon: '' },
       ].map(s => `
         <div class="stat-card">
           <div class="stat-info">
