@@ -3,12 +3,20 @@ import pytest
 
 
 @pytest.fixture
-def project_id(client, auth_headers_admin):
+def project_id(client, auth_headers_admin, regular_user):
     resp = client.post("/api/v1/projects", headers=auth_headers_admin, json={
         "name": "پروژه وظایف",
         "status": "ACTIVE",
     })
-    return resp.json()["data"]["id"]
+    assert resp.status_code == 201
+    project_id = resp.json()["data"]["id"]
+    member_resp = client.post(
+        f"/api/v1/projects/{project_id}/members",
+        headers=auth_headers_admin,
+        json={"user_id": regular_user.id, "project_role": "عضو"},
+    )
+    assert member_resp.status_code == 200
+    return project_id
 
 
 @pytest.fixture
@@ -82,7 +90,7 @@ def test_cross_user_task_access(client, db):
     """User cannot access another user's task."""
     from app.models.user import User, UserRole
     from app.models.task import Task
-    from app.models.project import Project
+    from app.models.project import Project, ProjectMember
     from app.core.security import hash_password, create_access_token
     from app.models.permission import Permission, UserPermission
     from app.core import permissions as P
@@ -99,6 +107,8 @@ def test_cross_user_task_access(client, db):
 
     proj = Project(name="p", created_by=user2.id, status="ACTIVE")
     db.add(proj)
+    db.commit()
+    db.add(ProjectMember(project_id=proj.id, user_id=user2.id, project_role="عضو"))
     db.commit()
 
     task = Task(title="private task", project_id=proj.id, assigned_to=user2.id, status="TODO", priority="MEDIUM")
