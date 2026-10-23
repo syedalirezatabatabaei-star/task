@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, MetaData, Table, Column, BigInteger, String, Text, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy import text as sql_text
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -16,6 +17,13 @@ from app.core.permissions import ALL_PERMISSIONS
 from app.models.user import User, UserRole
 from app.models.permission import Permission, UserPermission
 from app.main import app
+
+# SQLite only auto-generates integer primary keys when their DDL type is exactly INTEGER.
+# Keep production MySQL BIGINT columns unchanged while making the in-memory test schema behave correctly.
+@compiles(BigInteger, "sqlite")
+def _compile_bigint_as_integer_for_sqlite(type_, compiler, **kw):
+    return "INTEGER"
+
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 
