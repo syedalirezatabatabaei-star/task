@@ -55,7 +55,7 @@
 
           <div class="tab-content active" id="tab-stages">
             <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-              <button class="btn btn-primary btn-sm" id="btn-add-stage" data-permission="stages.create">+ مرحله جدید</button>
+              <button class="btn btn-primary btn-sm" id="btn-add-stage" data-permission="stages.create" data-permission="stages.create">+ مرحله جدید</button>
             </div>
             <div id="stages-list"></div>
           </div>
@@ -66,7 +66,7 @@
 
           <div class="tab-content" id="tab-members">
             <div style="display:flex;justify-content:flex-end;margin-bottom:12px" data-permission="projects.members.manage">
-              <button class="btn btn-primary btn-sm" id="btn-add-member">+ افزودن عضو</button>
+              <button class="btn btn-primary btn-sm" id="btn-add-member" data-permission="projects.members.manage">+ افزودن عضو</button>
             </div>
             <div id="members-list"></div>
           </div>
@@ -165,8 +165,8 @@ async function loadProject() {
     document.getElementById('overview-card').innerHTML = `
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px">
         <div>
-          <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">${project.name}</h2>
-          <p style="color:var(--text-secondary);font-size:14px;max-width:600px">${project.description||'بدون توضیحات'}</p>
+          <h2 style="font-size:20px;font-weight:800;margin-bottom:8px">${escapeHtml(project.name)}</h2>
+          <p style="color:var(--text-secondary);font-size:14px;max-width:600px">${escapeHtml(project.description || 'بدون توضیحات')}</p>
           <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
             <span style="font-size:13px;color:var(--text-muted)"> شروع: ${project.start_date?formatDate(project.start_date):'—'}</span>
             <span style="font-size:13px;color:var(--text-muted)"> پایان: ${project.end_date?formatDate(project.end_date):'—'}</span>
@@ -192,7 +192,7 @@ async function loadProject() {
     document.getElementById('project-content').classList.remove('hidden');
   } catch (e) {
     Toast.error(e.message);
-    document.getElementById('project-loading').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+    document.getElementById('project-loading').textContent = e.message || 'بارگذاری پروژه ناموفق بود';
   }
 }
 
@@ -206,8 +206,8 @@ function renderStages(stages) {
     <div class="card mb-4" style="padding:14px 18px">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <span style="font-weight:700;font-size:15px">${s.order_index+1}. ${s.name}</span>
-          ${s.description ? `<div style="font-size:13px;color:var(--text-muted);margin-top:3px">${s.description}</div>` : ''}
+          <span style="font-weight:700;font-size:15px">${s.order_index+1}. ${escapeHtml(s.name)}</span>
+          ${s.description ? `<div style="font-size:13px;color:var(--text-muted);margin-top:3px">${escapeHtml(s.description)}</div>` : ''}
           <div style="font-size:12px;color:var(--text-muted);margin-top:4px">
             ${s.task_count} وظیفه &nbsp;|&nbsp; ${s.completed_task_count} انجام‌شده
             ${s.end_date ? ` &nbsp;|&nbsp; ددلاین: ${formatDate(s.end_date)}` : ''}
@@ -215,7 +215,7 @@ function renderStages(stages) {
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <div style="min-width:120px">${progressBar(s.progress)}</div>
-          <button class="btn btn-sm btn-danger" onclick="deleteStage(${s.id},'${s.name}')" data-permission="stages.delete"></button>
+          <button class="btn btn-sm btn-danger" onclick="deleteStage(${Number(s.id)})" data-permission="stages.delete"></button>
         </div>
       </div>
     </div>
@@ -234,15 +234,15 @@ async function loadProjectTasks() {
     el.innerHTML = `<div class="table-container"><table class="data-table">
       <thead><tr><th>عنوان</th><th>مسئول</th><th>اولویت</th><th>وضعیت</th><th>ددلاین</th><th></th></tr></thead>
       <tbody>${tasks.map(t => `<tr>
-        <td><a href="/task-details.html?id=${t.id}" style="font-weight:600">${t.title}</a></td>
-        <td>${t.assignee_name||'—'}</td>
+        <td><a href="/task-details.html?id=${Number(t.id)}" style="font-weight:600">${escapeHtml(t.title)}</a></td>
+        <td>${escapeHtml(t.assignee_name || '—')}</td>
         <td>${priorityBadge(t.priority)}</td>
         <td>${statusBadge(t.status)}</td>
         <td style="font-size:12px">${t.deadline?formatDate(t.deadline):'—'}</td>
         <td><a href="/task-details.html?id=${t.id}" class="btn btn-sm btn-secondary"></a></td>
       </tr>`).join('')}</tbody>
     </table></div>`;
-  } catch (e) { el.innerHTML = `<p style="color:var(--danger)">${e.message}</p>`; }
+  } catch (e) { el.textContent = e.message || 'بارگذاری وظایف ناموفق بود'; }
 }
 
 function renderMembers(members) {
@@ -253,10 +253,10 @@ function renderMembers(members) {
   }
   el.innerHTML = `<div class="grid grid-3">${members.map(m => `
     <div class="card" style="padding:14px;display:flex;align-items:center;gap:12px">
-      <div class="user-avatar" style="width:40px;height:40px;font-size:16px">${(m.user?.full_name||'?').charAt(0)}</div>
+      <div class="user-avatar" style="width:40px;height:40px;font-size:16px">${escapeHtml((m.user?.full_name||'?').charAt(0))}</div>
       <div style="flex:1">
-        <div style="font-weight:700">${m.user?.full_name||'—'}</div>
-        <div style="font-size:12px;color:var(--text-muted)">${m.project_role||'عضو تیم'}</div>
+        <div style="font-weight:700">${escapeHtml(m.user?.full_name || '—')}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${escapeHtml(m.project_role || 'عضو تیم')}</div>
       </div>
       <button class="btn btn-sm btn-danger" onclick="removeMember(${m.user_id})" title="حذف"></button>
     </div>
@@ -292,10 +292,10 @@ async function loadRoadmap() {
                 <div class="roadmap-content">
                   <div class="roadmap-stage-card ${active?'active':''}">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                      <span style="font-weight:700">${s.order_index+1}. ${s.name}</span>
+                      <span style="font-weight:700">${s.order_index+1}. ${escapeHtml(s.name)}</span>
                       ${done ? '<span class="badge badge-success"> تکمیل</span>' : active ? '<span class="badge badge-info"> در جریان</span>' : '<span class="badge badge-gray"> در انتظار</span>'}
                     </div>
-                    ${s.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${s.description}</div>` : ''}
+                    ${s.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${escapeHtml(s.description)}</div>` : ''}
                     <div style="display:flex;gap:16px;font-size:12px;color:var(--text-muted);margin-bottom:8px">
                       <span>${s.task_count} وظیفه</span>
                       <span>${s.completed_task_count} انجام‌شده</span>
@@ -314,7 +314,7 @@ async function loadRoadmap() {
         </div>
       </div>`;
   } catch (e) {
-    el.innerHTML = `<div class="empty-state" style="color:var(--danger)">${e.message}</div>`;
+    el.textContent = e.message || 'بارگذاری نقشه راه ناموفق بود';
   }
 }
 
@@ -339,8 +339,8 @@ async function saveStage() {
   finally { setLoading(btn, false); }
 }
 
-async function deleteStage(id, name) {
-  confirmAction(`آیا از حذف مرحله "${name}" مطمئن هستید؟`, async () => {
+async function deleteStage(id) {
+  confirmAction('آیا از حذف این مرحله مطمئن هستید؟', async () => {
     try {
       await Api.deleteStage(id);
       Toast.success('مرحله حذف شد');
@@ -355,7 +355,7 @@ async function openMemberModal() {
   try {
     const res = await Api.getUsers({ page_size: 100 });
     const sel = document.getElementById('mf-user');
-    sel.innerHTML = res.data.items.map(u => `<option value="${u.id}">${u.full_name||u.username}</option>`).join('');
+    sel.innerHTML = res.data.items.map(u => `<option value="${u.id}">${escapeHtml(u.full_name || u.username)}</option>`).join('');
     document.getElementById('mf-role').value = '';
     Modal.open('member-modal');
   } catch (e) { Toast.error(e.message); }
