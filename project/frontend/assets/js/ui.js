@@ -290,10 +290,70 @@ function clearFieldErrors(formId) {
   form.querySelectorAll('.form-error').forEach(el => el.remove());
 }
 
-// ─── Jalali display for native date controls ──────
+// ─── Real Jalali date picker (stores ISO/Gregorian values for the API) ──
 (function initJalaliDateFields() {
   const nativeValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-  if (!nativeValue) return;
+  if (!nativeValue || !window.Intl || !Intl.DateTimeFormat) return;
+  const numberFa = new Intl.NumberFormat('fa-IR-u-nu-arabext');
+  const dateParts = new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric', month: 'numeric', day: 'numeric' });
+  const monthTitle = new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-arabext', { year: 'numeric', month: 'long' });
+  const weekdayNames = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+
+  function parseParts(date) {
+    const parts = {};
+    dateParts.formatToParts(date).forEach(p => { if (p.type === 'year' || p.type === 'month' || p.type === 'day') parts[p.type] = Number(p.value); });
+    return { year: parts.year, month: parts.month, day: parts.day };
+  }
+  function toGregorian(jy, jm, jd) {
+    jy += 1595;
+    let days = -355668 + (365 * jy) + Math.floor(jy / 33) * 8 + Math.floor(((jy % 33) + 3) / 4) + jd + (jm < 7 ? (jm - 1) * 31 : (jm - 7) * 30 + 186);
+    let gy = 400 * Math.floor(days / 146097);
+    days %= 146097;
+    if (days > 36524) {
+      gy += 100 * Math.floor(--days / 36524);
+      days %= 36524;
+      if (days >= 365) days += 1;
+    }
+    gy += 4 * Math.floor(days / 1461);
+    days %= 1461;
+    if (days > 365) {
+      gy += Math.floor((days - 1) / 365);
+      days = (days - 1) % 365;
+    }
+    let gd = days + 1;
+    const monthDays = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let gm = 1;
+    while (gm <= 12 && gd > monthDays[gm]) { gd -= monthDays[gm]; gm += 1; }
+    return { year: gy, month: gm, day: gd };
+  }
+  function isoFromJalali(y, m, d) {
+    const g = toGregorian(y, m, d);
+    return String(g.year).padStart(4, '0') + '-' + String(g.month).padStart(2, '0') + '-' + String(g.day).padStart(2, '0');
+  }
+  function isoDate(iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+    const d = new Date(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10)), 12);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  function jalaliFromIso(iso) {
+    const d = isoDate(iso);
+    return d ? parseParts(d) : null;
+  }
+  function formatJalali(iso) {
+    const j = jalaliFromIso(iso);
+    return j ? [j.year, String(j.month).padStart(2, '0'), String(j.day).padStart(2, '0')].join('/') : '';
+  }
+  function daysInMonth(year, month) {
+    const nextYear = month === 12 ? year + 1 : year;
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const first = isoDate(isoFromJalali(year, month, 1));
+    const next = isoDate(isoFromJalali(nextYear, nextMonth, 1));
+    return Math.round((next - first) / 86400000);
+  }
+  function normalizeDigits(value) {
+    return String(value).replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).trim();
+  }
+
   document.querySelectorAll('input[type="date"]').forEach(input => {
     if (input.dataset.jalaliReady === 'true') return;
     input.dataset.jalaliReady = 'true';
@@ -301,23 +361,93 @@ function clearFieldErrors(formId) {
     wrapper.className = 'jalali-date-wrap';
     input.parentNode.insertBefore(wrapper, input);
     wrapper.appendChild(input);
-    const display = document.createElement('span');
-    display.className = 'jalali-date-display';
-    display.setAttribute('aria-hidden', 'true');
-    wrapper.appendChild(display);
-    const sync = () => {
-      const value = nativeValue.get.call(input);
-      display.textContent = value ? formatDate(value) : 'انتخاب تاریخ شمسی';
-    };
+    input.classList.add('jalali-native-date');
+
+    const visible = document.createElement('input');
+    visible.type = 'text';
+    visible.className = 'form-control jalali-date-input';
+    visible.inputMode = 'numeric';
+    visible.placeholder = '۱۴۰۵/۰۷/۰۱';
+    visible.autocomplete = 'off';
+    visible.setAttribute('aria-label', input.getAttribute('aria-label') || input.parentElement.previousElementSibling?.textContent?.trim() || 'تاریخ شمسی');
+    wrapper.appendChild(visible);
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'jalali-calendar-toggle';
+    toggle.setAttribute('aria-label', 'بازکردن تقویم شمسی');
+    toggle.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>';
+    wrapper.appendChild(toggle);
+
+    const panel = document.createElement('div');
+    panel.className = 'jalali-calendar hidden';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', 'تقویم شمسی');
+    wrapper.appendChild(panel);
+
+    let view = parseParts(new Date());
+    function setIso(iso) {
+      nativeValue.set.call(input, iso || '');
+      visible.value = formatJalali(iso || '');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.setCustomValidity('');
+    }
+    function sync() {
+      visible.value = formatJalali(nativeValue.get.call(input));
+    }
     Object.defineProperty(input, 'value', {
       configurable: true,
       enumerable: true,
       get() { return nativeValue.get.call(this); },
       set(value) { nativeValue.set.call(this, value); sync(); }
     });
+
+    function renderCalendar() {
+      if (view.month < 1) { view.year -= 1; view.month = 12; }
+      if (view.month > 12) { view.year += 1; view.month = 1; }
+      const firstDate = isoDate(isoFromJalali(view.year, view.month, 1));
+      const offset = (firstDate.getDay() + 1) % 7;
+      const count = daysInMonth(view.year, view.month);
+      const selected = jalaliFromIso(nativeValue.get.call(input));
+      let cells = '';
+      for (let i = 0; i < offset; i++) cells += '<span class="jalali-calendar-blank"></span>';
+      for (let day = 1; day <= count; day++) {
+        const isSelected = selected && selected.year === view.year && selected.month === view.month && selected.day === day;
+        cells += '<button type="button" class="jalali-calendar-day' + (isSelected ? ' selected' : '') + '" data-jalali-day="' + day + '">' + numberFa.format(day) + '</button>';
+      }
+      panel.innerHTML = '<div class="jalali-calendar-head"><button type="button" data-jalali-shift="-1" aria-label="ماه قبل">‹</button><strong>' + monthTitle.format(firstDate) + '</strong><button type="button" data-jalali-shift="1" aria-label="ماه بعد">›</button></div><div class="jalali-calendar-week">' + weekdayNames.map(d => '<span>' + d + '</span>').join('') + '</div><div class="jalali-calendar-days">' + cells + '</div>';
+    }
+    function openCalendar() {
+      const selected = jalaliFromIso(nativeValue.get.call(input));
+      if (selected) view = selected;
+      else view = parseParts(new Date());
+      renderCalendar();
+      panel.classList.remove('hidden');
+    }
+    visible.addEventListener('change', () => {
+      const value = normalizeDigits(visible.value).replace(/[.-]/g, '/');
+      if (!value) { setIso(''); return; }
+      const match = value.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+      if (!match) { input.setCustomValidity('تاریخ را به شکل سال/ماه/روز شمسی وارد کنید'); visible.reportValidity(); return; }
+      const y = Number(match[1]), m = Number(match[2]), d = Number(match[3]);
+      if (m < 1 || m > 12 || d < 1 || d > daysInMonth(y, m)) {
+        input.setCustomValidity('تاریخ شمسی معتبر نیست'); visible.setCustomValidity('تاریخ شمسی معتبر نیست'); visible.reportValidity(); return;
+      }
+      visible.setCustomValidity('');
+      setIso(isoFromJalali(y, m, d));
+    });
+    visible.addEventListener('input', () => visible.setCustomValidity(''));
+    visible.addEventListener('keydown', event => { if (event.key === 'ArrowDown' && (event.altKey || event.ctrlKey)) { event.preventDefault(); openCalendar(); } if (event.key === 'Escape') panel.classList.add('hidden'); });
+    toggle.addEventListener('click', () => panel.classList.contains('hidden') ? openCalendar() : panel.classList.add('hidden'));
+    panel.addEventListener('click', event => {
+      const shift = event.target.closest('[data-jalali-shift]');
+      if (shift) { view.month += Number(shift.dataset.jalaliShift); renderCalendar(); return; }
+      const dayButton = event.target.closest('[data-jalali-day]');
+      if (dayButton) { setIso(isoFromJalali(view.year, view.month, Number(dayButton.dataset.jalaliDay))); panel.classList.add('hidden'); }
+    });
+    document.addEventListener('click', event => { if (!wrapper.contains(event.target)) panel.classList.add('hidden'); });
     input.addEventListener('change', sync);
-    input.addEventListener('input', sync);
-    input.setAttribute('aria-label', input.getAttribute('aria-label') || 'تاریخ شمسی');
     sync();
   });
 })();
