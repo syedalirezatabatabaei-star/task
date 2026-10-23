@@ -449,6 +449,7 @@ function clearFieldErrors(formId) {
     });
     document.addEventListener('click', event => { if (!wrapper.contains(event.target)) panel.classList.add('hidden'); });
     input.addEventListener('change', sync);
+    input.form?.addEventListener('reset', () => setTimeout(sync, 0));
     sync();
   });
 })();
