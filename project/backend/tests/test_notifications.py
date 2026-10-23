@@ -79,7 +79,7 @@ def test_private_announcement_is_visible_only_to_selected_recipient(
     assert forbidden_read.status_code == 404
 
 
-def test_public_announcement_fans_out_to_active_users(client, auth_headers_admin, regular_user, db):
+def test_public_announcement_fans_out_to_active_users(client, auth_headers_admin, auth_headers_user, regular_user, db):
     response = client.post(
         "/api/v1/notifications/announcements",
         headers=auth_headers_admin,
