@@ -153,10 +153,10 @@ async function load() {
     grid.innerHTML = items.map(p => `
       <div class="card" style="cursor:pointer;transition:all 0.2s" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow=''">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-          <div style="font-size:16px;font-weight:700;color:var(--text)">${p.name}</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)">${escapeHtml(p.name)}</div>
           ${projectStatusBadge(p.status)}
         </div>
-        <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;min-height:36px">${p.description?.substring(0,80) || 'بدون توضیحات'}${p.description?.length>80?'...':''}</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;min-height:36px">${escapeHtml(p.description?.substring(0,80) || 'بدون توضیحات')}${p.description?.length>80?'...':''}</div>
         <div style="display:flex;gap:16px;font-size:12px;color:var(--text-secondary);margin-bottom:12px">
           <span> ${p.member_count} عضو</span>
           <span> ${p.task_count} وظیفه</span>
@@ -166,13 +166,13 @@ async function load() {
         <div style="display:flex;gap:8px;margin-top:14px">
           <a href="/project-details.html?id=${p.id}" class="btn btn-secondary btn-sm project-action-icon" style="flex:1;justify-content:center" title="جزئیات" aria-label="جزئیات"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg><span>جزئیات</span></a>
           <button class="btn btn-sm btn-secondary project-action-icon" onclick="event.stopPropagation();openEditModal(${p.id})" data-permission="projects.edit" title="ویرایش" aria-label="ویرایش"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4Z"/></svg></button>
-          <button class="btn btn-sm btn-danger project-action-icon" onclick="event.stopPropagation();deleteProject(${p.id},'${String(p.name||'').replace(/'/g,'&#39;')}')" data-permission="projects.delete" title="حذف" aria-label="حذف"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 10v6M14 10v6"/></svg></button>
+          <button class="btn btn-sm btn-danger project-action-icon" onclick="event.stopPropagation();deleteProject(${Number(p.id)})" data-REMOVE="/'/g,'&#39;')}')" data-permission="projects.delete" title="حذف" aria-label="حذف"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 10v6M14 10v6"/></svg></button>
         </div>
       </div>
     `).join('');
     renderPagination('pagination', currentPage, pages, total, pageSize, p => { currentPage=p; load(); });
   } catch (e) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;color:var(--danger)">${e.message}</div>`;
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;color:var(--danger)"></div>';\n    grid.firstElementChild.textContent = e.message || 'خطا در دریافت پروژه‌ها';
   }
 }
 
