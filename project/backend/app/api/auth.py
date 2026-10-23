@@ -1,8 +1,8 @@
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
-from app.core.database import get_db, engine
+from app.core.database import get_db
 from app.core.security import verify_password, create_access_token
 from app.core.config import settings
 from app.models.user import User
@@ -44,24 +44,18 @@ def login(body: LoginRequest, request: Request, db: Session = Depends(get_db)):
         expires_delta=timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
-    # Write the audit entry through a dedicated committed session so the
-    # request session is left untouched (fastapi/testclient sessions are not
-    # committed and grow until SQLite runs out of disk space).
-    AuditSession = sessionmaker(bind=engine)
-    audit_db = AuditSession()
-    try:
-        log_action(
-            db=audit_db,
-            user_id=user.id,
-            action="USER_LOGIN",
-            entity_type="user",
-            entity_id=user.id,
-            description=f"ورود کاربر {user.username}",
-            ip_address=get_client_ip(request),
-        )
-    finally:
-        audit_db.commit()
-        audit_db.close()
+    # Use the request-scoped database session so audit events follow the same
+    # database configuration as the request and remain isolated in tests.
+    log_action(
+        db=db,
+        user_id=user.id,
+        action="USER_LOGIN",
+        entity_type="user",
+        entity_id=user.id,
+        description=f"ورود کاربر {user.username}",
+        ip_address=get_client_ip(request),
+    )
+    db.commit()
 
     return LoginResponse(
         access_token=access_token,
