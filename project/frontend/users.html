@@ -250,10 +250,10 @@ async function loadUsers() {
             <tr>
               <td>${(currentPage-1)*pageSize + i + 1}</td>
               <td>
-                <div style="font-weight:600">${u.full_name || '—'}</div>
-                <div style="font-size:12px;color:var(--text-muted)">${u.email || ''}</div>
+                <div style="font-weight:600">${escapeHtml(u.full_name || '—')}</div>
+                <div style="font-size:12px;color:var(--text-muted)">${escapeHtml(u.email || '')}</div>
               </td>
-              <td><code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;font-size:12px">${u.username}</code></td>
+              <td><code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;font-size:12px">${escapeHtml(u.username)}</code></td>
               <td>${u.role === 'ADMIN' ? '<span class="badge badge-purple">مدیر</span>' : '<span class="badge badge-info">کاربر</span>'}</td>
               <td>${u.is_active
                 ? '<span class="badge badge-success">فعال</span>'
@@ -262,11 +262,11 @@ async function loadUsers() {
               <td>
                 <div class="table-actions">
                   <a href="/user-details.html?id=${u.id}" class="btn btn-sm btn-secondary icon-action" title="جزئیات" aria-label="جزئیات"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></a>
-                  <button class="btn btn-sm btn-secondary icon-action" onclick="openEditModal(${u.id})" title="ویرایش" aria-label="ویرایش"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4Z"/></svg></button>
-                  <button class="btn btn-sm btn-secondary icon-action" onclick="openResetModal(${u.id})" title="بازنشانی رمز" aria-label="بازنشانی رمز"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></button>
+                  <button class="btn btn-sm btn-secondary icon-action" data-permission="users.edit" onclick="openEditModal(${Number(u.id)})" title="ویرایش" aria-label="ویرایش"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4Z"/></svg></button>
+                  <button class="btn btn-sm btn-secondary icon-action" data-permission="users.edit" onclick="openResetModal(${Number(u.id)})" title="بازنشانی رمز" aria-label="بازنشانی رمز"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></button>
                   <a href="/user-permissions.html?id=${u.id}" class="btn btn-sm btn-secondary icon-action" title="دسترسی‌ها" aria-label="دسترسی‌ها"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><path d="m10 16 1.5 1.5L14 15"/></svg></a>
-                  <button class="btn btn-sm icon-action ${u.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleStatus(${u.id},${u.is_active})" title="${u.is_active ? 'غیرفعال کردن' : 'فعال کردن'}" aria-label="${u.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">${userActionIcon(u.is_active ? 'disable' : 'enable')}</button>
-                  <button class="btn btn-sm btn-danger icon-action" onclick="deleteUser(${u.id}, ${JSON.stringify(u.full_name || '').replace(/"/g, '&quot;')})" title="حذف" aria-label="حذف"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 10v6M14 10v6"/></svg></button>
+                  <button class="btn btn-sm icon-action" data-permission="users.edit" onclick="toggleStatus(${Number(u.id)},${Boolean(u.is_active)})" class="${u.is_active ? 'btn-warning' : 'btn-success'}" title="${u.is_active ? 'غیرفعال کردن' : 'فعال کردن'}" aria-label="${u.is_active ? 'غیرفعال کردن' : 'فعال کردن'}">${userActionIcon(u.is_active ? 'disable' : 'enable')}</button>
+                  <button class="btn btn-sm btn-danger icon-action" data-permission="users.delete" onclick="deleteUser(${Number(u.id)})" title="حذف" aria-label="حذف"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 10v6M14 10v6"/></svg></button>
                 </div>
               </td>
             </tr>
@@ -277,7 +277,7 @@ async function loadUsers() {
 
     renderPagination('pagination', currentPage, pages, total, pageSize, (p) => { currentPage = p; loadUsers(); });
   } catch (e) {
-    container.innerHTML = `<div class="empty-state" style="padding:48px;color:var(--danger)">${e.message}</div>`;
+    container.innerHTML = '<div class="empty-state" style="padding:48px;color:var(--danger)"></div>';\n    container.firstElementChild.textContent = e.message || 'خطا در دریافت کاربران';
   }
 }
 
@@ -370,8 +370,7 @@ async function toggleStatus(id, isActive) {
   } catch (e) { Toast.error(e.message); }
 }
 
-async function deleteUser(id, name) {
-  confirmAction(`آیا از حذف کاربر "${name}" مطمئن هستید؟`, async () => {
+async function deleteUser(id) {\n  confirmAction('آیا از حذف این کاربر مطمئن هستید؟', async () => {
     try {
       await Api.deleteUser(id);
       Toast.success('کاربر حذف شد');
