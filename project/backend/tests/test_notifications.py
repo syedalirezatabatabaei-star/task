@@ -26,7 +26,7 @@ def test_user_without_notification_permission_cannot_publish_or_list_recipients(
 
 
 def test_private_announcement_is_visible_only_to_selected_recipient(
-    client, auth_headers_admin, regular_user, db
+    client, auth_headers_admin, auth_headers_user, regular_user, db
 ):
     other = User(
         username="other-notification-user",
@@ -60,6 +60,17 @@ def test_private_announcement_is_visible_only_to_selected_recipient(
     assert rows[0].is_read is False
     assert db.query(Notification).filter(Notification.user_id == other.id).count() == 0
 
+    inbox = client.get("/api/v1/notifications", headers=auth_headers_user)
+    assert inbox.status_code == 200
+    assert any(item["title"] == "اعلان خصوصی" for item in inbox.json()["data"]["items"])
+    assert inbox.json()["data"]["unread_count"] == 1
+
+    marked = client.patch(
+        f"/api/v1/notifications/{rows[0].id}/read", headers=auth_headers_user
+    )
+    assert marked.status_code == 200
+    assert marked.json()["data"]["is_read"] is True
+
     from app.core.security import create_access_token
     other_headers = {"Authorization": f"Bearer {create_access_token({'sub': str(other.id)})}"}
     forbidden_read = client.patch(
@@ -88,6 +99,9 @@ def test_public_announcement_fans_out_to_active_users(client, auth_headers_admin
     assert {row.user_id for row in rows} == {
         user.id for user in db.query(User).filter(User.is_active.is_(True)).all()
     }
+    inbox = client.get("/api/v1/notifications", headers=auth_headers_user)
+    assert inbox.status_code == 200
+    assert any(item["title"] == "اعلان عمومی" for item in inbox.json()["data"]["items"])
 
 
 def test_private_announcement_requires_a_valid_active_recipient(client, auth_headers_admin):
