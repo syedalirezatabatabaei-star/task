@@ -247,7 +247,8 @@ async function loadList() {
       </table>`;
     renderPagination('pagination', currentPage, pages, total, pageSize, p => { currentPage=p; loadList(); });
   } catch (e) {
-    container.innerHTML = '<div class="empty-state" style="padding:48px;color:var(--danger)"></div>';\n    container.firstElementChild.textContent = e.message || 'خطا در دریافت وظایف';
+    container.innerHTML = '<div class="empty-state" style="padding:48px;color:var(--danger)"></div>';
+    container.firstElementChild.textContent = e.message || 'خطا در دریافت وظایف';
   }
 }
 
@@ -352,7 +353,8 @@ async function doSubmit() {
   finally { setLoading(btn, false); }
 }
 
-async function deleteTask(id) {\n  confirmAction('آیا از حذف این وظیفه مطمئن هستید؟', async () => {
+async function deleteTask(id) {
+  confirmAction('آیا از حذف این وظیفه مطمئن هستید؟', async () => {
     try { await Api.deleteTask(id); Toast.success('وظیفه حذف شد'); await loadView(); }
     catch (e) { Toast.error(e.message); }
   });
