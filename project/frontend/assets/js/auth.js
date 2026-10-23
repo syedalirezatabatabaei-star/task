@@ -97,29 +97,12 @@ const Auth = (() => {
       overlay.classList.remove('active');
     });
 
-    // Notifications dropdown (UI placeholder until a backend notifications endpoint is available).
-    const notificationToggle = document.getElementById('notification-toggle');
+    // Notification dropdown behavior is handled by ui.js.
     const notificationPanel = document.getElementById('notification-panel');
-    const notificationDot = document.getElementById('notification-dot');
-    notificationToggle?.addEventListener('click', () => {
-      const open = notificationPanel?.classList.contains('hidden');
-      notificationPanel?.classList.toggle('hidden', !open);
-      notificationToggle.setAttribute('aria-expanded', String(!!open));
-    });
-    document.getElementById('notification-clear')?.addEventListener('click', () => {
-      if (notificationDot) notificationDot.style.display = 'none';
-      notificationPanel?.classList.add('hidden');
-      notificationToggle?.setAttribute('aria-expanded', 'false');
-    });
-    document.addEventListener('click', event => {
-      if (!event.target.closest('.notification-wrap')) {
-        notificationPanel?.classList.add('hidden');
-        notificationToggle?.setAttribute('aria-expanded', 'false');
-      }
-    });
+    const notificationToggle = document.getElementById('notification-toggle');
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') {
-        notificationPanel?.classList.add('hidden');
+      if (event.key === 'Escape' && notificationPanel) {
+        notificationPanel.classList.add('hidden');
         notificationToggle?.setAttribute('aria-expanded', 'false');
       }
     });
