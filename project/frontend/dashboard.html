@@ -212,8 +212,8 @@ if (isAdmin) {
       const tasksHtml = (d.recent_tasks || []).map(t => `
         <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
           <div style="flex:1">
-            <div style="font-size:13px;font-weight:600">${t.title}</div>
-            <div style="font-size:12px;color:var(--text-muted)">${t.project_name||'—'} | ${t.assignee_name||'—'}</div>
+            <div style="font-size:13px;font-weight:600">${escapeHtml(t.title)}</div>
+            <div style="font-size:12px;color:var(--text-muted)">${escapeHtml(t.project_name || '—')} | ${escapeHtml(t.assignee_name || '—')}</div>
           </div>
           ${statusBadge(t.status)}
         </div>
@@ -231,7 +231,7 @@ if (isAdmin) {
       const res = await Api.getUserDashboard();
       const d = res.data;
 
-      document.getElementById('user-greeting').textContent = `سلام ${d.user?.full_name || ''}`;
+      document.getElementById('user-greeting').textContent = `سلام ${escapeHtml(d.user?.full_name || '')}`;
 
       document.getElementById('stat-cards-user').innerHTML = [
         { label: 'پروژه‌هایم',       value: d.my_project_count,      icon: '' },
@@ -251,10 +251,10 @@ if (isAdmin) {
       // Upcoming deadlines
       const upcomingHtml = (d.upcoming_deadlines || []).length
         ? d.upcoming_deadlines.map(t => `
-            <a href="/task-details.html?id=${t.id}" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit">
+            <a href="/task-details.html?id=${Number(t.id)}" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit">
               <div style="flex:1">
-                <div style="font-size:13px;font-weight:600">${t.title}</div>
-                <div style="font-size:12px;color:var(--text-muted)">${t.project_name||''}</div>
+                <div style="font-size:13px;font-weight:600">${escapeHtml(t.title)}</div>
+                <div style="font-size:12px;color:var(--text-muted)">${escapeHtml(t.project_name || '')}</div>
               </div>
               <div style="text-align:left">
                 <div style="font-size:12px;color:var(--danger);font-weight:600">${formatDate(t.deadline)}</div>
@@ -270,10 +270,10 @@ if (isAdmin) {
         ? d.recent_evaluations.map(e => `
             <div style="padding:10px 0;border-bottom:1px solid var(--border)">
               <div style="display:flex;justify-content:space-between;align-items:center">
-                <div style="font-size:13px;font-weight:600">${e.task_title||'وظیفه'}</div>
+                <div style="font-size:13px;font-weight:600">${escapeHtml(e.task_title || 'وظیفه')}</div>
                 <div style="font-size:18px;font-weight:800;color:${e.score>=70?'var(--success)':e.score>=50?'var(--warning)':'var(--danger)'}">${e.score}</div>
               </div>
-              ${e.comment?`<div style="font-size:12px;color:var(--text-muted);margin-top:3px">${e.comment}</div>`:''}
+              ${e.comment?`<div style="font-size:12px;color:var(--text-muted);margin-top:3px">${escapeHtml(e.comment)}</div>`:''}
             </div>
           `).join('')
         : '<div class="empty-state" style="padding:24px"><p>ارزیابی‌ای وجود ندارد</p></div>';
