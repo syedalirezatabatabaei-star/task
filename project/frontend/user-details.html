@@ -103,7 +103,7 @@
     ].map(([k,v]) => `<div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">${k}</span><span style="font-weight:500">${escapeHtml(v)}</span></div>`).join('');
 
     const permissionsLink = document.getElementById('edit-perms-btn');
-    if (user.role === 'ADMIN' || Api.getCurrentUser()?.role === 'ADMIN') permissionsLink.href = `/user-permissions.html?id=${Number(userId)}`;
+    if (Api.getCurrentUser()?.role === 'ADMIN') permissionsLink.href = `/user-permissions.html?id=${Number(userId)}`;
     else permissionsLink.style.display = 'none';
 
     if (report) {
