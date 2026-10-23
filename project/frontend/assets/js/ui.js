@@ -368,6 +368,8 @@ function clearFieldErrors(formId) {
     visible.type = 'text';
     visible.className = 'form-control jalali-date-input';
     visible.inputMode = 'numeric';
+    visible.required = input.required;
+    input.required = false;
     visible.placeholder = '۱۴۰۵/۰۷/۰۱';
     visible.autocomplete = 'off';
     visible.setAttribute('aria-label', input.getAttribute('aria-label') || input.parentElement.previousElementSibling?.textContent?.trim() || 'تاریخ شمسی');
@@ -426,18 +428,29 @@ function clearFieldErrors(formId) {
       renderCalendar();
       panel.classList.remove('hidden');
     }
-    visible.addEventListener('change', () => {
+    function validateVisibleDate(showError = false) {
       const value = normalizeDigits(visible.value).replace(/[.-]/g, '/');
-      if (!value) { setIso(''); return; }
+      if (!value) {
+        setIso('');
+        return true;
+      }
       const match = value.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
-      if (!match) { visible.setCustomValidity('تاریخ را به شکل سال/ماه/روز شمسی وارد کنید'); visible.reportValidity(); return; }
+      if (!match) {
+        visible.setCustomValidity('تاریخ را به شکل سال/ماه/روز شمسی وارد کنید');
+        if (showError) visible.reportValidity();
+        return false;
+      }
       const y = Number(match[1]), m = Number(match[2]), d = Number(match[3]);
       if (m < 1 || m > 12 || d < 1 || d > daysInMonth(y, m)) {
-        visible.setCustomValidity('تاریخ شمسی معتبر نیست'); visible.reportValidity(); return;
+        visible.setCustomValidity('تاریخ شمسی معتبر نیست');
+        if (showError) visible.reportValidity();
+        return false;
       }
       visible.setCustomValidity('');
       setIso(isoFromJalali(y, m, d));
-    });
+      return true;
+    }
+    visible.addEventListener('change', () => validateVisibleDate(true));
     visible.addEventListener('input', () => visible.setCustomValidity(''));
     visible.addEventListener('keydown', event => { if (event.key === 'ArrowDown' && (event.altKey || event.ctrlKey)) { event.preventDefault(); openCalendar(); } if (event.key === 'Escape') panel.classList.add('hidden'); });
     toggle.addEventListener('click', () => panel.classList.contains('hidden') ? openCalendar() : panel.classList.add('hidden'));
@@ -449,6 +462,12 @@ function clearFieldErrors(formId) {
     });
     document.addEventListener('click', event => { if (!wrapper.contains(event.target)) panel.classList.add('hidden'); });
     input.addEventListener('change', sync);
+    input.form?.addEventListener('submit', event => {
+      if (!validateVisibleDate(false)) {
+        event.preventDefault();
+        visible.reportValidity();
+      }
+    });
     input.form?.addEventListener('reset', () => setTimeout(sync, 0));
     sync();
   });
