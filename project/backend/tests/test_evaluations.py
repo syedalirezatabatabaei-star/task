@@ -8,6 +8,13 @@ def submitted_task(client, auth_headers_admin, regular_user):
         "name": "ارزیابی پروژه", "status": "ACTIVE"
     }).json()["data"]
 
+    membership = client.post(
+        f"/api/v1/projects/{proj['id']}/members",
+        headers=auth_headers_admin,
+        json={"user_id": regular_user.id, "project_role": "عضو"},
+    )
+    assert membership.status_code == 200
+
     task = client.post("/api/v1/tasks", headers=auth_headers_admin, json={
         "title": "وظیفه ارزیابی",
         "project_id": proj["id"],
@@ -73,6 +80,13 @@ def test_evaluate_non_submitted_task(client, auth_headers_admin, regular_user):
     proj = client.post("/api/v1/projects", headers=auth_headers_admin, json={
         "name": "p2", "status": "ACTIVE"
     }).json()["data"]
+
+    membership = client.post(
+        f"/api/v1/projects/{proj['id']}/members",
+        headers=auth_headers_admin,
+        json={"user_id": regular_user.id, "project_role": "عضو"},
+    )
+    assert membership.status_code == 200
 
     task = client.post("/api/v1/tasks", headers=auth_headers_admin, json={
         "title": "وظیفه TODO",
