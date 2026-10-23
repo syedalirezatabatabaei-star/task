@@ -60,6 +60,13 @@ def test_private_announcement_is_visible_only_to_selected_recipient(
     assert rows[0].is_read is False
     assert db.query(Notification).filter(Notification.user_id == other.id).count() == 0
 
+    from app.core.security import create_access_token
+    other_headers = {"Authorization": f"Bearer {create_access_token({'sub': str(other.id)})}"}
+    forbidden_read = client.patch(
+        f"/api/v1/notifications/{rows[0].id}/read", headers=other_headers
+    )
+    assert forbidden_read.status_code == 404
+
 
 def test_public_announcement_fans_out_to_active_users(client, auth_headers_admin, regular_user, db):
     response = client.post(
