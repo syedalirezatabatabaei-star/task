@@ -10,6 +10,7 @@ def test_list_permissions(client, auth_headers_admin):
     codes = [p["code"] for p in data]
     assert "dashboard.view" in codes
     assert "tasks.submit" in codes
+    assert "notifications.manage" in codes
 
 
 def test_list_permissions_non_admin(client, auth_headers_user):
@@ -58,3 +59,30 @@ def test_permission_enforced_on_backend(client, regular_user, db):
     token = create_access_token({"sub": str(regular_user.id)})
     resp = client.get("/api/v1/projects", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
+
+def test_notification_permission_can_be_granted_and_revoked(client, auth_headers_admin, regular_user):
+    grant = client.put(
+        f"/api/v1/users/{regular_user.id}/permissions",
+        headers=auth_headers_admin,
+        json={"permission_codes": ["dashboard.view", "notifications.manage"]},
+    )
+    assert grant.status_code == 200
+
+    listed = client.get(
+        f"/api/v1/users/{regular_user.id}/permissions",
+        headers=auth_headers_admin,
+    )
+    assert "notifications.manage" in listed.json()["data"]["permissions"]
+
+    revoke = client.put(
+        f"/api/v1/users/{regular_user.id}/permissions",
+        headers=auth_headers_admin,
+        json={"permission_codes": ["dashboard.view"]},
+    )
+    assert revoke.status_code == 200
+    listed_after = client.get(
+        f"/api/v1/users/{regular_user.id}/permissions",
+        headers=auth_headers_admin,
+    )
+    assert "notifications.manage" not in listed_after.json()["data"]["permissions"]
+
