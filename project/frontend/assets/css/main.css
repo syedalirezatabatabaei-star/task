@@ -1464,3 +1464,14 @@ body { overflow-x:hidden; }
   .header-brand span { font-size:9px; }
   .header-right { gap:3px; }
 }
+
+
+/* Preserve the fixed app header; the centered brand is positioned relative to this header. */
+.header {
+  position:fixed !important;
+  top:0;
+  left:0;
+  right:var(--sidebar-width);
+  height:var(--header-height);
+}
+.header.sidebar-collapsed { right:var(--sidebar-collapsed); }
