@@ -222,7 +222,8 @@ async function saveProject() {
   finally { setLoading(btn, false); }
 }
 
-async function deleteProject(id) {\n  confirmAction('آیا از حذف این پروژه مطمئن هستید؟', async () => {
+async function deleteProject(id) {
+  confirmAction('آیا از حذف این پروژه مطمئن هستید؟', async () => {
     try { await Api.deleteProject(id); Toast.success('پروژه حذف شد'); await load(); }
     catch (e) { Toast.error(e.message); }
   });
