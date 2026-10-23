@@ -42,6 +42,7 @@ const Auth = (() => {
     renderUserInfo();
     setupSidebar();
     hideUnauthorizedNavItems();
+    watchDynamicPermissions();
     return true;
   }
 
@@ -121,17 +122,35 @@ const Auth = (() => {
     });
   }
 
-  function hideUnauthorizedNavItems() {
+  function hideUnauthorizedNavItems(root = document) {
     const user = Api.getCurrentUser();
     if (!user) return;
-    if (user.role === 'ADMIN') return; // Admin sees everything
-
-    document.querySelectorAll('[data-permission]').forEach(el => {
-      const perm = el.dataset.permission;
-      if (!Api.hasPermission(perm)) {
+    const elements = [];
+    if (root.matches?.('[data-permission]')) elements.push(root);
+    elements.push(...(root.querySelectorAll?.('[data-permission]') || []));
+    elements.forEach(el => {
+      const allowed = user.role === 'ADMIN' || Api.hasPermission(el.dataset.permission);
+      if (!allowed) {
+        el.dataset.permissionHidden = 'true';
         el.style.display = 'none';
+        el.setAttribute('aria-hidden', 'true');
+      } else if (el.dataset.permissionHidden === 'true') {
+        delete el.dataset.permissionHidden;
+        el.style.removeProperty('display');
+        el.removeAttribute('aria-hidden');
       }
     });
+  }
+
+  let permissionObserver = null;
+  function watchDynamicPermissions() {
+    if (permissionObserver || !document.body || !window.MutationObserver) return;
+    permissionObserver = new MutationObserver(records => {
+      records.forEach(record => record.addedNodes.forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) hideUnauthorizedNavItems(node);
+      }));
+    });
+    permissionObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   async function logout() {
