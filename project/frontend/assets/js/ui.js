@@ -429,10 +429,10 @@ function clearFieldErrors(formId) {
       const value = normalizeDigits(visible.value).replace(/[.-]/g, '/');
       if (!value) { setIso(''); return; }
       const match = value.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
-      if (!match) { input.setCustomValidity('تاریخ را به شکل سال/ماه/روز شمسی وارد کنید'); visible.reportValidity(); return; }
+      if (!match) { visible.setCustomValidity('تاریخ را به شکل سال/ماه/روز شمسی وارد کنید'); visible.reportValidity(); return; }
       const y = Number(match[1]), m = Number(match[2]), d = Number(match[3]);
       if (m < 1 || m > 12 || d < 1 || d > daysInMonth(y, m)) {
-        input.setCustomValidity('تاریخ شمسی معتبر نیست'); visible.setCustomValidity('تاریخ شمسی معتبر نیست'); visible.reportValidity(); return;
+        visible.setCustomValidity('تاریخ شمسی معتبر نیست'); visible.reportValidity(); return;
       }
       visible.setCustomValidity('');
       setIso(isoFromJalali(y, m, d));
@@ -480,7 +480,7 @@ function clearFieldErrors(formId) {
       list.innerHTML = items.map(n => `
         <article class="notification-item ${n.is_read ? '' : 'unread'}" data-notification-id="${Number(n.id)}">
           <div class="notification-item-title">${escapeHtml(n.title)}</div>
-          <div class="notification-item-message">${escapeHtml(n.message).replace(/\\n/g, '<br>')}</div>
+          <div class="notification-item-message">${escapeHtml(n.message).replace(/\r?\n/g, '<br>')}</div>
           <div class="notification-item-meta">${formatDateTime(n.created_at)} · ${n.scope === 'public' ? 'عمومی' : 'خصوصی'} ${n.is_read ? '' : '<button type="button" class="notification-mark-read" data-read-id="' + Number(n.id) + '">خواندم</button>'}</div>
         </article>
       `).join('');
