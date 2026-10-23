@@ -339,9 +339,10 @@ function clearFieldErrors(formId) {
     const d = isoDate(iso);
     return d ? parseParts(d) : null;
   }
+  function faDigits(value) { return String(value).replace(/\\d/g, digit => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]); }
   function formatJalali(iso) {
     const j = jalaliFromIso(iso);
-    return j ? [j.year, String(j.month).padStart(2, '0'), String(j.day).padStart(2, '0')].join('/') : '';
+    return j ? [faDigits(j.year), faDigits(String(j.month).padStart(2, '0')), faDigits(String(j.day).padStart(2, '0'))].join('/') : '';
   }
   function daysInMonth(year, month) {
     const nextYear = month === 12 ? year + 1 : year;
