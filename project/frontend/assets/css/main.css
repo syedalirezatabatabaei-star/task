@@ -1418,3 +1418,49 @@ body { overflow-x:hidden; }
 .header-left, .header-right { position:relative; z-index:2; }
 @media(max-width:768px) { .header-brand { position:static; transform:none; margin-inline:auto; } .header-brand span { display:none; } }
 @media(max-width:380px) { .header-brand { display:flex; } .header-brand img { width:26px; height:26px; } }
+
+
+/* Header layout correction: keep navigation controls in their own lanes and center only the company logo/name. */
+.header { isolation:isolate; }
+.header-left { position:relative; z-index:3; min-width:0; }
+.header-right { position:static !important; z-index:auto !important; min-width:0; }
+.header-brand {
+  position:absolute !important;
+  left:50% !important;
+  right:auto !important;
+  top:50% !important;
+  transform:translate(-50%,-50%) !important;
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:max-content;
+  max-width:clamp(120px, 32vw, 300px);
+  margin:0 !important;
+  z-index:1 !important;
+  pointer-events:none;
+}
+.header-brand img { width:34px; height:34px; object-fit:contain; flex:0 0 auto; }
+.header-brand span {
+  display:block !important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:12px;
+  font-weight:700;
+}
+.header-actions { gap:12px; }
+@media(max-width:768px) {
+  .header { padding-inline:10px; }
+  .header-left { gap:6px; max-width:42%; }
+  .header-right { gap:6px; max-width:42%; }
+  .header-brand { max-width:28vw; gap:4px; }
+  .header-brand img { width:27px; height:27px; }
+  .header-brand span { font-size:10px; }
+}
+@media(max-width:380px) {
+  .header-brand { display:flex !important; max-width:25vw; }
+  .header-brand img { width:23px; height:23px; }
+  .header-brand span { font-size:9px; }
+  .header-right { gap:3px; }
+}
