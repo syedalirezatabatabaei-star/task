@@ -339,7 +339,7 @@ function clearFieldErrors(formId) {
     const d = isoDate(iso);
     return d ? parseParts(d) : null;
   }
-  function faDigits(value) { return String(value).replace(/\\d/g, digit => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]); }
+  function faDigits(value) { return String(value).replace(/\d/g, digit => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]); }
   function formatJalali(iso) {
     const j = jalaliFromIso(iso);
     return j ? [faDigits(j.year), faDigits(String(j.month).padStart(2, '0')), faDigits(String(j.day).padStart(2, '0'))].join('/') : '';
