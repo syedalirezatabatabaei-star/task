@@ -196,6 +196,7 @@ const Api = (() => {
 
     // ─── Notifications ─────────────────────────
     getNotifications: () => request('GET', '/notifications'),
+    getNotificationRecipients: () => request('GET', '/notifications/recipients'),
     markNotificationRead: (id) => request('PATCH', `/notifications/${id}/read`),
     markAllNotificationsRead: () => request('PATCH', '/notifications/read-all'),
     publishAnnouncement: (data) => request('POST', '/notifications/announcements', data),
