@@ -164,9 +164,9 @@ async function load() {
         </div>
         ${progressBar(p.progress)}
         <div style="display:flex;gap:8px;margin-top:14px">
-          <a href="/project-details.html?id=${p.id}" class="btn btn-secondary btn-sm" style="flex:1;justify-content:center">جزئیات</a>
-          <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openEditModal(${p.id})" data-permission="projects.edit"></button>
-          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProject(${p.id},'${p.name}')" data-permission="projects.delete"></button>
+          <a href="/project-details.html?id=${p.id}" class="btn btn-secondary btn-sm project-action-icon" style="flex:1;justify-content:center" title="جزئیات" aria-label="جزئیات"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg><span>جزئیات</span></a>
+          <button class="btn btn-sm btn-secondary project-action-icon" onclick="event.stopPropagation();openEditModal(${p.id})" data-permission="projects.edit" title="ویرایش" aria-label="ویرایش"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4Z"/></svg></button>
+          <button class="btn btn-sm btn-danger project-action-icon" onclick="event.stopPropagation();deleteProject(${p.id},'${String(p.name||'').replace(/'/g,'&#39;')}')" data-permission="projects.delete" title="حذف" aria-label="حذف"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 10v6M14 10v6"/></svg></button>
         </div>
       </div>
     `).join('');
