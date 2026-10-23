@@ -17,13 +17,13 @@
       <a class="nav-item" href="/projects.html" data-permission="projects.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="nav-label">پروژه‌ها</span></a>
       <a class="nav-item" href="/tasks.html" data-permission="tasks.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-label">وظایف</span></a>
       <a class="nav-item" href="/reports.html" data-permission="reports.view"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/></svg></span><span class="nav-label">گزارش‌ها</span></a>
-      <a class="nav-item active" href="/notifications.html" data-admin-only="true"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="nav-label">مدیریت اعلان‌ها</span></a>
+      <a class="nav-item active" href="/notifications.html" data-permission="notifications.manage"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="nav-label">مدیریت اعلان‌ها</span></a>
     </nav>
-    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></span><span class="nav-label">خروج</span></a></div>
+    <div class="sidebar-footer"><a class="nav-item" href="#" id="logout-btn"><span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></span><span class="nav-label">خروج</span></a></div>
   </aside>
   <div class="main-content" id="main-content">
     <header class="header" id="header">
-      <div class="header-left"><button class="sidebar-toggle" id="sidebar-toggle" aria-label="نمایش منو">☰</button><h1 class="page-title" id="page-title">مدیریت اعلان‌ها</h1></div>
+      <div class="header-left"><button class="sidebar-toggle" id="sidebar-toggle" aria-label="نمایش منو">&#x2630;</button><h1 class="page-title" id="page-title">مدیریت اعلان‌ها</h1></div>
       <div class="header-right header-actions">
         <div class="header-brand"><img src="/assets/images/logo.jpg" alt="لوگوی شرکت"><span>ره آورد رایان تینا</span></div>
         <div class="notification-wrap"><button type="button" id="notification-toggle" class="notification-toggle" aria-label="اعلان‌ها" aria-expanded="false" aria-controls="notification-panel"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="notification-dot" id="notification-dot"></span></button><section id="notification-panel" class="notification-panel hidden" aria-label="اعلان‌ها"><div class="notification-panel-header"><span>اعلان‌ها</span><button type="button" class="btn btn-sm btn-secondary" id="notification-clear">خوانده‌شدن همه</button></div><div id="notification-list" class="notification-empty"><p>اعلانی برای نمایش وجود ندارد.</p></div></section></div>
@@ -58,7 +58,7 @@
   const ok = await Auth.initPage();
   if (!ok) return;
   const user = Api.getCurrentUser();
-  if (user?.role !== 'ADMIN') { window.location.replace('/dashboard.html'); return; }
+  if (user?.role !== 'ADMIN' && !Api.hasPermission('notifications.manage')) { window.location.replace('/dashboard.html'); return; }
   document.getElementById('logout-btn').addEventListener('click', async e => { e.preventDefault(); await Auth.logout(); });
   const scopeInputs = document.querySelectorAll('input[name="announcement-scope"]');
   const recipientGroup = document.getElementById('recipient-group');
@@ -74,9 +74,9 @@
   updateScope();
 
   try {
-    const res = await Api.getUsers({page_size:100, is_active:true});
-    const users = res.data?.items || [];
-    recipient.innerHTML = '<option value="">انتخاب کاربر</option>' + users.map(u => '<option value="' + Number(u.id) + '">' + escapeHtml(u.full_name || u.username) + ' (' + escapeHtml(u.username) + ')</option>').join('');
+    const res = await Api.getNotificationRecipients();
+    const users = res.data || [];
+    recipient.innerHTML = '<option value="">انتخاب کاربر</option>' + users.map(u => '<option value="' + Number(u.id) + '">' + window.escapeHtml(u.full_name || u.username) + ' (' + window.escapeHtml(u.username) + ')</option>').join('');
   } catch (e) {
     recipient.innerHTML = '<option value="">بارگذاری کاربران ناموفق بود</option>';
     Toast.error(e.message || 'دریافت فهرست کاربران ناموفق بود');
