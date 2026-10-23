@@ -41,6 +41,8 @@ ATTACHMENTS_UPLOAD = "attachments.upload"
 
 AUDIT_LOGS_VIEW = "audit_logs.view"
 
+NOTIFICATIONS_MANAGE = "notifications.manage"
+
 ALL_PERMISSIONS = [
     (DASHBOARD_VIEW, "مشاهده داشبورد", "دسترسی به داشبورد اصلی"),
     (USERS_VIEW, "مشاهده کاربران", "مشاهده لیست کاربران"),
@@ -71,4 +73,5 @@ ALL_PERMISSIONS = [
     (ATTACHMENTS_VIEW, "مشاهده پیوست‌ها", "مشاهده فایل‌های پیوست"),
     (ATTACHMENTS_UPLOAD, "آپلود پیوست", "آپلود فایل پیوست"),
     (AUDIT_LOGS_VIEW, "مشاهده لاگ‌ها", "مشاهده لاگ‌های سیستم"),
+    (NOTIFICATIONS_MANAGE, "مدیریت اعلان‌ها", "انتشار اعلان عمومی و خصوصی"),
 ]
