@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.api.deps import get_current_user, require_admin
+from app.api.deps import get_current_user, require_permission
+from app.core import permissions as P
 from app.models.notification import Notification
 from app.models.user import User
 
@@ -42,6 +43,15 @@ def list_notifications(
     return {"success": True, "data": {"items": [_item(row) for row in rows], "unread_count": unread_count}}
 
 
+@router.get("/recipients", summary="فهرست دریافت‌کنندگان اعلان")
+def notification_recipients(
+    current_user: User = Depends(require_permission(P.NOTIFICATIONS_MANAGE)),
+    db: Session = Depends(get_db),
+):
+    users = db.query(User).filter(User.is_active.is_(True)).order_by(User.first_name, User.last_name, User.username).all()
+    return {"success": True, "data": [{"id": user.id, "username": user.username, "full_name": user.full_name} for user in users]}
+
+
 @router.patch("/{notification_id}/read", summary="خوانده‌شدن اعلان")
 def mark_read(
     notification_id: int,
@@ -73,7 +83,7 @@ def mark_all_read(
 @router.post("/announcements", status_code=status.HTTP_201_CREATED, summary="انتشار اعلان عمومی یا خصوصی")
 def create_announcement(
     body: AnnouncementCreate,
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(require_permission(P.NOTIFICATIONS_MANAGE)),
     db: Session = Depends(get_db),
 ):
     title = body.title.strip()
