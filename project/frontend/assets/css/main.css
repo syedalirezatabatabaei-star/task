@@ -1405,3 +1405,16 @@ body { overflow-x:hidden; }
 .jalali-date-wrap input[type="date"]::-webkit-calendar-picker-indicator { opacity:.75; cursor:pointer; }
 .jalali-date-display { position:absolute; inset:0; display:flex; align-items:center; padding:0 14px; pointer-events:none; color:var(--text); z-index:0; overflow:hidden; white-space:nowrap; }
 .jalali-date-wrap input[type="date"]:disabled + .jalali-date-display { color:var(--text-muted); }
+
+
+/* Shared visual alignment for icon actions and centered company branding */
+.table-actions { display:flex; align-items:center; gap:6px; flex-wrap:nowrap; }
+.icon-action { display:inline-flex; align-items:center; justify-content:center; width:34px; min-width:34px; height:34px; padding:0; }
+.icon-action svg { display:block; flex:0 0 17px; }
+.header { position:relative; }
+.header-brand { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:center; gap:10px; z-index:1; pointer-events:none; }
+.header-brand img { width:38px; height:38px; object-fit:contain; }
+.header-brand span { font-size:13px; font-weight:700; color:var(--text-secondary); white-space:nowrap; }
+.header-left, .header-right { position:relative; z-index:2; }
+@media(max-width:768px) { .header-brand { position:static; transform:none; margin-inline:auto; } .header-brand span { display:none; } }
+@media(max-width:380px) { .header-brand { display:flex; } .header-brand img { width:26px; height:26px; } }
