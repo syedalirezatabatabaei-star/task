@@ -100,7 +100,7 @@
       [' تاریخ شروع', formatDate(user.start_date)],
       [' تاریخ پایان', formatDate(user.end_date)],
       [' عضویت', formatDate(user.created_at)],
-    ].map(([k,v]) => `<div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">${k}</span><span style="font-weight:500">${v}</span></div>`).join('');
+    ].map(([k,v]) => `<div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">${k}</span><span style="font-weight:500">${escapeHtml(v)}</span></div>`).join('');
 
     document.getElementById('edit-perms-btn').href = `/user-permissions.html?id=${userId}`;
 
@@ -121,8 +121,8 @@
       ? `<div class="table-container"><table class="data-table">
           <thead><tr><th>عنوان</th><th>پروژه</th><th>اولویت</th><th>وضعیت</th><th>ددلاین</th></tr></thead>
           <tbody>${tasks.map(t => `<tr>
-            <td><a href="/task-details.html?id=${t.id}" style="font-weight:600">${t.title}</a></td>
-            <td style="font-size:12px;color:var(--text-muted)">${t.project_name||'—'}</td>
+            <td><a href="/task-details.html?id=${Number(t.id)}" style="font-weight:600">${escapeHtml(t.title)}</a></td>
+            <td style="font-size:12px;color:var(--text-muted)">${escapeHtml(t.project_name || '—')}</td>
             <td>${priorityBadge(t.priority)}</td>
             <td>${statusBadge(t.status)}</td>
             <td style="font-size:12px">${formatDate(t.deadline)}</td>
@@ -133,7 +133,7 @@
     document.getElementById('user-loading').classList.add('hidden');
     document.getElementById('user-content').classList.remove('hidden');
   } catch (e) {
-    document.getElementById('user-loading').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+    document.getElementById('user-loading').textContent = e.message || 'بارگذاری اطلاعات کاربر ناموفق بود';
   }
 })();
 </script>
