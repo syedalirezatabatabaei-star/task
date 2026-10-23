@@ -172,7 +172,8 @@ async function load() {
     `).join('');
     renderPagination('pagination', currentPage, pages, total, pageSize, p => { currentPage=p; load(); });
   } catch (e) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;color:var(--danger)"></div>';\n    grid.firstElementChild.textContent = e.message || 'خطا در دریافت پروژه‌ها';
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;color:var(--danger)"></div>';
+    grid.firstElementChild.textContent = e.message || 'خطا در دریافت پروژه‌ها';
   }
 }
 
