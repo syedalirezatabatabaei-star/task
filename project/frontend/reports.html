@@ -148,18 +148,18 @@ async function loadUsersSelect() {
     const me = Api.getCurrentUser();
     const sel = document.getElementById('user-select');
     if (me?.role !== 'ADMIN') {
-      sel.innerHTML = `<option value="${me.id}">${me.full_name||me.username}</option>`;
+      sel.innerHTML = `<option value="${me.id}">${escapeHtml(me.full_name || me.username)}</option>`;
       return;
     }
     const res = await Api.getUsers({ page_size: 100 });
-    sel.innerHTML = '<option value="">انتخاب کنید...</option>' + res.data.items.map(u => `<option value="${u.id}">${u.full_name||u.username}</option>`).join('');
+    sel.innerHTML = '<option value="">انتخاب کنید...</option>' + res.data.items.map(u => `<option value="${Number(u.id)}">${escapeHtml(u.full_name || u.username)}</option>`).join('');
   } catch {}
 }
 
 async function loadProjectsSelect() {
   try {
     const res = await Api.getProjects({ page_size: 100 });
-    document.getElementById('project-select').innerHTML = '<option value="">انتخاب کنید...</option>' + res.data.items.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    document.getElementById('project-select').innerHTML = '<option value="">انتخاب کنید...</option>' + res.data.items.map(p => `<option value="${Number(p.id)}">${escapeHtml(p.name)}</option>`).join('');
   } catch {}
 }
 
@@ -202,7 +202,7 @@ async function loadUserReport() {
     // Projects
     document.getElementById('user-projects-list').innerHTML = d.projects.map(p => `
       <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:13px;font-weight:600">${p.name}</span>
+        <span style="font-size:13px;font-weight:600">${escapeHtml(p.name)}</span>
         ${projectStatusBadge(p.status)}
       </div>`).join('') || '<p style="color:var(--text-muted);font-size:13px">پروژه‌ای وجود ندارد</p>';
 
@@ -213,7 +213,7 @@ async function loadUserReport() {
           <tbody>${d.evaluation_history.map(e => `<tr>
             <td>${e.task_title||'—'}</td>
             <td><span style="font-weight:800;color:${e.score>=70?'var(--success)':e.score>=50?'var(--warning)':'var(--danger)'}">${e.score}</span></td>
-            <td style="font-size:12px;max-width:200px">${e.comment||'—'}</td>
+            <td style="font-size:12px;max-width:200px">${escapeHtml(e.comment || '—')}</td>
             <td style="font-size:12px">${formatDate(e.created_at)}</td>
           </tr>`).join('')}</tbody>
         </table></div>`
@@ -245,8 +245,8 @@ async function loadProjectReport() {
       ? `<table class="data-table">
           <thead><tr><th>نام</th><th>نقش</th><th>کل وظایف</th><th>انجام‌شده</th><th>میانگین نمره</th></tr></thead>
           <tbody>${d.member_stats.map(m => `<tr>
-            <td style="font-weight:600">${m.full_name}</td>
-            <td style="font-size:12px;color:var(--text-muted)">${m.project_role||'—'}</td>
+            <td style="font-weight:600">${escapeHtml(m.full_name)}</td>
+            <td style="font-size:12px;color:var(--text-muted)">${escapeHtml(m.project_role || '—')}</td>
             <td>${m.total_tasks}</td>
             <td>${m.completed_tasks}</td>
             <td>${m.average_score!=null?`<span style="font-weight:700;color:var(--success)">${m.average_score}</span>`:'—'}</td>
@@ -271,13 +271,13 @@ async function loadAuditLogs() {
         <td>${l.user_name||'سیستم'}</td>
         <td><code style="background:var(--surface-2);padding:2px 6px;border-radius:4px;font-size:11px">${l.action}</code></td>
         <td style="font-size:12px">${l.entity_type||'—'}</td>
-        <td style="font-size:12px;max-width:250px">${l.description||'—'}</td>
+        <td style="font-size:12px;max-width:250px">${escapeHtml(l.description || '—')}</td>
         <td style="font-size:11px;color:var(--text-muted)">${l.ip_address||'—'}</td>
         <td style="font-size:11px">${formatDateTime(l.created_at)}</td>
       </tr>`).join('')}</tbody>
     </table>`;
     renderPagination('audit-pagination', auditPage, pages, total, 20, p => { auditPage=p; loadAuditLogs(); });
-  } catch (e) { el.innerHTML = `<div class="empty-state" style="color:var(--danger)">${e.message}</div>`; }
+  } catch (e) { el.textContent = e.message || 'بارگذاری گزارش ناموفق بود'; }
 }
 </script>
 </body>
