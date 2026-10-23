@@ -370,7 +370,8 @@ async function toggleStatus(id, isActive) {
   } catch (e) { Toast.error(e.message); }
 }
 
-async function deleteUser(id) {\n  confirmAction('آیا از حذف این کاربر مطمئن هستید؟', async () => {
+async function deleteUser(id) {
+  confirmAction('آیا از حذف این کاربر مطمئن هستید؟', async () => {
     try {
       await Api.deleteUser(id);
       Toast.success('کاربر حذف شد');
