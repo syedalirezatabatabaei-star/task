@@ -258,7 +258,7 @@ function renderMembers(members) {
         <div style="font-weight:700">${escapeHtml(m.user?.full_name || '—')}</div>
         <div style="font-size:12px;color:var(--text-muted)">${escapeHtml(m.project_role || 'عضو تیم')}</div>
       </div>
-      <button class="btn btn-sm btn-danger" onclick="removeMember(${m.user_id})" title="حذف"></button>
+      <button class="btn btn-sm btn-danger" data-permission="projects.members.manage" onclick="removeMember(${Number(m.user_id)})" title="حذف" aria-label="حذف"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 10v6M14 10v6"/></svg></button>
     </div>
   `).join('')}</div>`;
 }
