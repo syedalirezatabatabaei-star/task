@@ -37,3 +37,48 @@ jobs:
           MYSQL_USER: test
           MYSQL_PASSWORD: test
         run: pytest -q
+
+  migration-mysql57:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: task_db
+          MYSQL_USER: task_user
+          MYSQL_PASSWORD: test-db-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    defaults:
+      run:
+        working-directory: project/backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: project/backend/requirements.txt
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: Apply migrations against MySQL 5.7
+        env:
+          ENVIRONMENT: test
+          SECRET_KEY: test-secret-key-0123456789-0123456789
+          JWT_SECRET_KEY: test-jwt-secret-key-0123456789-0123456789
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_PORT: 3306
+          MYSQL_DATABASE: task_db
+          MYSQL_USER: task_user
+          MYSQL_PASSWORD: test-db-password
+        run: |
+          alembic upgrade head
+          alembic current
