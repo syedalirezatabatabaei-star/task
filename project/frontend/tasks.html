@@ -225,9 +225,9 @@ async function loadList() {
           ${items.map(t => {
             const overdue = t.deadline && new Date(t.deadline) < new Date() && !['DONE','APPROVED'].includes(t.status);
             return `<tr>
-              <td><a href="/task-details.html?id=${t.id}" style="font-weight:600;color:var(--text)">${t.title}</a></td>
-              <td><span style="font-size:12px;color:var(--text-muted)">${t.project_name||'—'}</span></td>
-              ${isAdmin ? `<td>${t.assignee_name||'—'}</td>` : ''}
+              <td><a href="/task-details.html?id=${Number(t.id)}" style="font-weight:600;color:var(--text)">${escapeHtml(t.title)}</a></td>
+              <td><span style="font-size:12px;color:var(--text-muted)">${escapeHtml(t.project_name || '—')}</span></td>
+              ${isAdmin ? `<td>${escapeHtml(t.assignee_name || '—')}</td>` : ''}
               <td>${priorityBadge(t.priority)}</td>
               <td>${statusBadge(t.status)}</td>
               <td style="min-width:120px">${progressBar(t.progress)}</td>
@@ -235,10 +235,10 @@ async function loadList() {
               <td>
                 <div style="display:flex;gap:4px">
                   <a href="/task-details.html?id=${t.id}" class="btn btn-sm btn-secondary"></a>
-                  ${isAdmin ? `<button class="btn btn-sm btn-secondary" onclick="openEditModal(${t.id})"></button>` : ''}
+                  ${isAdmin ? `<button class="btn btn-sm btn-secondary" data-permission="tasks.edit" onclick="openEditModal(${Number(t.id)})"></button>` : ''}
                   ${['TODO','IN_PROGRESS','NEEDS_REVISION'].includes(t.status) && t.assigned_to == Api.getCurrentUser()?.id
-                    ? `<button class="btn btn-sm btn-primary" onclick="openSubmitModal(${t.id})"> ارسال</button>` : ''}
-                  ${isAdmin ? `<button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id},'${t.title}')"></button>` : ''}
+                    ? `<button class="btn btn-sm btn-primary" data-permission="tasks.submit" onclick="openSubmitModal(${Number(t.id)})"> ارسال</button>` : ''}
+                  ${isAdmin ? `<button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id},'${escapeHtml(t.title)}')"></button>` : ''}
                 </div>
               </td>
             </tr>`;
@@ -247,7 +247,7 @@ async function loadList() {
       </table>`;
     renderPagination('pagination', currentPage, pages, total, pageSize, p => { currentPage=p; loadList(); });
   } catch (e) {
-    container.innerHTML = `<div class="empty-state" style="padding:48px;color:var(--danger)">${e.message}</div>`;
+    container.innerHTML = '<div class="empty-state" style="padding:48px;color:var(--danger)"></div>';\n    container.firstElementChild.textContent = e.message || 'خطا در دریافت وظایف';
   }
 }
 
@@ -256,7 +256,7 @@ async function loadProjects() {
     const res = await Api.getProjects({ page_size: 100 });
     const sel = document.getElementById('f-project');
     sel.innerHTML = '<option value="">انتخاب پروژه</option>' +
-      res.data.items.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      res.data.items.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
     sel.addEventListener('change', async () => {
       const pid = sel.value;
       const stSel = document.getElementById('f-stage');
@@ -264,7 +264,7 @@ async function loadProjects() {
       if (!pid) return;
       try {
         const sr = await Api.getStages(pid);
-        stSel.innerHTML += sr.data.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        stSel.innerHTML += sr.data.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
       } catch {}
     });
   } catch {}
@@ -275,7 +275,7 @@ async function loadUsers() {
     const res = await Api.getUsers({ page_size: 100 });
     const sel = document.getElementById('f-assignee');
     sel.innerHTML = '<option value="">انتخاب کاربر</option>' +
-      res.data.items.map(u => `<option value="${u.id}">${u.full_name||u.username}</option>`).join('');
+      res.data.items.map(u => `<option value="${u.id}">${escapeHtml(u.full_name || u.username)}</option>`).join('');
   } catch {}
 }
 
@@ -352,8 +352,7 @@ async function doSubmit() {
   finally { setLoading(btn, false); }
 }
 
-async function deleteTask(id, name) {
-  confirmAction(`آیا از حذف وظیفه "${name}" مطمئن هستید؟`, async () => {
+async function deleteTask(id) {\n  confirmAction('آیا از حذف این وظیفه مطمئن هستید؟', async () => {
     try { await Api.deleteTask(id); Toast.success('وظیفه حذف شد'); await loadView(); }
     catch (e) { Toast.error(e.message); }
   });
