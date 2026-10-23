@@ -50,7 +50,7 @@
             <div class="card mb-4">
               <div class="card-header">
                 <div class="card-title"> پیوست‌ها</div>
-                <button class="btn btn-sm btn-primary" id="btn-upload" data-permission="attachments.upload">آپلود فایل</button>
+                <button class="btn btn-sm btn-primary" id="btn-upload" data-permission="attachments.upload" data-permission="attachments.upload">آپلود فایل</button>
               </div>
               <input type="file" id="file-input" style="display:none">
               <div id="attachments-list"></div>
@@ -59,7 +59,7 @@
             <div class="card" id="evaluations-section" data-permission="evaluations.view">
               <div class="card-header">
                 <div class="card-title"> ارزیابی‌ها</div>
-                <button class="btn btn-sm btn-primary" id="btn-add-eval" data-permission="evaluations.create">+ ارزیابی</button>
+                <button class="btn btn-sm btn-primary" id="btn-add-eval" data-permission="evaluations.create" data-permission="evaluations.create">+ ارزیابی</button>
               </div>
               <div id="evaluations-list"></div>
             </div>
@@ -176,14 +176,15 @@ async function loadTask() {
 
     const user = Api.getCurrentUser();
     const isAdmin = user?.role === 'ADMIN';
+    const canEdit = Api.hasPermission('tasks.edit');
     const isAssignee = task.assigned_to == user?.id;
     const canSubmit = (isAssignee || isAdmin) && Api.hasPermission('tasks.submit') &&
       ['TODO','IN_PROGRESS','NEEDS_REVISION'].includes(task.status);
 
     document.getElementById('task-info-card').innerHTML = `
       <div style="margin-bottom:12px">
-        <h2 style="font-size:18px;font-weight:800;margin-bottom:8px">${task.title}</h2>
-        <p style="color:var(--text-secondary);line-height:1.7">${task.description||'بدون توضیحات'}</p>
+        <h2 style="font-size:18px;font-weight:800;margin-bottom:8px">${escapeHtml(task.title)}</h2>
+        <p style="color:var(--text-secondary);line-height:1.7">${escapeHtml(task.description || 'بدون توضیحات')}</p>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
         ${statusBadge(task.status)}
@@ -195,7 +196,7 @@ async function loadTask() {
     document.getElementById('task-actions-card').innerHTML = `
       <div class="card-title" style="margin-bottom:12px"> عملیات</div>
       ${canSubmit ? `<button class="btn btn-primary w-full mb-4" id="btn-submit-task"> ارسال وظیفه</button>` : ''}
-      ${isAdmin ? `
+      ${canEdit ? `
         <div style="display:flex;flex-direction:column;gap:8px">
           <label class="form-label" style="margin-bottom:0">تغییر وضعیت</label>
           <select class="form-control" id="status-select">
@@ -213,9 +214,9 @@ async function loadTask() {
     document.getElementById('task-meta-card').innerHTML = `
       <div class="card-title" style="margin-bottom:12px"> اطلاعات</div>
       <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">پروژه</span><span style="font-weight:600">${task.project_name||'—'}</span></div>
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">مرحله</span><span>${task.stage_name||'—'}</span></div>
-        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">مسئول</span><span>${task.assignee_name||'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">پروژه</span><span style="font-weight:600">${escapeHtml(task.project_name || '—')}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">مرحله</span><span>${escapeHtml(task.stage_name || '—')}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">مسئول</span><span>${escapeHtml(task.assignee_name || '—')}</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">تاریخ شروع</span><span>${formatDate(task.start_date)}</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">ددلاین</span><span style="${task.deadline && new Date(task.deadline)<new Date() && !['DONE','APPROVED'].includes(task.status)?'color:var(--danger);font-weight:600':''}">${formatDate(task.deadline)}</span></div>
         ${task.submitted_at ? `<div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">تاریخ ارسال</span><span>${formatDateTime(task.submitted_at)}</span></div>` : ''}
@@ -234,7 +235,7 @@ async function loadTask() {
 
     await Promise.all([loadAttachments(), loadEvaluations()]);
   } catch (e) {
-    document.getElementById('task-loading').innerHTML = `<p style="color:var(--danger)">${e.message}</p>`;
+    document.getElementById('task-loading').textContent = e.message || 'بارگذاری وظیفه ناموفق بود';
   }
 }
 
@@ -248,10 +249,10 @@ async function loadAttachments() {
       <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:20px"></span>
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:600">${a.original_filename}</div>
+          <div style="font-size:13px;font-weight:600">${escapeHtml(a.original_filename)}</div>
           <div style="font-size:11px;color:var(--text-muted)">${formatFileSize(a.file_size)} | ${formatDateTime(a.created_at)}</div>
         </div>
-        <button class="btn btn-sm btn-danger" onclick="deleteAtt(${a.id})" data-permission="attachments.upload"></button>
+        <button class="btn btn-sm btn-danger" onclick="deleteAtt(${Number(a.id)})" data-permission="attachments.upload"></button>
       </div>`).join('');
   } catch {}
 }
@@ -265,12 +266,12 @@ async function loadEvaluations() {
     el.innerHTML = evals.map(e => `
       <div style="padding:14px 0;border-bottom:1px solid var(--border)">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-weight:700;font-size:14px">ارزیابی توسط: ${e.evaluator_name||'ناشناس'}</span>
+          <span style="font-weight:700;font-size:14px">ارزیابی توسط: ${escapeHtml(e.evaluator_name || 'ناشناس')}</span>
           <span style="font-size:24px;font-weight:900;color:${e.score>=70?'var(--success)':e.score>=50?'var(--warning)':'var(--danger)'}">${e.score}</span>
         </div>
-        ${e.strengths ? `<div style="font-size:13px;color:var(--success);margin-bottom:4px"> نقاط قوت: ${e.strengths}</div>` : ''}
-        ${e.weaknesses ? `<div style="font-size:13px;color:var(--danger);margin-bottom:4px"> نقاط ضعف: ${e.weaknesses}</div>` : ''}
-        ${e.comment ? `<div style="font-size:13px;color:var(--text-secondary)">${e.comment}</div>` : ''}
+        ${e.strengths ? `<div style="font-size:13px;color:var(--success);margin-bottom:4px"> نقاط قوت: ${escapeHtml(e.strengths)}</div>` : ''}
+        ${e.weaknesses ? `<div style="font-size:13px;color:var(--danger);margin-bottom:4px"> نقاط ضعف: ${escapeHtml(e.weaknesses)}</div>` : ''}
+        ${e.comment ? `<div style="font-size:13px;color:var(--text-secondary)">${escapeHtml(e.comment)}</div>` : ''}
         <div style="font-size:11px;color:var(--text-muted);margin-top:4px">${formatDateTime(e.created_at)}</div>
       </div>`).join('');
   } catch {}
