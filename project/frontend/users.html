@@ -277,7 +277,8 @@ async function loadUsers() {
 
     renderPagination('pagination', currentPage, pages, total, pageSize, (p) => { currentPage = p; loadUsers(); });
   } catch (e) {
-    container.innerHTML = '<div class="empty-state" style="padding:48px;color:var(--danger)"></div>';\n    container.firstElementChild.textContent = e.message || 'خطا در دریافت کاربران';
+    container.innerHTML = '<div class="empty-state" style="padding:48px;color:var(--danger)"></div>';
+    container.firstElementChild.textContent = e.message || 'خطا در دریافت کاربران';
   }
 }
 
