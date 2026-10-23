@@ -2,7 +2,7 @@
 import pytest
 
 
-def test_login_success(client, admin_user):
+def test_login_success(client, admin_user, db):
     resp = client.post("/api/v1/auth/login", json={"username": "testadmin", "password": "adminpass123"})
     assert resp.status_code == 200
     data = resp.json()
@@ -10,6 +10,12 @@ def test_login_success(client, admin_user):
     assert data["token_type"] == "bearer"
     assert data["user"]["username"] == "testadmin"
     assert data["user"]["role"] == "ADMIN"
+
+    from app.models.audit_log import AuditLog
+    audit = db.query(AuditLog).filter(
+        AuditLog.action == "USER_LOGIN", AuditLog.user_id == admin_user.id
+    ).first()
+    assert audit is not None
 
 
 def test_login_wrong_password(client, admin_user):
